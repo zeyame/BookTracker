@@ -1,0 +1,41 @@
+.navigation {
+    background-color: rgb(22, 18, 32);
+    display: flex;
+    width: 120px;
+    height: 100vh;
+}
+
+.navigation ul {
+    list-style-type: none;
+    padding-left: 10px;
+}
+
+.nav-option {
+    color: white;
+    width: 170px;
+    font-weight: 700px;
+    font-size: 11px;
+}
+
+.nav-option p {
+    display: inline;
+    margin-left: 6px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.sbmenu-header {
+    color: white;
+    font-size: 8px;
+    font-weight: 700px;
+}
+
+#add-book-nav p,
+#read-nav p {
+    margin-bottom: 30px;
+}
+
+.nav-option a {
+    display: flex;
+    align-items: center;
+}
