@@ -10,8 +10,7 @@ import { ToRead } from './pages/library/ToRead';
 import { Reading } from './pages/library/Reading';
 import { Goals } from './pages/activity/Goals';
 import { Stats } from './pages/activity/Stats';
-
-import './index.css';
+import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
 
