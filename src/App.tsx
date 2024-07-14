@@ -1,15 +1,15 @@
 import React from "react";
 import { Navbar } from "./components/Navbar";
 import './index.css'
+import './app.css'
 
 export const App: React.FC = () => {
   return (
     <div className="app-container">
-      <nav>
-        <Navbar />
-      </nav>
+      <Navbar />
       <main>
         <div className="page-content">
+          hello
         </div>
       </main>
     </div>
