@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar } from "./components/Navbar";
+import { Outlet } from "react-router-dom";
 import './index.css'
 import './app.css'
 
@@ -8,9 +9,7 @@ export const App: React.FC = () => {
     <div className="app-container">
       <Navbar />
       <main>
-        <div className="page-content">
-          hello
-        </div>
+        <Outlet />
       </main>
     </div>
   )

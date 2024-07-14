@@ -24,7 +24,7 @@
 
 .nav-option p {
     display: inline;
-    margin-left: 6px;
+    margin-left: 12px;
     margin-top: 0px;
     margin-bottom: 0px;
     cursor: pointer;
@@ -39,6 +39,8 @@
 .nav-link {
     display: flex;
     align-items: center;
+    text-decoration: none;
+    color: white;
 }
 
 #add-book-nav, #read-nav {
