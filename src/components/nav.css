@@ -2,18 +2,24 @@
     background-color: rgb(22, 18, 32);
     display: flex;
     height: 100vh;
+    font-weight: bold;
 }
 
 .navigation ul {
-    list-style-type: none;
-    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding-left: 15px;
+    padding-top: 7px;
 }
 
 .nav-option {
     color: white;
-    width: 170px;
+    width: 100%;
     font-weight: 700px;
-    font-size: 11px;
+    font-size: 10px;
+    margin-bottom: 7px;
+    height: 20px;
 }
 
 .nav-option p {
@@ -21,20 +27,20 @@
     margin-left: 6px;
     margin-top: 0px;
     margin-bottom: 0px;
+    cursor: pointer;
 }
 
 .sbmenu-header {
     color: white;
-    font-size: 8px;
-    font-weight: 700px;
+    font-size: 7px;
+    margin-bottom: 7px;
 }
 
-#add-book-nav p,
-#read-nav p {
-    margin-bottom: 30px;
-}
-
-.nav-option a {
+.nav-link {
     display: flex;
     align-items: center;
+}
+
+#add-book-nav, #read-nav {
+    margin-bottom: 20px;
 }
