@@ -3,7 +3,6 @@
     flex-direction: column;
     background-color: rgb(248, 248, 248);
     height: 100vh;
-    align-items: center;
 }
 
 .search-bar {
@@ -13,8 +12,10 @@
     height: 30px;
     border-radius: 10px;
     margin-top: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     padding-left: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-left: 450px;
 }
 
 .search-input {
@@ -29,3 +30,39 @@
     outline: none;
 }
 
+.search-default-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    height: 100%;
+    width: 100%;
+    margin-left: 30px;
+    margin-top: 40px;
+    grid-auto-rows: 120px ;
+}
+
+.genre-section {
+    overflow-x: auto;
+}
+
+.genre-books {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 200px;
+    overflow-x: auto;
+    margin-left: 20px;
+}
+
+
+.genre-books::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-books {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.genre-title {
+    margin: 0;
+    margin-bottom: 5px;
+}

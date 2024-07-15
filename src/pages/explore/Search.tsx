@@ -10,6 +10,37 @@ export const Search: React.FC = () => {
                 </svg>
                 <input className="search-input" type="text" placeholder="title, author, ISBN"/>
             </div>
+            <div className="search-default-content">
+                <div className="genre-section">
+                    <h3 className="genre-title">Fiction</h3>
+                    <div id="fiction-genre" className="genre-books">
+                        <div className="book">
+                            Book1
+                        </div>
+                        <div className="book">
+                            Book2
+                        </div>
+                        <div className="book">
+                            Book3
+                        </div>
+                        <div className="book">
+                            Book4
+                        </div>
+                        <div className="book">
+                            Book5
+                        </div>
+                        <div className="book">
+                            Book6
+                        </div>
+                        <div className="book">
+                            Book7
+                        </div>
+                        <div className="book">
+                            Book8
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
