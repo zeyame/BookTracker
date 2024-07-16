@@ -1,6 +1,6 @@
 import React from "react"
 
-export const Goals: React.FC = () => {
+export const GoalsPage: React.FC = () => {
     return (
         <div>
             Goals Page

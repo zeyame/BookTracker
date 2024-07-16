@@ -1,6 +1,6 @@
 import React from "react"
 
-export const TrendingBooks: React.FC = () => {
+export const TrendingBooksPage: React.FC = () => {
     return (
         <div>
             Trending Books Page

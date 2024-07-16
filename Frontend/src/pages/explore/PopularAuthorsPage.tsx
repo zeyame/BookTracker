@@ -1,6 +1,6 @@
 import React from "react"
 
-export const PopularAuthors: React.FC = () => {
+export const PopularAuthorsPage: React.FC = () => {
     return (
         <div>
             Popular Authors Page

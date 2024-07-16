@@ -1,9 +1,9 @@
 import React from "react"
 
-export const Read: React.FC = () => {
+export const AddBookPage: React.FC = () => {
     return (
         <div>
-            Read Page
+            Add Book Page
         </div>
     )
 }

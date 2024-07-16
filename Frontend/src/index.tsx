@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {RouterProvider, createBrowserRouter} from 'react-router-dom';
-import { Search } from './pages/explore/Search';
-import { TrendingBooks } from './pages/explore/TrendingBooks';
-import { PopularAuthors } from './pages/explore/PopularAuthors';
-import { AddBook } from './pages/explore/AddBook';
-import { Read } from './pages/library/Read';
-import { ToRead } from './pages/library/ToRead';
-import { Reading } from './pages/library/Reading';
-import { Goals } from './pages/activity/Goals';
-import { Stats } from './pages/activity/Stats';
+import { SearchPage } from './pages/explore/SearchPage';
+import { TrendingBooksPage } from './pages/explore/TrendingBooksPage';
+import { PopularAuthorsPage } from './pages/explore/PopularAuthorsPage';
+import { AddBookPage } from './pages/explore/AddBookPage';
+import { ReadPage } from './pages/library/ReadPage';
+import { ToReadPage } from './pages/library/ToReadPage';
+import { ReadingPage } from './pages/library/ReadingPage';
+import { GoalsPage } from './pages/activity/GoalsPage';
+import { StatsPage } from './pages/activity/StatsPage';
 import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
@@ -21,39 +21,39 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Search />
+        element: <SearchPage />
       },
       {
         path: '/trending-books',
-        element: <TrendingBooks />
+        element: <TrendingBooksPage />
       },
       {
         path: '/popular-authors',
-        element: <PopularAuthors />
+        element: <PopularAuthorsPage />
       },
       {
         path: '/add-book',
-        element: <AddBook />
+        element: <AddBookPage />
       },
       {
         path: '/read',
-        element: <Read />
+        element: <ReadPage />
       },
       {
         path: '/reading',
-        element: <Reading />
+        element: <ReadingPage />
       },
       {
         path: '/to-read',
-        element: <ToRead />
+        element: <ToReadPage />
       },
       {
         path: '/goals',
-        element: <Goals />
+        element: <GoalsPage />
       },
       {
         path: '/stats',
-        element: <Stats />
+        element: <StatsPage />
       }
     ],
     errorElement: <ErrorPage />

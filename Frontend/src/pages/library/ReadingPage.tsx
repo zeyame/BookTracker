@@ -1,6 +1,6 @@
 import React from "react"
 
-export const Reading: React.FC = () => {
+export const ReadingPage: React.FC = () => {
     return (
         <div>
             Reading Page

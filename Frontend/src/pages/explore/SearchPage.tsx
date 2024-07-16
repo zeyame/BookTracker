@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
 
-export const Search: React.FC = () => {
+export const SearchPage: React.FC = () => {
     return (
         <div className="search-page-container">
             <div className="search-bar">
