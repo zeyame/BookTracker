@@ -1,24 +1,24 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
-import { fetchRomanceBooks } from "../../services/api"
+import { fetchDefaultBooks } from "../../services/api"
 import { book } from "../../BookInterface"
-
+import { v4 as uuidv4 } from 'uuid';
 
 export const SearchPage: React.FC = () => {
 
+    const genres: Array<string> = ['Romance', 'Fiction', 'Thriller', 'Action', 'Mystery', 'History', 'Scifi']
+
     // k = genre name, v = fetched books in the genre
     const map: Map<string, Array<book>> = new Map();
-
     const [books, setBooks] = useState(map);
 
     
     useEffect(() => {
         const getBooks = async () => {
             try {
-                const data: Array<book> = await fetchRomanceBooks();
-                map.set('romance', data);
-                setBooks(map);
+                const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
+                setBooks(newBooks);
             }
             catch (error) {
                 console.error(error);
@@ -36,13 +36,9 @@ export const SearchPage: React.FC = () => {
                 <input className="search-input" type="text" placeholder="title, author, ISBN" />
             </div>
             <div className="search-default-content">
-                <Genre name="Romance" books={books.get('romance')} />
-                <Genre name="Fiction" />
-                <Genre name="Thriller" />
-                <Genre name="Action" />
-                <Genre name="Sci-Fi" />
-                <Genre name="Mystery" />
-                <Genre name="History" />
+                {genres.map(genre => 
+                    <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
+                )}
             </div>
         </div>
     );

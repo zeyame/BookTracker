@@ -5,7 +5,7 @@ import {v4 as uuidv4} from 'uuid';
 
 interface GenreProps {
     name: string
-    books?: Array<book>
+    books: Array<book>
 }
 
 export const Genre: React.FC<GenreProps> = ( { name, books } ) => {
@@ -13,9 +13,9 @@ export const Genre: React.FC<GenreProps> = ( { name, books } ) => {
         <div className="genre-section">
             <h3 className="genre-title">{name}</h3>
             <div id="fiction-genre" className="genre-books">
-                {books ? books.map(book => 
+                {books.map(book => 
                     <Book key={uuidv4()} name={book.name} image_url={book.image_url} />
-                ) : 'Hello'}
+                )}
             </div>
         </div>
     );
