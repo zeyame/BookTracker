@@ -1,7 +1,7 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
-import { fetchDefaultBooks } from "../../services/api"
+import { fetchRomanceBooks } from "../../services/api"
 
 export const SearchPage: React.FC = () => {
 
@@ -11,7 +11,7 @@ export const SearchPage: React.FC = () => {
     useEffect(() => {
         const getBooks = async () => {
             try {
-                const data = await fetchDefaultBooks();
+                const data = await fetchRomanceBooks();
                 console.log(data);
             }
             catch (error) {
@@ -34,9 +34,6 @@ export const SearchPage: React.FC = () => {
                 <Genre name="Romance" />
                 <Genre name="Thriller" />
                 <Genre name="Action" />
-                <Genre name="Sci-Fi" />
-                <Genre name="Mystery" />
-                <Genre name="History" />
                 <Genre name="Sci-Fi" />
                 <Genre name="Mystery" />
                 <Genre name="History" />
