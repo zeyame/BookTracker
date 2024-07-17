@@ -60,7 +60,7 @@ def getBooksByGenre(genre):
     books = formattedBooks(works)
     
             
-    return jsonify(books)   
+    return jsonify(books)
 
 # helper function
 def formattedBooks(works):
@@ -68,7 +68,7 @@ def formattedBooks(works):
     if works:
         for work in works:
             # extracting the book name and cover id from metadata dictionary of each book
-            name, cover_id = work.get('title', ''), work.get('cover_id', '')
+            name, cover_id, author = work.get('title', ''), work.get('cover_id', ''), work.get('authors')[0].get('name')
             
             # we get a jpg image url for each book
             image_url = f'{COVERS_URL}/{cover_id}-S.jpg' if cover_id else None
@@ -76,7 +76,8 @@ def formattedBooks(works):
             result.append(
                 {
                 'name': name, 
-                'image_url': image_url
+                'image_url': image_url,
+                'author': author
                 }
             )
             

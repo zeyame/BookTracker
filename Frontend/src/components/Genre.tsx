@@ -14,7 +14,7 @@ export const Genre: React.FC<GenreProps> = ( { name, books } ) => {
             <h3 className="genre-title">{name}</h3>
             <div id="fiction-genre" className="genre-books">
                 {books.map(book => 
-                    <Book key={uuidv4()} name={book.name} image_url={book.image_url} />
+                    <Book key={uuidv4()} name={book.name} image_url={book.image_url} author={book.author} />
                 )}
             </div>
         </div>
