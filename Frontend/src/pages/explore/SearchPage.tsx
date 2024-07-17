@@ -1,8 +1,26 @@
-import React, { ChangeEventHandler, useState } from "react"
+import React, { ChangeEventHandler, useEffect, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
+import { fetchDefaultBooks } from "../../services/api"
 
 export const SearchPage: React.FC = () => {
+
+    const [books, setBooks] = useState(['']);
+
+    
+    useEffect(() => {
+        const getBooks = async () => {
+            try {
+                const data = await fetchDefaultBooks();
+                console.log(data);
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
+        getBooks();
+    }, []);
+
     return (
         <div className="search-page-container">
             <div className="search-bar">
@@ -12,10 +30,13 @@ export const SearchPage: React.FC = () => {
                 <input className="search-input" type="text" placeholder="title, author, ISBN" />
             </div>
             <div className="search-default-content">
-                <Genre name="Fiction" />
+                <Genre name="Fiction" books={books} />
                 <Genre name="Romance" />
                 <Genre name="Thriller" />
                 <Genre name="Action" />
+                <Genre name="Sci-Fi" />
+                <Genre name="Mystery" />
+                <Genre name="History" />
                 <Genre name="Sci-Fi" />
                 <Genre name="Mystery" />
                 <Genre name="History" />
