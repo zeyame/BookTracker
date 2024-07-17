@@ -2,17 +2,23 @@ import React, { ChangeEventHandler, useEffect, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
 import { fetchRomanceBooks } from "../../services/api"
+import { book } from "../../BookInterface"
+
 
 export const SearchPage: React.FC = () => {
 
-    const [books, setBooks] = useState(['']);
+    // k = genre name, v = fetched books in the genre
+    const map: Map<string, Array<book>> = new Map();
+
+    const [books, setBooks] = useState(map);
 
     
     useEffect(() => {
         const getBooks = async () => {
             try {
-                const data = await fetchRomanceBooks();
-                console.log(data);
+                const data: Array<book> = await fetchRomanceBooks();
+                map.set('romance', data);
+                setBooks(map);
             }
             catch (error) {
                 console.error(error);
@@ -30,8 +36,8 @@ export const SearchPage: React.FC = () => {
                 <input className="search-input" type="text" placeholder="title, author, ISBN" />
             </div>
             <div className="search-default-content">
-                <Genre name="Fiction" books={books} />
-                <Genre name="Romance" />
+                <Genre name="Romance" books={books.get('romance')} />
+                <Genre name="Fiction" />
                 <Genre name="Thriller" />
                 <Genre name="Action" />
                 <Genre name="Sci-Fi" />

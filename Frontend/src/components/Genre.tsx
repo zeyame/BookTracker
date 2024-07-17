@@ -1,26 +1,21 @@
 import React from "react";
 import { Book } from "./Book";
+import { book } from "../BookInterface";
+import {v4 as uuidv4} from 'uuid';
 
 interface GenreProps {
     name: string
-    books?: string[]
+    books?: Array<book>
 }
 
-export const Genre: React.FC<GenreProps> = ( { name, books} ) => {
+export const Genre: React.FC<GenreProps> = ( { name, books } ) => {
     return (
         <div className="genre-section">
             <h3 className="genre-title">{name}</h3>
             <div id="fiction-genre" className="genre-books">
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
-                <Book />
+                {books ? books.map(book => 
+                    <Book key={uuidv4()} name={book.name} image_url={book.image_url} />
+                ) : 'Hello'}
             </div>
         </div>
     );
