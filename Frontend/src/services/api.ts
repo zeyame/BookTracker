@@ -1,5 +1,5 @@
 // File handles API calls to Flask backend 
-import { book } from "../BookInterface";
+import { book } from "../interfaces/BookInterface";
 
 const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 

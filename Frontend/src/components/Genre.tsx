@@ -1,6 +1,6 @@
 import React from "react";
 import { Book } from "./Book";
-import { book } from "../BookInterface";
+import { book } from "../interfaces/BookInterface";
 import {v4 as uuidv4} from 'uuid';
 
 interface GenreProps {

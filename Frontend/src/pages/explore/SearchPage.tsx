@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, useEffect, useState } from "react"
 import '../../styles/search.css'
 import { Genre } from "../../components/Genre"
 import { fetchDefaultBooks } from "../../services/api"
-import { book } from "../../BookInterface"
+import { book } from "../../interfaces/BookInterface"
 import { v4 as uuidv4 } from 'uuid';
 
 export const SearchPage: React.FC = () => {
