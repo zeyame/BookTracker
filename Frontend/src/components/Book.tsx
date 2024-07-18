@@ -10,8 +10,11 @@ interface BookProps {
 export const Book: React.FC<BookProps> = ({ name, image_url, author }) => {
     return (
         <div className="book-container">
-            <img className="book-image" src={image_url} alt="Book" />
-            <p className="title-author"><span className="book-title">{name}</span> - <span className="book-author">{author}</span></p>
+            <img className="book-cover" src={image_url} alt="Book" />
+            <div className="book-info">
+                <p className="book-title">{name}</p>
+                <p className="book-author">{author}</p>
+            </div>
         </div>
     )
 }

@@ -52,6 +52,7 @@
     align-items: start;
     overflow-y: auto;
     padding-bottom: 230px;
+    gap: 30px;
 }
 
 .genre-section {
