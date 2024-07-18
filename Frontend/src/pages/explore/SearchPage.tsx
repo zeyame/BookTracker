@@ -11,17 +11,20 @@ export const SearchPage: React.FC = () => {
 
     // k = genre name, v = fetched books in the genre
     const map: Map<string, Array<book>> = new Map();
-    const [books, setBooks] = useState(map);
 
-    
+    const [books, setBooks] = useState(map);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const getBooks = async () => {
             try {
                 const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
                 setBooks(newBooks);
+                setLoading(false);
             }
             catch (error) {
                 console.error(error);
+                setLoading(true);
             }
         }
         getBooks();
@@ -35,11 +38,14 @@ export const SearchPage: React.FC = () => {
                 </svg>
                 <input className="search-input" type="text" placeholder="title, author, ISBN" />
             </div>
-            <div className="search-default-content">
-                {genres.map(genre => 
-                    <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
-                )}
-            </div>
+            {loading ? 
+                <div>Loading.....</div> : 
+                <div className="search-default-content">
+                    {genres.map(genre => 
+                        <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
+                    )}
+                </div> 
+            }
         </div>
     );
 }

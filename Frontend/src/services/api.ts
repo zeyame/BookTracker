@@ -5,23 +5,20 @@ const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
 
 export const fetchDefaultBooks = async () => {
-    const romanceBooks = await fetchBooksByGenre('romance');
-    const fictionBooks = await fetchBooksByGenre('fiction');
-    const thrillerBooks = await fetchBooksByGenre('thriller');
-    const actionBooks = await fetchBooksByGenre('action');
-    const mysteryBooks = await fetchBooksByGenre('mystery');
-    const historyBooks = await fetchBooksByGenre('history');
-    const scifiBooks = await fetchBooksByGenre('scifi');
 
-    const defaultBooks: Map<string, Array<book>> = new Map([
-        ['Romance', romanceBooks],
-        ['Fiction', fictionBooks],
-        ['Thriller', thrillerBooks],
-        ['Action', actionBooks],
-        ['Mystery', mysteryBooks],
-        ['History', historyBooks],
-        ['Scifi', scifiBooks],
-    ]);
+    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi'];
+
+    const fetchPromises = genres.map(genre => 
+        fetchBooksByGenre(genre)
+    );
+
+    const books = await Promise.all(fetchPromises);
+
+    const defaultBooks: Map<string, Array<book>> = new Map();
+
+    genres.forEach((genre, index) => {
+        defaultBooks.set(genre.charAt(0).toUpperCase() + genre.slice(1), books[index]);
+    });
 
     return defaultBooks;
 }

@@ -59,7 +59,6 @@ def getBooksByGenre(genre):
     # list contains the same objects stored in works but without the unneeded properties
     books = formattedBooks(works)
     
-            
     return jsonify(books)
 
 # helper function
