@@ -8,6 +8,14 @@ export const fetchDefaultBooks = async () => {
 
     const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi'];
 
+    if (sessionStorage.getItem('defaultBooksCache')) {
+        const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
+        if (defaultBooksCache) {
+            const parsedCache = JSON.parse(defaultBooksCache);  // parse object corresponding to original default books map as a js object
+            return new Map<string, Array<book>>(Object.entries(parsedCache));
+        }
+    }
+
     const fetchPromises = genres.map(genre => 
         fetchBooksByGenre(genre)
     );
@@ -19,6 +27,10 @@ export const fetchDefaultBooks = async () => {
     genres.forEach((genre, index) => {
         defaultBooks.set(genre.charAt(0).toUpperCase() + genre.slice(1), books[index]);
     });
+
+    // Saving default books fetched as cache data lasting for a single session
+    const defaultBooksObject = Object.fromEntries(defaultBooks);
+    sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
 
     return defaultBooks;
 }
