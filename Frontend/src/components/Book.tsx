@@ -1,19 +1,18 @@
 import React from "react"
 import '../styles/book.css'
+import { book } from "../interfaces/BookInterface"
 
 interface BookProps {
-    name: string
-    image_url: string
-    author: string
+    book: book
 }
 
-export const Book: React.FC<BookProps> = ({ name, image_url, author }) => {
+export const Book: React.FC<BookProps> = ({ book }) => {
     return (
         <div className="book-container">
-            <img className="book-cover" src={image_url} alt="Book" />
+            <img className="book-cover" src={book.image_url} alt="Book" />
             <div className="book-info">
-                <p className="book-title">{name}</p>
-                <p className="book-author">{author}</p>
+                <p className="book-title">{book.name}</p>
+                <p className="book-author">{book.author}</p>
             </div>
         </div>
     )

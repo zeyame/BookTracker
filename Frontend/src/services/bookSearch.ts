@@ -12,7 +12,7 @@ export const getBooks = async (search: string) => {
         }
 
         // fetched data can be a single book if ISBN was used for search or multiple books (5) if title or author name was used
-        const data: book | Array<book> = await response.json();
+        const data: Array<book> = await response.json();
         return data;
     }
     catch (error) {

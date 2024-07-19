@@ -86,11 +86,11 @@ def getBook():
         
         book_cover = f"{COVERS_URL}/isbn/{search}-S.jpg"
         
-        return jsonify({
+        return jsonify([{
             'name': book_name,
             'author': author_name,
             'image_url': book_cover
-        })
+        }])
             
     # title or author name
     else:
