@@ -69,7 +69,9 @@ def getBook():
             return jsonify({'error': f'Failed response from the Open Library API when fetching book with ISBN {search}'}), book_response.status_code
         
         data = book_response.json()
-        
+        if not data:
+            return jsonify({'error': f'No book with the isbn {search} was found'}), 404
+                
         # formatting the response to be sent to client 
         book_name = data.get('title')
         
@@ -89,7 +91,7 @@ def getBook():
             'author': author_name,
             'image_url': book_cover
         })
-    
+            
     # title or author name
     else:
         book_response = requests.get(f"{SEARCH_URL}?q={search}&limit={limit}")
@@ -97,6 +99,10 @@ def getBook():
             return jsonify({'error': f'Failed response from the Open Library API to fetch book by title or author name of {search}'}), book_response.status_code
         
         books = book_response.json().get('docs', [])
+        
+        if not books:
+            return jsonify({'error': f'No books with the search {search} could be found.'}), 404
+        
         books = formattedBooks(books, limit)        # array of objects with each object representing a book with its name, title, cover
         
         return jsonify(books)
@@ -117,20 +123,19 @@ def isISBN(search):
 # helper function that formats the docs property of a json object returned by a book search from the Open Library API
 def formattedBooks(books, limit):
     result = []
-    if books:
-        books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
-        for book in books:
-            book_name = book.get('title', '')
-            book_author = book.get('author_name')[0] if book.get('author_name') else 'Uknown'
-            
-            book_cover_id = book.get('cover_i', '')
-            book_cover = f"{COVERS_URL}/id/{book_cover_id}-S.jpg" if book_cover_id else ''
-            
-            result.append({
-                'name': book_name,
-                'author': book_author,
-                'image_url': book_cover
-            })
+    books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
+    for book in books:
+        book_name = book.get('title', '')
+        book_author = book.get('author_name')[0] if book.get('author_name') else 'Uknown'
+        
+        book_cover_id = book.get('cover_i', '')
+        book_cover = f"{COVERS_URL}/id/{book_cover_id}-S.jpg" if book_cover_id else ''
+        
+        result.append({
+            'name': book_name,
+            'author': book_author,
+            'image_url': book_cover
+        })
             
     return result
         
