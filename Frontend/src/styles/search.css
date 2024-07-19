@@ -82,3 +82,9 @@
     height: 20%;
     flex-shrink: 0;
 }
+
+.loading {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+}
