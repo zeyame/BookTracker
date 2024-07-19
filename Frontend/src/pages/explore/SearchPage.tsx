@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
 import { fetchDefaultBooks } from "../../services/defaultBooks";
@@ -35,6 +35,12 @@ export const SearchPage: React.FC = () => {
     }, []);
 
 
+    const content: Array<JSX.Element> = useMemo(() => {
+        return genres.map(genre => 
+            <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
+        )
+    }, [books])
+
     // functions
     const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
@@ -58,9 +64,7 @@ export const SearchPage: React.FC = () => {
             {loading ? 
                 <p className="loading">Loading.....</p> : 
                 <div className="search-default-content">
-                    {genres.map(genre => 
-                        <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
-                    )}
+                    {content}
                 </div> 
             }
         </div>

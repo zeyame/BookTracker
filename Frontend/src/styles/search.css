@@ -29,6 +29,10 @@
     margin-left: 450px;
 }
 
+.search-bar-icon {
+    cursor: pointer;
+}
+
 .search-input {
     height: 80%;
     width: 80%;
