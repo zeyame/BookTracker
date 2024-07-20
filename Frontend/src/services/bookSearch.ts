@@ -4,9 +4,9 @@ import { book } from "../interfaces/BookInterface";
 const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
 
-export const getBooks = async (search: string) => {
+export const getBooks = async (search: string, signal?: AbortSignal) => {
     try {
-        const response = await fetch(`${BASE_URL}/book?search=${search}&limit=5`);
+        const response = await fetch(`${BASE_URL}/book?search=${search}&limit=5`, { signal });
         if (!response.ok) {
             throw new Error(`Response from backend failed for fetching book with the user search ${search}`);
         }
@@ -15,8 +15,7 @@ export const getBooks = async (search: string) => {
         const data: Array<book> = await response.json();
         return data;
     }
-    catch (error) {
-        console.error(error);
+    catch (error: any) {
         throw error;
     }
 }
