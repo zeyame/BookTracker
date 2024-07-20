@@ -6,7 +6,7 @@ const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
 export const fetchDefaultBooks = async () => {
 
-    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi'];
+    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
 
     if (sessionStorage.getItem('defaultBooksCache')) {
         const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
@@ -16,9 +16,10 @@ export const fetchDefaultBooks = async () => {
         }
     }
 
-    const fetchPromises = genres.map(genre => 
-        fetchBooksByGenre(genre)
-    );
+    const fetchPromises = genres.map(genre => {
+        const encodedGenre = encodeURIComponent(genre);
+        return fetchBooksByGenre(encodedGenre);
+    });
 
     const books = await Promise.all(fetchPromises);
 

@@ -10,7 +10,7 @@ import { useDebounce } from "../../custom-hooks/useDebounce";
 
 export const SearchPage: React.FC = () => {
 
-    const genres: Array<string> = ['Romance', 'Fiction', 'Thriller', 'Action', 'Mystery', 'History', 'Scifi']
+    const genres: Array<string> = ['Romance', 'Fiction', 'Thriller', 'Action', 'Mystery', 'History', 'Scifi', 'Horror', 'Fantasy'];
 
     // k = genre name, v = fetched books in the genre
     const map: Map<string, Array<book>> = new Map();
