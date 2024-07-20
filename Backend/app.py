@@ -86,6 +86,7 @@ def getBook():
         
         book_cover = f"{COVERS_URL}/isbn/{search}-S.jpg"
         
+        # respond with an array of a single book
         return jsonify([{
             'name': book_name,
             'author': author_name,
@@ -105,6 +106,7 @@ def getBook():
         
         books = formattedBooks(books, limit)        # array of objects with each object representing a book with its name, title, cover
         
+        # respond with an array of books
         return jsonify(books)
     
 
@@ -125,11 +127,11 @@ def formattedBooks(books, limit):
     result = []
     books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
     for book in books:
-        book_name = book.get('title', '')
+        book_name = book.get('title', 'Uknown')
         book_author = book.get('author_name')[0] if book.get('author_name') else 'Uknown'
         
         book_cover_id = book.get('cover_i', '')
-        book_cover = f"{COVERS_URL}/id/{book_cover_id}-S.jpg" if book_cover_id else ''
+        book_cover = f"{COVERS_URL}/id/{book_cover_id}-S.jpg" if book_cover_id else 'Not found'
         
         result.append({
             'name': book_name,

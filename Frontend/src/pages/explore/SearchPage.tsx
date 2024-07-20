@@ -6,6 +6,7 @@ import { book } from "../../interfaces/BookInterface";
 import { v4 as uuidv4 } from 'uuid';
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
+import { useDebounce } from "../../custom-hooks/useDebounce";
 
 export const SearchPage: React.FC = () => {
 
@@ -19,6 +20,7 @@ export const SearchPage: React.FC = () => {
     const [books, setBooks] = useState(map);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const debouncedSearch = useDebounce(search);
     const [searchResults, setSearchResults] = useState<Array<book> | null>(null);
 
     // fetching books from backend and storing them in a map on mount
@@ -39,14 +41,15 @@ export const SearchPage: React.FC = () => {
 
     // Fetching the 5 books that match what the user has inputted so far
     useEffect(() => {
-        if (search) {
+        if (debouncedSearch) {
             const booksFetched = async () => {
                 try {
-                    const currentBooks = await getBooks(search);
+                    const currentBooks = await getBooks(debouncedSearch);
                     setSearchResults(currentBooks);
                 }
                 catch (error) {
-                    console.error("No results found.");
+                    console.error("No results found.");         // display row instead
+                    setSearchResults(null);
                 }
             }
             booksFetched();
@@ -54,7 +57,7 @@ export const SearchPage: React.FC = () => {
         else {
             setSearchResults(null);
         }
-    }, [search]);
+    }, [debouncedSearch]);
 
 
     // functions
@@ -91,7 +94,7 @@ export const SearchPage: React.FC = () => {
                     </svg>
                 </div>
                 {searchResults ? searchResults.map(book => 
-                    <SearchRow book={book} />
+                    <SearchRow key={uuidv4()} book={book} />
                 ) : ''}
             </div>
             {loading ? 
