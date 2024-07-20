@@ -10,7 +10,6 @@ SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 ISBN_URL = "https://openlibrary.org/isbn"
 
-
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
 # Route handles fetching a given number of books of a specific genre from the Open Library API
@@ -28,7 +27,7 @@ def getBooksByGenre(genre):
     data = response.json()      # a python dictionary of 5 key value pairs
     works = data.get('works', [])       # gets a python list of dictionaries of the 20 books, each dictionary storing metadata about a specific book
     
-    works = formattedWorks(works)       # array of objects with each object representing a book in the requested genre with its name, author, cover 
+    works = formattedWorks(works)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     
     return jsonify(works)
 
@@ -45,7 +44,7 @@ def formattedWorks(works):
             
             # we get a jpg image url for each book
             book_cover_id = work.get('cover_id', '')
-            book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else ''
+            book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
                 
             result.append({
                 'name': book_name, 
@@ -85,6 +84,8 @@ def getBook():
         author_name = author_response.json().get('name')
         
         book_cover = f"{COVERS_URL}/isbn/{search}-S.jpg"
+        if not book_cover:
+            book_cover = 'https://via.placeholder.com/200x300.png?text=No+Cover'
         
         # respond with an array of a single book
         return jsonify([{
@@ -104,7 +105,7 @@ def getBook():
         if not books:
             return jsonify({'error': f'No books with the search {search} could be found.'}), 404
         
-        books = formattedBooks(books, limit)        # array of objects with each object representing a book with its name, title, cover
+        books = formattedBooks(books, limit)        # an array of objects with each object representing a book with its name, title, image url
         
         # respond with an array of books
         return jsonify(books)
@@ -124,20 +125,28 @@ def isISBN(search):
 
 # helper function that formats the docs property of a json object returned by a book search from the Open Library API
 def formattedBooks(books, limit):
+    seen_books = set()
     result = []
     books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
     for book in books:
-        book_name = book.get('title', 'Uknown')
-        book_author = book.get('author_name')[0] if book.get('author_name') else 'Uknown'
+        book_isbn_list = book.get('isbn', [])
+        book_isbn = book_isbn_list[0] if book_isbn_list else ''
         
-        book_cover_id = book.get('cover_i', '')
-        book_cover = f"{COVERS_URL}/id/{book_cover_id}-S.jpg" if book_cover_id else 'Not found'
-        
-        result.append({
-            'name': book_name,
-            'author': book_author,
-            'image_url': book_cover
-        })
+        if book_isbn and book_isbn not in seen_books:
+            seen_books.add(book_isbn)
+            
+            book_name = book.get('title', 'Uknown')
+            book_author = book.get('author_name')[0] if book.get('author_name') else 'Unknown'
+            
+            book_cover_id = book.get('cover_i', '')
+            book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
+
+            
+            result.append({
+                'name': book_name,
+                'author': book_author,
+                'image_url': book_cover
+            })
             
     return result
         

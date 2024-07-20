@@ -79,14 +79,23 @@
     height: 100%;
 }
 
+/* .search-row-details-no-img {
+    display: flex;
+    flex-direction: column;
+    margin-left: 46px;
+    height: 100%;
+} */
+
+
+
 .search-row-title {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 620;
     margin: 0px;
 }
 
 .search-row-author {
-    font-size: 11px;
+    font-size: 10px;
     margin: 0px;
     margin-top: 2px;
 }
