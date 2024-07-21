@@ -79,14 +79,6 @@
     height: 100%;
 }
 
-/* .search-row-details-no-img {
-    display: flex;
-    flex-direction: column;
-    margin-left: 46px;
-    height: 100%;
-} */
-
-
 
 .search-row-title {
     font-size: 11px;
@@ -98,6 +90,19 @@
     font-size: 10px;
     margin: 0px;
     margin-top: 2px;
+}
+
+.no-results-row {
+    display: flex;
+    justify-content: center;
+    width: 25%;
+    height: 24px;
+    padding-top: 5px;
+    padding-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
 }
 
 .search-default-content {
@@ -146,4 +151,10 @@
     position: absolute;
     top: 40%;
     left: 50%;
+}
+
+.default-books-error {
+    position: absolute;
+    top: 40%;
+    left: 42%;
 }

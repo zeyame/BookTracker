@@ -39,8 +39,8 @@ export const SearchPage: React.FC = () => {
                 console.log(`The search with query ${query} was aborted`);
             }
             else {
-                console.error(error);       // Display a search row indicating no search results were found
-                setError('No results were found.');
+                console.error(error);
+                setError('Search');
                 setSearchResults(null);
             }
         }
@@ -62,7 +62,7 @@ export const SearchPage: React.FC = () => {
             }
             catch (error: any) {
                 console.error(error);
-                setError('Failed to load default books. Please refresh the page.');
+                setError('Default books');
             }
             finally {
                 setLoading(false);
@@ -105,6 +105,7 @@ export const SearchPage: React.FC = () => {
     // Function updates search state as user is typing
     const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
+        setError('');
     }
 
 
@@ -123,9 +124,10 @@ export const SearchPage: React.FC = () => {
                         <SearchRow key={book.id} book={book} />
                     ) : ''  
                 }
+                {error === 'Search' && <div className="no-results-row">No search results found.</div>}
             </div>
-            {loading ? 
-                <p className="loading">Loading.....</p> : 
+            { loading ? <p className="loading">Loading.....</p> :
+                error === 'Default books' ? <div className="default-books-error">Failed to fetch default books. Please refresh the page.</div> :
                 <div className="search-default-content">
                     {content}
                 </div> 
