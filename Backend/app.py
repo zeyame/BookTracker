@@ -9,7 +9,6 @@ CORS(app)
 SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
-ISBN_URL = "https://openlibrary.org/isbn"
 
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
@@ -62,59 +61,26 @@ def formattedWorks(works):
 def getBook():
     search = request.args.get('search')
     limit = request.args.get('limit', 5)
+
+    book_response = requests.get(f"{SEARCH_URL}?q={search}&limit={limit}")
+    if book_response.status_code != 200:
+        return jsonify({'error': f'Failed response from the Open Library API with search {search}'}), book_response.status_code
     
-    # user searching with ISBN
+    books = book_response.json().get('docs', [])
+    
+    if not books:
+        return jsonify({'error': f'No books with the search {search} could be found.'}), 404
+    
     if isISBN(search):
-        book_response = requests.get(f"{ISBN_URL}/{search}.json")
-        if book_response.status_code != 200:
-            return jsonify({'error': f'Failed response from the Open Library API when fetching book with ISBN {search}'}), book_response.status_code
-        
-        data = book_response.json()
-        if not data:
-            return jsonify({'error': f'No book with the isbn {search} was found'}), 404
-                
-        # formatting the response to be sent to client 
-        book_name = data.get('title')
-        
-        author_data = data.get('authors', [])
-        author_key = author_data[0].get('key') if author_data else ''
-        
-        author_response = requests.get(f"https://openlibrary.org{author_key}.json")
-        if author_response.status_code != 200:
-            return jsonify({'error': f'Failed response from the Open Library API when fetching author with key {author_key}'}), author_response.status_code
-        
-        author_name = author_response.json().get('name')
-        
-        book_cover = f"{COVERS_URL}/isbn/{search}-S.jpg"
-        if not book_cover:
-            book_cover = 'https://via.placeholder.com/200x300.png?text=No+Cover'
-        
-        # respond with an array of a single book
-        return jsonify([{
-            'id': uuid.uuid4(),
-            'name': book_name,
-            'author': author_name,
-            'image_url': book_cover
-        }])
-            
-    # title or author name
+        books = formattedBooks(books, limit, isbn=True)
     else:
-        book_response = requests.get(f"{SEARCH_URL}?q={search}&limit={limit}")
-        if book_response.status_code != 200:
-            return jsonify({'error': f'Failed response from the Open Library API to fetch book by title or author name of {search}'}), book_response.status_code
-        
-        books = book_response.json().get('docs', [])
-        
-        if not books:
-            return jsonify({'error': f'No books with the search {search} could be found.'}), 404
-        
-        books = formattedBooks(books, limit)        # an array of objects with each object representing a book with its name, title, image url
-        
-        # respond with an array of books
-        return jsonify(books)
+        books = formattedBooks(books, limit)
+    
+    # respond with an array of book(s)
+    return jsonify(books)
     
 
-# helper function that checks if a user search has a valid format for an ISBN 
+# # helper function that checks if a user search has a valid format for an ISBN 
 def isISBN(search):
     if len(search) != 10 and len(search) != 13:
         return False
@@ -127,7 +93,23 @@ def isISBN(search):
 
 
 # helper function that formats the docs property of a json object returned by a book search from the Open Library API
-def formattedBooks(books, limit):
+def formattedBooks(books, limit, isbn=False):
+    # if it was an isbn search
+    if isbn:
+        book_name = books[0].get('title', 'Unknown')
+        book_author = books[0].get('author_name', ['Unknown'])[0]
+        
+        book_cover_id = books[0].get('cover_i', '')
+        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
+
+        return jsonify([{
+            'id': uuid.uuid4(),
+            'name': book_name,
+            'author': book_author,
+            'image_url': book_cover
+        }])
+        
+    # else we will make sure only the unique books of the 5 are returned
     seen_books = set()
     result = []
     books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
@@ -138,8 +120,8 @@ def formattedBooks(books, limit):
         if book_isbn and book_isbn not in seen_books:
             seen_books.add(book_isbn)
             
-            book_name = book.get('title', 'Uknown')
-            book_author = book.get('author_name')[0] if book.get('author_name') else 'Unknown'
+            book_name = book.get('title', 'Unknown')
+            book_author = book.get('author_name', ['Unknown'])[0]
             
             book_cover_id = book.get('cover_i', '')
             book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
