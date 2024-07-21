@@ -1,12 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
 import { fetchDefaultBooks } from "../../services/defaultBooks";
 import { book } from "../../interfaces/BookInterface";
-import { v4 as uuidv4 } from 'uuid';
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
-import { useDebounce } from "../../custom-hooks/useDebounce";
 
 export const SearchPage: React.FC = () => {
 
@@ -18,17 +16,18 @@ export const SearchPage: React.FC = () => {
     
     // states
     const [books, setBooks] = useState(map);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [searchResults, setSearchResults] = useState<Array<book> | null>(null);
-    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const [loading, setLoading] = useState(true);  
+    const [search, setSearch] = useState('');       // stores the current search value in the search bar
+    const [searchResults, setSearchResults] = useState<Array<book> | null>(null);           // storing the fetched books for a search
+    const [isFetching, setisFetching] = useState<boolean>(false);           // we are in the process of fetching books
+    const [error, setError] = useState<string>('');
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
 
     // callbacks
-    const fetchBooks = async (query: string, signal?: AbortSignal) => {
-        setIsSearching(true);
+    const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
+        setisFetching(true);
         try {
             const currentBooks = await getBooks(query, signal);
             if (!signal?.aborted) {
@@ -37,24 +36,20 @@ export const SearchPage: React.FC = () => {
         }
         catch (error: any) {
             if (error.name === 'AbortError') {
-                console.log(`The search with query ${search} was aborted`);
+                console.log(`The search with query ${query} was aborted`);
             }
             else {
                 console.error(error);       // Display a search row indicating no search results were found
+                setError('No results were found.');
                 setSearchResults(null);
             }
         }
         finally {
             if (!signal?.aborted) {
-                setIsSearching(false);
-            }
-            else {
-                // handles the scenario when user deletes the search input altogether
-                // this means the last search will be aborted but this time we won't be making a search request as the user was not typing but actually removing their search
-                !search && setIsSearching(false);
+                setisFetching(false);
             }
         }
-    }
+    }, []);
 
     // effects
     // fetching books from backend and storing them in a map on mount
@@ -65,9 +60,12 @@ export const SearchPage: React.FC = () => {
                 setBooks(newBooks);
                 setLoading(false);
             }
-            catch (error) {
+            catch (error: any) {
                 console.error(error);
-                setLoading(true);
+                setError('Failed to load default books. Please refresh the page.');
+            }
+            finally {
+                setLoading(false);
             }
         }
         getDefaultBooks();
@@ -84,6 +82,7 @@ export const SearchPage: React.FC = () => {
         } 
         else {
             setSearchResults(null);
+            setisFetching(false);
         }
 
         return () => {
@@ -98,7 +97,7 @@ export const SearchPage: React.FC = () => {
     // Function memoizes the default content on the search page
     const content: Array<JSX.Element> = useMemo(() => {
         return genres.map(genre => 
-            <Genre key={uuidv4()} name={genre} books={books.get(genre) || []} />
+            <Genre key={genre} name={genre} books={books.get(genre) || []} />
         )
     }, [books]);
 
@@ -109,27 +108,19 @@ export const SearchPage: React.FC = () => {
     }
 
 
-    // Function re-renders search page to display books user may be looking for
-    const handleSearchClick = () => {
-        // user typed something
-        // if (search) {
-        //     const d = getBooks(search);
-        // }
-    }
-
     return (
         <div className="search-page-container">
             <div className="search-bar-container">
                 <div className="search-bar">
-                    <input className="search-input" type="text" placeholder="title, author, ISBN" onChange={handleSearchInput} />
-                    <svg className="search-bar-icon" width='10' height='10' viewBox="0 0 50 50" fill="black" xmlns="http://www.w3.org/2000/svg" onClick={handleSearchClick}>
+                    <input className="search-input" type="text" placeholder="title, author, ISBN" value={search} onChange={handleSearchInput} />
+                    <svg className="search-bar-icon" width='10' height='10' viewBox="0 0 50 50" fill="black" xmlns="http://www.w3.org/2000/svg" >
                         <path d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z" />
                     </svg>
                 </div>
                 {
-                    isSearching ? <div>Searching...</div> :
+                    isFetching ? <div>Searching...</div> :
                     searchResults ? searchResults.map(book => 
-                        <SearchRow key={uuidv4()} book={book} />
+                        <SearchRow key={book.id} book={book} />
                     ) : ''  
                 }
             </div>

@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS # type: ignore
 import requests
+import uuid
 
 app = Flask(__name__)
 CORS(app)
@@ -47,6 +48,7 @@ def formattedWorks(works):
             book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
                 
             result.append({
+                'id': uuid.uuid4(),
                 'name': book_name, 
                 'author': author,
                 'image_url': book_cover
@@ -89,6 +91,7 @@ def getBook():
         
         # respond with an array of a single book
         return jsonify([{
+            'id': uuid.uuid4(),
             'name': book_name,
             'author': author_name,
             'image_url': book_cover
@@ -143,6 +146,7 @@ def formattedBooks(books, limit):
 
             
             result.append({
+                'id': uuid.uuid4(),
                 'name': book_name,
                 'author': book_author,
                 'image_url': book_cover
