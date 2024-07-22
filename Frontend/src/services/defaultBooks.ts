@@ -18,7 +18,7 @@ export const fetchDefaultBooks = async () => {
 
     const fetchPromises = genres.map(genre => {
         const encodedGenre = encodeURIComponent(genre);
-        return fetchBooksByGenre(encodedGenre);
+        return fetchBooksByGenre(encodedGenre, 0);
     });
 
     const books = await Promise.all(fetchPromises);
@@ -36,9 +36,9 @@ export const fetchDefaultBooks = async () => {
     return defaultBooks;
 }
 
-const fetchBooksByGenre = async (genre : string) => {
+const fetchBooksByGenre = async (genre : string, offset: number) => {
     try {
-        const response = await fetch(`${BASE_URL}/${genre}-books?limit=20`);
+        const response = await fetch(`${BASE_URL}/${genre}-books?limit=7&offset=${offset}`);
         if (!response.ok) {
             throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
         }

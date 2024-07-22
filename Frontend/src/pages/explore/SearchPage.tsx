@@ -24,6 +24,7 @@ export const SearchPage: React.FC = () => {
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
+    const offsetRef = useRef<number>(0);
 
     // callbacks
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
@@ -119,10 +120,14 @@ export const SearchPage: React.FC = () => {
                     </svg>
                 </div>
                 {
-                    isFetching ? <div>Searching...</div> :
-                    searchResults ? searchResults.map(book => 
-                        <SearchRow key={book.id} book={book} />
-                    ) : ''  
+                    isFetching ? <div className="searching-message">Searching...</div> :
+                    searchResults ? 
+                        <div className="search-results-container">
+                            {searchResults.map(book => 
+                                <SearchRow key={book.id} book={book} />
+                            )}
+                        </div>
+                    : ''  
                 }
                 {error === 'Search' && <div className="no-results-row">No search results found.</div>}
             </div>

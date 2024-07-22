@@ -3,7 +3,9 @@
     flex-direction: column;
     background-color: rgb(248, 248, 248);
     height: 100vh;
-    overflow: hidden;
+    width: 100vw;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .search-page-container::-webkit-scrollbar {
@@ -18,14 +20,13 @@
 .search-bar-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .search-bar {
     display: flex;
     align-items: center;
     height: 25px;
-    width: 25%;
+    width: 15%;
     flex-shrink: 0;
     margin-top: 10px;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -50,16 +51,25 @@
     outline: none;
 }
 
+.search-results-container {
+    position: absolute;
+    width: 288px;
+    margin-left: 450px;
+    top: 5%;
+    background-color: white;
+}
+
 .search-row {
     display: flex;
     align-items: center;
-    width: 25%;
     height: 42px;
+    width: 100%;
     padding-top: 5px;
     padding-left: 10px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all 0.3s ease;
+    background-color: white;
 }
 
 .search-row:hover {
@@ -95,7 +105,6 @@
 .no-results-row {
     display: flex;
     justify-content: center;
-    width: 25%;
     height: 24px;
     padding-top: 5px;
     padding-left: 10px;
@@ -103,6 +112,17 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 12px;
+}
+
+.search-bar, .no-results-row {
+    width: 15%;
+    margin-left: 450px;
+}
+
+.searching-message {
+    position: absolute;
+    top: 6%;
+    left: 48%;
 }
 
 .search-default-content {
@@ -116,12 +136,11 @@
     align-items: start;
     overflow-y: auto;
     padding-bottom: 230px;
-    gap: 30px;
+    gap: 20px;
 }
 
 .genre-section {
-    overflow-x: auto;
-    height: 100%;
+    overflow: visible;
 }
 
 .genre-books {
@@ -145,6 +164,13 @@
     margin-bottom: 5px;
     height: 20%;
     flex-shrink: 0;
+}
+
+.load-more-icon {
+    display: flex;
+    align-items: center;
+    margin-left: -40px;
+    z-index: 1;
 }
 
 .loading {

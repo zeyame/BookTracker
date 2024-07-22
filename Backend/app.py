@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS # type: ignore
 import requests
 import uuid
+from collections import defaultdict
 
 app = Flask(__name__)
 CORS(app)
@@ -10,15 +11,18 @@ SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 
+seen_books = defaultdict(set)
+
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
 # Route handles fetching a given number of books of a specific genre from the Open Library API
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
-    limit = request.args.get('limit', 20)
+    limit = request.args.get('limit', 7)
+    offset = request.args.get('offset', 0)
     
     # requesting the API for twenty romance books
-    response = requests.get(f"{SUBJECTS_URL}/{genre}.json?limit={limit}")
+    response = requests.get(f"{SUBJECTS_URL}/{genre}.json?limit={limit}&offset={offset}")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -27,31 +31,38 @@ def getBooksByGenre(genre):
     data = response.json()      # a python dictionary of 5 key value pairs
     works = data.get('works', [])       # gets a python list of dictionaries of the 20 books, each dictionary storing metadata about a specific book
     
-    works = formattedWorks(works)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
+    if not works:
+        return jsonify({'error': f'Could not find any books in the {genre} genre.'}), 404
+    
+    works = formattedWorks(works, genre)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     
     return jsonify(works)
 
 
 # helper function to format response for fetching the initial set of books displayed on client's search page
-def formattedWorks(works):
+def formattedWorks(works, genre):
     result = []
-    if works:
-        for work in works:
-            # extracting the book name, cover id and author from metadata dictionary of each book
-            book_name = work.get('title', '')
-            authors = work.get('authors', [])
-            author = authors[0].get('name') if authors else 'Unknown'
-            
-            # we get a jpg image url for each book
-            book_cover_id = work.get('cover_id', '')
-            book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
-                
-            result.append({
-                'id': uuid.uuid4(),
-                'name': book_name, 
-                'author': author,
-                'image_url': book_cover
-            })
+    for work in works:
+        if work.get("key") in seen_books[genre]:
+            continue
+        seen_books[genre].add(work.get('key'))
+        
+        # extracting the book name, cover id and author from metadata dictionary of each book
+        book_name = work.get('title', '')
+        authors = work.get('authors', [])
+        author = authors[0].get('name') if authors else 'Unknown'
+        
+        # we get a jpg image url for each book
+        book_cover_id = work.get('cover_id', '')
+        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
+        
+        
+        result.append({
+            'id': uuid.uuid4(),
+            'name': book_name, 
+            'author': author,
+            'image_url': book_cover
+        })
             
     return result
     
