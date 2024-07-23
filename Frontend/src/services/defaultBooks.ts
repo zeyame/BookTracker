@@ -26,7 +26,7 @@ export const fetchDefaultBooks = async () => {
     const defaultBooks: Map<string, Array<book>> = new Map();
 
     genres.forEach((genre, index) => {
-        defaultBooks.set(genre.charAt(0).toUpperCase() + genre.slice(1), books[index]);
+        defaultBooks.set(genre, books[index]);
     });
 
     // Saving default books fetched as cache data lasting for a single session
@@ -36,7 +36,7 @@ export const fetchDefaultBooks = async () => {
     return defaultBooks;
 }
 
-const fetchBooksByGenre = async (genre : string, offset: number) => {
+export const fetchBooksByGenre = async (genre : string, offset: number) => {
     try {
         const response = await fetch(`${BASE_URL}/${genre}-books?limit=7&offset=${offset}`);
         if (!response.ok) {

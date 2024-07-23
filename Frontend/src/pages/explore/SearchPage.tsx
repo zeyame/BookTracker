@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
-import { fetchDefaultBooks } from "../../services/defaultBooks";
+import { fetchBooksByGenre, fetchDefaultBooks } from "../../services/defaultBooks";
 import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
 
 export const SearchPage: React.FC = () => {
 
-    const genres: Array<string> = ['Romance', 'Fiction', 'Thriller', 'Action', 'Mystery', 'History', 'Scifi', 'Horror', 'Fantasy'];
+    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
 
+    // maps
     // k = genre name, v = fetched books in the genre
     const map: Map<string, Array<book>> = new Map();
 
@@ -24,9 +25,8 @@ export const SearchPage: React.FC = () => {
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
-    const offsetRef = useRef<number>(0);
 
-    // callbacks
+    // callbacks - memoizes functions
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
         setisFetching(true);
         try {
@@ -94,11 +94,24 @@ export const SearchPage: React.FC = () => {
 
 
     // functions
+    const handlePagination = async (genreName: string, offset: number) => {
+        try {
+            const newBooks = await fetchBooksByGenre(genreName, offset);
+            const updatedBooksMap: Map<string, Array<book>> = new Map(); 
+            books.forEach((books, genre) => 
+                genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
+            setBooks(updatedBooksMap);
+        }
+        catch (error: any) {
+            console.error(`Failed to fetch paginated books for ${genreName} genre`);
+            setError('Pagination');
+        }
+    }
 
     // Function memoizes the default content on the search page
     const content: Array<JSX.Element> = useMemo(() => {
         return genres.map(genre => 
-            <Genre key={genre} name={genre} books={books.get(genre) || []} />
+            <Genre key={genre} name={genre} books={books.get(genre) || []} svgClick={handlePagination}/>
         )
     }, [books]);
 

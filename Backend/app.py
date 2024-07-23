@@ -11,8 +11,6 @@ SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 
-seen_books = defaultdict(set)
-
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
 # Route handles fetching a given number of books of a specific genre from the Open Library API
@@ -22,51 +20,21 @@ def getBooksByGenre(genre):
     offset = request.args.get('offset', 0)
     
     # requesting the API for twenty romance books
-    response = requests.get(f"{SUBJECTS_URL}/{genre}.json?limit={limit}&offset={offset}")
+    response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={offset}")
     
     # we send back an error if request failed
     if response.status_code != 200:
         return jsonify({'error': f'An error occurred requesting books with subject: {genre}'}), response.status_code
     
     data = response.json()      # a python dictionary of 5 key value pairs
-    works = data.get('works', [])       # gets a python list of dictionaries of the 20 books, each dictionary storing metadata about a specific book
+    books = data.get('docs', [])       # gets a python list of dictionaries of the 20 books, each dictionary storing metadata about a specific book
     
-    if not works:
+    if not books:
         return jsonify({'error': f'Could not find any books in the {genre} genre.'}), 404
     
-    works = formattedWorks(works, genre)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
-    
-    return jsonify(works)
+    books = formattedBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
+    return jsonify(books)
 
-
-# helper function to format response for fetching the initial set of books displayed on client's search page
-def formattedWorks(works, genre):
-    result = []
-    for work in works:
-        if work.get("key") in seen_books[genre]:
-            continue
-        seen_books[genre].add(work.get('key'))
-        
-        # extracting the book name, cover id and author from metadata dictionary of each book
-        book_name = work.get('title', '')
-        authors = work.get('authors', [])
-        author = authors[0].get('name') if authors else 'Unknown'
-        
-        # we get a jpg image url for each book
-        book_cover_id = work.get('cover_id', '')
-        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
-        
-        
-        result.append({
-            'id': uuid.uuid4(),
-            'name': book_name, 
-            'author': author,
-            'image_url': book_cover
-        })
-            
-    return result
-    
-    
 # Route handles fetching a book by title, author, or ISBN from the Open Library API
 @app.route('/book', methods=['GET'])
 def getBook():
@@ -120,7 +88,7 @@ def formattedBooks(books, limit, isbn=False):
             'image_url': book_cover
         }])
         
-    # else we will make sure only the unique books of the 5 are returned
+    # else we will make sure only the unique books of the 5 are returned - useful for typed user searches which may return repeated results
     seen_books = set()
     result = []
     books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
