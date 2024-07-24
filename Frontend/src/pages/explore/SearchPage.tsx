@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
-import { fetchBooksByGenre, fetchDefaultBooks } from "../../services/defaultBooks";
+import { cacheBooks, fetchBooksByGenre, fetchDefaultBooks } from "../../services/defaultBooks";
 import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
@@ -20,11 +20,13 @@ export const SearchPage: React.FC = () => {
     const [searchResults, setSearchResults] = useState<Array<book> | null>(null);           // storing the fetched books for a search
     const [isFetching, setisFetching] = useState<boolean>(false);           // we are in the process of fetching books
     const [error, setError] = useState<string>('');
+    const [initialBooksFetched, setInitialBooksFetched] = useState<boolean>(false);
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
 
     // callbacks - memoizes functions
+    // function fetches 5 books from the backend for user searches
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
         setisFetching(true);
         try {
@@ -50,8 +52,8 @@ export const SearchPage: React.FC = () => {
         }
     }, []);
 
-    // effects
-    // fetching books from backend and storing them in a map on mount
+    // use effects
+    // fetching the initial set of books from backend/session storage and storing them in a map on mount of page
     useEffect(() => {
         if (sessionStorage.getItem('defaultBooksCache')) {
             const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
@@ -60,7 +62,6 @@ export const SearchPage: React.FC = () => {
                 const defaultBooks = new Map<string, Array<book>>(Object.entries(parsedCache));
                 setBooks(defaultBooks);
                 setLoading(false);
-                
             }
         }
         else {
@@ -69,6 +70,7 @@ export const SearchPage: React.FC = () => {
                     const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
                     setBooks(newBooks);
                     setLoading(false);
+                    setInitialBooksFetched(true);
                 }
                 catch (error: any) {
                     console.error(error);
@@ -111,6 +113,21 @@ export const SearchPage: React.FC = () => {
             sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
         }
     }, [books]);
+
+    // fetching 21 more books in the background for each genre to optimize pagination (books stored in server cache)
+    useEffect(() => {
+        if (initialBooksFetched) {
+            const beginCaching = async () => { 
+                try {
+                    cacheBooks();
+                }
+                catch (error: any) {
+                    console.error("Request for server to cache books has failed.");
+                }
+            }
+            beginCaching();
+        }
+    }, [initialBooksFetched]);
 
 
     // functions

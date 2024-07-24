@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS # type: ignore
 import requests
 import uuid
+import asyncio, aiohttp
 from collections import defaultdict
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ cache = defaultdict(list)
 
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
-# Route handles fetching a given number of books of a specific genre from the Open Library API
+# Route handles fetching a set of books belonging to a specific genre from the Open Library API when application runs
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
     limit = request.args.get('limit', 7)
@@ -35,10 +36,31 @@ def getBooksByGenre(genre):
     if not books:
         return jsonify({'error': f'Could not find any books in the {genre} genre.'}), 404
     
-    books = formattedBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
+    books = formatDefaultBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     return jsonify(books)
 
-# Route handles fetching a book by title, author, or ISBN from the Open Library API
+def formatDefaultBooks(books, limit):
+    result = []
+    books = books[:int(limit)]
+    for book in books:
+        book_name = book.get('title', 'Unknown')
+        book_author = book.get('author_name', ['Unknown'])[0]
+            
+        book_cover_id = book.get('cover_i', '')
+        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
+
+            
+        result.append({
+            'id': uuid.uuid4(),
+            'name': book_name,
+            'author': book_author,
+            'image_url': book_cover
+        })
+        
+    return result
+    
+    
+# Route handles fetching a book by title, author, or ISBN from the Open Library API when users inputs a search
 @app.route('/book', methods=['GET'])
 def getBook():
     search = request.args.get('search')
@@ -54,13 +76,12 @@ def getBook():
         return jsonify({'error': f'No books with the search {search} could be found.'}), 404
     
     if isISBN(search):
-        books = formattedBooks(books, limit, isbn=True)
+        books = formatSearchedBooks(books, limit, isbn=True)
     else:
-        books = formattedBooks(books, limit)
+        books = formatSearchedBooks(books, limit)
     
     # respond with an array of book(s)
     return jsonify(books)
-    
 
 # # helper function that checks if a user search has a valid format for an ISBN 
 def isISBN(search):
@@ -75,7 +96,7 @@ def isISBN(search):
 
 
 # helper function that formats the docs property of a json object returned by a book search from the Open Library API
-def formattedBooks(books, limit, isbn=False):
+def formatSearchedBooks(books, limit, isbn=False):
     # if it was an isbn search
     if isbn:
         book_name = books[0].get('title', 'Unknown')
@@ -118,6 +139,40 @@ def formattedBooks(books, limit, isbn=False):
             
     return result
         
+@app.route('/cache')
+async def setup_cache():
+    genres = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy']
+    if not genres:
+        return jsonify({'error': 'Could not retrieve the genres array passed by client.'}), 404
+    
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetchBooks(session, genre) for genre in genres]        # coroutine object
+        responses_json = await asyncio.gather(*tasks)       # array of json objects - each object represents the search result for books in one genre
+        
+        for genre, response in zip(genres, responses_json):
+            if response:
+                formatted_books = formatDefaultBooks(response.get('docs', []), 14)
+                if formatted_books:
+                    cache[genre] = formatted_books
+                else:
+                    print(f"No books were found in the returned json response for {genre} genre when caching.")
+            
+            else:
+                return jsonify({'error': f'Failed to cache books for {genre} genre due to a failed response from the Open Library API.'})
+            
+    return jsonify({'Cache': cache}), 200
+
+        
+async def fetchBooks(session, genre):
+    url = f"{SEARCH_URL}?subject={genre}&limit=14&offset=7"
+    
+    async with session.get(url) as response:
+        if response.status == 200:
+            return await response.json()
+        else:
+            print(f"Failed to fetch books for {genre} genre to be stored in cache.")
+            return None
+
 if __name__ == '__main__':
     app.run(debug=True)
     
