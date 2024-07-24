@@ -69,10 +69,6 @@ export const SearchPage: React.FC = () => {
                     const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
                     setBooks(newBooks);
                     setLoading(false);
-                    
-                    // save to storage
-                    const defaultBooksObject = Object.fromEntries(newBooks);
-                    sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
                 }
                 catch (error: any) {
                     console.error(error);
@@ -108,6 +104,14 @@ export const SearchPage: React.FC = () => {
 
     }, [search]);
 
+    // saving any changes to the default books map to session storage 
+    useEffect(() => {
+        if (books.size > 0) {
+            const defaultBooksObject = Object.fromEntries(books);
+            sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
+        }
+    }, [books]);
+
 
     // functions
     const handlePagination = async (genreName: string, offset: number) => {
@@ -117,10 +121,6 @@ export const SearchPage: React.FC = () => {
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
-
-            // save to storage
-            const defaultBooksObject = Object.fromEntries(updatedBooksMap);
-            sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
         }
         catch (error: any) {
             console.error(`Failed to fetch paginated books for ${genreName} genre`);
