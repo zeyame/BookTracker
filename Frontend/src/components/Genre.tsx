@@ -11,14 +11,17 @@ interface GenreProps {
 export const Genre: React.FC<GenreProps> = ( { name, books, svgClick } ) => {
     const booksLength = books.length;
 
-    const [offset, setOffset] = useState<number>(() => {
+    // each genre component will maintain an offset saved in session storage
+    const getOffset = () => {
         const storedOffset = sessionStorage.getItem(`${name}-offset`);
         return storedOffset !== null ? Number(storedOffset) : 0;
-    });
+    };
 
     const saveOffset = (newOffset: number) => {
         sessionStorage.setItem(`${name}-offset`, JSON.stringify(newOffset));
     }
+
+    const currentOffset: number = getOffset();
 
     return (
         <div className="genre-section">
@@ -33,10 +36,8 @@ export const Genre: React.FC<GenreProps> = ( { name, books, svgClick } ) => {
                     <div className="load-more-icon">
                         <svg fill="#000000" height="100" width="100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" 
                                 onClick={() => {
-                                    const newOffset = offset + 7;
-                                    console.log(newOffset);
+                                    const newOffset = currentOffset + 7;           // 7 is the limit for each batch of books fetched for a given genre
                                     saveOffset(newOffset);
-                                    setOffset(newOffset);
                                     svgClick(name, newOffset);
                                 }
                             } >

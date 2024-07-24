@@ -11,6 +11,9 @@ SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 
+# k = genre, v = books
+cache = defaultdict(list)
+
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
 # Route handles fetching a given number of books of a specific genre from the Open Library API

@@ -10,10 +10,8 @@ export const SearchPage: React.FC = () => {
 
     const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
 
-    // maps
     // k = genre name, v = fetched books in the genre
     const map: Map<string, Array<book>> = new Map();
-
     
     // states
     const [books, setBooks] = useState(map);
@@ -55,21 +53,39 @@ export const SearchPage: React.FC = () => {
     // effects
     // fetching books from backend and storing them in a map on mount
     useEffect(() => {
-        const getDefaultBooks = async () => {
-            try {
-                const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
-                setBooks(newBooks);
+        if (sessionStorage.getItem('defaultBooksCache')) {
+            const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
+            if (defaultBooksCache) {
+                const parsedCache = JSON.parse(defaultBooksCache);  // parse object corresponding to original default books map as a js object
+                const defaultBooks = new Map<string, Array<book>>(Object.entries(parsedCache));
+                setBooks(defaultBooks);
                 setLoading(false);
-            }
-            catch (error: any) {
-                console.error(error);
-                setError('Default books');
-            }
-            finally {
-                setLoading(false);
+                
             }
         }
-        getDefaultBooks();
+        else {
+            const getDefaultBooks = async () => {
+                try {
+                    const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
+                    setBooks(newBooks);
+                    setLoading(false);
+                    
+                    // save to storage
+                    const defaultBooksObject = Object.fromEntries(newBooks);
+                    sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
+                }
+                catch (error: any) {
+                    console.error(error);
+                    setError('Default books');
+                }
+                finally {
+                    setLoading(false);
+                }
+            }
+
+            getDefaultBooks();
+        }
+
     }, []);
 
     // Fetching the 5 books that match what the user has inputted so far
@@ -101,6 +117,10 @@ export const SearchPage: React.FC = () => {
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
+
+            // save to storage
+            const defaultBooksObject = Object.fromEntries(updatedBooksMap);
+            sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
         }
         catch (error: any) {
             console.error(`Failed to fetch paginated books for ${genreName} genre`);
