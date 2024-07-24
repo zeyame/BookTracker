@@ -9,7 +9,7 @@ export const fetchDefaultBooks = async () => {
     try {
         const fetchPromises = genres.map(genre => {
             const encodedGenre = encodeURIComponent(genre);
-            return fetchBooksByGenre(encodedGenre, 0);
+            return fetchBooksByGenre(encodedGenre);
         });
         const books = await Promise.all(fetchPromises);
 
@@ -25,17 +25,34 @@ export const fetchDefaultBooks = async () => {
     }
 }
 
-export const cacheBooks = async () => {
+export const initializeCaching = async () => {
     try {
         const response = await fetch(`${BASE_URL}/cache`);
-        console.log(await response.json());
+        if (!response.ok) {
+            throw new Error(`Server failed to set up the cache`);
+        }
+        console.log(await response.json());         // logging the cache if response was ok
     }
     catch (error: any) {
         throw error;
     }
 }
 
-export const fetchBooksByGenre = async (genre : string, offset: number) => {
+export const getCachedBooks = async (genreName: string) => {
+    try {
+        const response = await fetch(`${BASE_URL}/cached-${genreName}`);
+        if (!response.ok) {
+            throw new Error(`Response from backend failed when retrieving cached books for ${genreName} genre`);
+        }
+        const cachedBooks: Array<book> = await response.json();
+        return cachedBooks;
+    }
+    catch (error: any) {
+        throw error;
+    }
+}
+
+export const fetchBooksByGenre = async (genre : string, offset?: number) => {
     try {
         const response = await fetch(`${BASE_URL}/${genre}-books?limit=7&offset=${offset}`);
         if (!response.ok) {

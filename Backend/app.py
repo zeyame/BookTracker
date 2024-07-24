@@ -12,8 +12,14 @@ SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 
+# Hashmaps
+
 # k = genre, v = books
 cache = defaultdict(list)
+
+# k = genre, v = current offset 
+genre_offset = {'romance': 0, 'fiction': 0, 'thriller': 0, 'action': 0, 'mystery': 0, 'history': 0, 'scifi': 0, 'horror': 0, 'fantasy': 0}
+
 
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
 
@@ -21,7 +27,7 @@ cache = defaultdict(list)
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
     limit = request.args.get('limit', 7)
-    offset = request.args.get('offset', 0)
+    offset = genre_offset.get(genre, 0)
     
     # requesting the API for twenty romance books
     response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={offset}")
@@ -36,6 +42,7 @@ def getBooksByGenre(genre):
     if not books:
         return jsonify({'error': f'Could not find any books in the {genre} genre.'}), 404
     
+    genre_offset[genre] += 7
     books = formatDefaultBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     return jsonify(books)
 
@@ -139,20 +146,18 @@ def formatSearchedBooks(books, limit, isbn=False):
             
     return result
         
-@app.route('/cache')
+@app.route('/cache', methods=['GET'])
 async def setup_cache():
-    genres = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy']
-    if not genres:
-        return jsonify({'error': 'Could not retrieve the genres array passed by client.'}), 404
     
     async with aiohttp.ClientSession() as session:
-        tasks = [fetchBooks(session, genre) for genre in genres]        # coroutine object
+        tasks = [fetchBooks(session, genre, genre_offset.get(genre)) for genre in genre_offset.keys()]        # coroutine objects
         responses_json = await asyncio.gather(*tasks)       # array of json objects - each object represents the search result for books in one genre
         
-        for genre, response in zip(genres, responses_json):
+        for genre, response in zip(genre_offset.keys(), responses_json):
             if response:
                 formatted_books = formatDefaultBooks(response.get('docs', []), 14)
                 if formatted_books:
+                    genre_offset[genre] += 14
                     cache[genre] = formatted_books
                 else:
                     print(f"No books were found in the returned json response for {genre} genre when caching.")
@@ -163,8 +168,8 @@ async def setup_cache():
     return jsonify({'Cache': cache}), 200
 
         
-async def fetchBooks(session, genre):
-    url = f"{SEARCH_URL}?subject={genre}&limit=14&offset=7"
+async def fetchBooks(session, genre, offset):
+    url = f"{SEARCH_URL}?subject={genre}&limit=14&offset={offset}"
     
     async with session.get(url) as response:
         if response.status == 200:
@@ -172,7 +177,26 @@ async def fetchBooks(session, genre):
         else:
             print(f"Failed to fetch books for {genre} genre to be stored in cache.")
             return None
+        
 
+@app.route('/cached-<genre>', methods=['GET'])
+def getCachedBooks(genre):
+    books = cache.get(genre, [])
+    if genre not in cache or not books:
+        return jsonify({'error': f'No cached books for {genre} genre on the server.'}), 404
+        
+    if len(books) < 7:
+        cached_books = books 
+        del cache[genre]
+        return jsonify(cached_books)
+           
+    cached_books = cache[genre][-7:]        # get the last 7 elements to avoid any shifting
+    del cache[genre][-7:]                   # delete the last 7 elements
+    
+    return jsonify(cached_books)
+        
+        
+        
 if __name__ == '__main__':
     app.run(debug=True)
     

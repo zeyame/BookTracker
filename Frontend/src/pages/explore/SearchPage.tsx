@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
-import { cacheBooks, fetchBooksByGenre, fetchDefaultBooks } from "../../services/defaultBooks";
+import { fetchBooksByGenre, fetchDefaultBooks, getCachedBooks, initializeCaching } from "../../services/defaultBooks";
 import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
@@ -11,10 +11,10 @@ export const SearchPage: React.FC = () => {
     const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
 
     // k = genre name, v = fetched books in the genre
-    const map: Map<string, Array<book>> = new Map();
+    const defaultBooks: Map<string, Array<book>> = new Map();
     
     // states
-    const [books, setBooks] = useState(map);
+    const [books, setBooks] = useState(defaultBooks);
     const [loading, setLoading] = useState(true);  
     const [search, setSearch] = useState('');       // stores the current search value in the search bar
     const [searchResults, setSearchResults] = useState<Array<book> | null>(null);           // storing the fetched books for a search
@@ -30,7 +30,7 @@ export const SearchPage: React.FC = () => {
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
         setisFetching(true);
         try {
-            const currentBooks = await getBooks(query, signal);
+            const currentBooks: Array<book> = await getBooks(query, signal);
             if (!signal?.aborted) {
                 setSearchResults(currentBooks);
             }
@@ -40,7 +40,6 @@ export const SearchPage: React.FC = () => {
                 console.log(`The search with query ${query} was aborted`);
             }
             else {
-                console.error(error);
                 setError('Search');
                 setSearchResults(null);
             }
@@ -114,26 +113,26 @@ export const SearchPage: React.FC = () => {
         }
     }, [books]);
 
-    // fetching 21 more books in the background for each genre to optimize pagination (books stored in server cache)
+    // fetching 14 more books in the background for each genre to optimize pagination (books stored in server cache)
     useEffect(() => {
         if (initialBooksFetched) {
-            const beginCaching = async () => { 
+            const caching = async () => { 
                 try {
-                    cacheBooks();
+                    initializeCaching();        // server side caching set up
                 }
                 catch (error: any) {
                     console.error("Request for server to cache books has failed.");
                 }
             }
-            beginCaching();
+            caching();
         }
     }, [initialBooksFetched]);
 
 
     // functions
-    const handlePagination = async (genreName: string, offset: number) => {
+    const handlePagination = async (genreName: string) => {
         try {
-            const newBooks = await fetchBooksByGenre(genreName, offset);
+            const newBooks: Array<book> = await getCachedBooks(genreName);
             const updatedBooksMap: Map<string, Array<book>> = new Map(); 
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
