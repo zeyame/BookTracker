@@ -25,9 +25,25 @@ export const fetchDefaultBooks = async () => {
     }
 }
 
+export const fetchBooksByGenre = async (genre : string) => {
+    try {
+        const response = await fetch(`${BASE_URL}/${genre}-books?limit=7`);
+        if (!response.ok) {
+            throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
+        }
+        const data: Array<book> = await response.json();
+        return data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+// requests cache to be setup on the server
 export const initializeCaching = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/cache`);
+        const response = await fetch(`${BASE_URL}/cache?limit=14`);
         if (!response.ok) {
             throw new Error(`Server failed to set up the cache`);
         }
@@ -38,6 +54,7 @@ export const initializeCaching = async () => {
     }
 }
 
+// retrieves 7 cached books for a specific genre which the user requested
 export const getCachedBooks = async (genreName: string) => {
     try {
         const response = await fetch(`${BASE_URL}/cached-${genreName}`);
@@ -52,17 +69,16 @@ export const getCachedBooks = async (genreName: string) => {
     }
 }
 
-export const fetchBooksByGenre = async (genre : string, offset?: number) => {
+// requests more books to be cached for a specific genre
+export const updateCache = async (genreName: string) => {
     try {
-        const response = await fetch(`${BASE_URL}/${genre}-books?limit=7&offset=${offset}`);
+        const response = await fetch(`${BASE_URL}/update-${genreName}-cache?limit=7`);
         if (!response.ok) {
-            throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
+            throw new Error(`Failed response from the backend when requested to update the cache for ${genreName} genre.`);
         }
-        const data: Array<book> = await response.json();
-        return data;
+        console.log(await response.json());
     }
-    catch (error) {
-        console.error(error);
+    catch (error: any) {
         throw error;
     }
 }

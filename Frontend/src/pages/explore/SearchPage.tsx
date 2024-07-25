@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
-import { fetchBooksByGenre, fetchDefaultBooks, getCachedBooks, initializeCaching } from "../../services/defaultBooks";
+import { fetchDefaultBooks, getCachedBooks, initializeCaching, updateCache } from "../../services/defaultBooks";
 import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
@@ -21,6 +21,7 @@ export const SearchPage: React.FC = () => {
     const [isFetching, setisFetching] = useState<boolean>(false);           // we are in the process of fetching books
     const [error, setError] = useState<string>('');
     const [initialBooksFetched, setInitialBooksFetched] = useState<boolean>(false);
+    const [paginatedGenre, setPaginatedGenre] = useState<string>('');       // keeps track of the clicked genre when user requests more books
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -103,7 +104,7 @@ export const SearchPage: React.FC = () => {
             abortControllerRef.current?.abort();
         }
 
-    }, [search]);
+    }, [search, fetchBooks]);
 
     // saving any changes to the default books map to session storage 
     useEffect(() => {
@@ -128,6 +129,25 @@ export const SearchPage: React.FC = () => {
         }
     }, [initialBooksFetched]);
 
+    // effect calls a function that requests more books to be stored in the cache for the clicked genre
+    useEffect(() => {
+        if (paginatedGenre) {
+            const cacheUpdate = async () => {
+                try {
+                    await updateCache(paginatedGenre);
+                }
+                catch (error: any) {
+                    console.error(`Failed to update the cache for ${paginatedGenre} genre.`);
+                }
+            }   
+            cacheUpdate();
+        }
+
+        return () => {
+            setPaginatedGenre('');
+        }
+    }, [paginatedGenre]);
+
 
     // functions
     const handlePagination = async (genreName: string) => {
@@ -137,6 +157,7 @@ export const SearchPage: React.FC = () => {
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
+            setPaginatedGenre(genreName);
         }
         catch (error: any) {
             console.error(`Failed to fetch paginated books for ${genreName} genre`);
@@ -149,7 +170,7 @@ export const SearchPage: React.FC = () => {
         return genres.map(genre => 
             <Genre key={genre} name={genre} books={books.get(genre) || []} svgClick={handlePagination}/>
         )
-    }, [books]);
+    }, [books, genres]);
 
 
     // Function updates search state as user is typing
