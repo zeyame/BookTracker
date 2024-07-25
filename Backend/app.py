@@ -18,7 +18,7 @@ COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the siz
 cache = defaultdict(list)
 
 # k = genre, v = current offset 
-genre_offset = {'romance': 0, 'fiction': 0, 'thriller': 0, 'action': 0, 'mystery': 0, 'history': 0, 'scifi': 0, 'horror': 0, 'fantasy': 0}
+genre_offset = {'romance': 7, 'fiction': 7, 'thriller': 7, 'action': 7, 'mystery': 7, 'history': 7, 'scifi': 7, 'horror': 7, 'fantasy': 7}
 
 
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
@@ -27,10 +27,9 @@ genre_offset = {'romance': 0, 'fiction': 0, 'thriller': 0, 'action': 0, 'mystery
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
     limit = int(request.args.get('limit', 7))
-    offset = int(genre_offset.get(genre, 0))
     
     # requesting the API for a certain number of books for the specified genre
-    response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={offset}")
+    response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -42,7 +41,6 @@ def getBooksByGenre(genre):
     if not books:
         return jsonify({'error': f'No books were return for the {genre} genre from the API.'}), 404
     
-    genre_offset[genre] += limit
     books = formatDefaultBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     return jsonify(books)
 
@@ -204,26 +202,29 @@ def updateGenreCache(genre):
         return jsonify({'error': f'{genre} genre does not exist in the cache'}), 404
     
     limit = int(request.args.get('limit', 7))
+    genre_offset[genre] += limit        # avoids race condition - two quick requests having the same offset
     
     # requesting the API for twenty romance books
     response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={genre_offset[genre]}")
     
     # we send back an error if request failed
     if response.status_code != 200:
+        genre_offset[genre] -= limit        # remove offset update
         return jsonify({'error': f'An error occurred requesting books with subject: {genre}'}), response.status_code
     
     data = response.json()     
     books = data.get('docs', [])       # gets a python list of dictionaries of the 'limit' books, each dictionary storing metadata about a specific book
     
     if not books:
+        genre_offset[genre] -= limit        # remove offset update
         return jsonify({'error': f'Could not fetch new books for the {genre} genre when updating its cache.'}), 404
     
-    genre_offset[genre] += limit
     
     books = formatDefaultBooks(books, limit)
     cache[genre].extend(books)
     
-    return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
+    return jsonify({f'{genre} cache': cache[genre]})
+    # return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
     
         
 if __name__ == '__main__':

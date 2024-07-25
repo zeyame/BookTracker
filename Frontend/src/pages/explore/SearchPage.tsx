@@ -119,7 +119,7 @@ export const SearchPage: React.FC = () => {
         if (initialBooksFetched) {
             const caching = async () => { 
                 try {
-                    initializeCaching();        // server side caching set up
+                    await initializeCaching();        // server side caching set up
                 }
                 catch (error: any) {
                     console.error("Request for server to cache books has failed.");
