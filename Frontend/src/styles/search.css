@@ -174,7 +174,7 @@
     flex-shrink: 0;
 }
 
-.load-more-icon {
+.load-more-or-loading {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -183,16 +183,24 @@
     padding-bottom: 34px;
 }
 
-.load-more-icon svg {
+.load-more-or-loading svg {
     width: 20px;
     height: 10px;
     cursor: pointer;
 }
 
-.loading {
+.defualt-books-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: absolute;
-    top: 40%;
+    top: 38%;
     left: 50%;
+}
+
+.default-books-loading p {
+    font-size: 18px;
+    margin-bottom: 10px;
 }
 
 .default-books-error {

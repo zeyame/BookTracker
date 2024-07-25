@@ -5,108 +5,88 @@ import { fetchDefaultBooks, getCachedBooks, initializeCaching, updateCache } fro
 import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/bookSearch";
 import { SearchRow } from "../../components/SearchRow";
+import { LoadingIcon } from "../../components/LoadingIcon";
 
 export const SearchPage: React.FC = () => {
-
     const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
 
-    // k = genre name, v = fetched books in the genre
-    const defaultBooks: Map<string, Array<book>> = new Map();
-    
     // states
-    const [books, setBooks] = useState(defaultBooks);
-    const [loading, setLoading] = useState(true);  
-    const [search, setSearch] = useState('');       // stores the current search value in the search bar
-    const [searchResults, setSearchResults] = useState<Array<book> | null>(null);           // storing the fetched books for a search
-    const [isFetching, setisFetching] = useState<boolean>(false);           // we are in the process of fetching books
-    const [error, setError] = useState<string>('');
+    const [books, setBooks] = useState<Map<string, Array<book>>>(new Map());
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [searchResults, setSearchResults] = useState<Array<book> | null>(null);
+    const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [booksError, setBooksError] = useState<string>('');
     const [initialBooksFetched, setInitialBooksFetched] = useState<boolean>(false);
-    const [paginatedGenre, setPaginatedGenre] = useState<string>('');       // keeps track of the clicked genre when user requests more books
+    const [paginationLoading, setPaginationLoading] = useState<string>('');
+    const [cacheInitialized, setCacheInitialized] = useState(false);
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    // callbacks - memoizes functions
-    // function fetches 5 books from the backend for user searches
+    // callbacks
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
-        setisFetching(true);
+        setIsFetching(true);
         try {
             const currentBooks: Array<book> = await getBooks(query, signal);
             if (!signal?.aborted) {
                 setSearchResults(currentBooks);
             }
-        }
-        catch (error: any) {
+        } catch (error: any) {
             if (error.name === 'AbortError') {
                 console.log(`The search with query ${query} was aborted`);
-            }
-            else {
-                setError('Search');
+            } else {
+                setBooksError('Search');
                 setSearchResults(null);
             }
-        }
-        finally {
+        } finally {
             if (!signal?.aborted) {
-                setisFetching(false);
+                setIsFetching(false);
             }
         }
     }, []);
 
     // use effects
-    // fetching the initial set of books from backend/session storage and storing them in a map on mount of page
     useEffect(() => {
         if (sessionStorage.getItem('defaultBooksCache')) {
             const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
             if (defaultBooksCache) {
-                const parsedCache = JSON.parse(defaultBooksCache);  // parse object corresponding to original default books map as a js object
+                const parsedCache = JSON.parse(defaultBooksCache);
                 const defaultBooks = new Map<string, Array<book>>(Object.entries(parsedCache));
                 setBooks(defaultBooks);
                 setLoading(false);
             }
-        }
-        else {
+        } else {
             const getDefaultBooks = async () => {
                 try {
                     const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
                     setBooks(newBooks);
-                    setLoading(false);
                     setInitialBooksFetched(true);
-                }
-                catch (error: any) {
+                } catch (error: any) {
                     console.error(error);
-                    setError('Default books');
-                }
-                finally {
+                    setBooksError('Default books');
+                } finally {
                     setLoading(false);
                 }
             }
-
             getDefaultBooks();
         }
-
     }, []);
 
-    // Fetching the 5 books that match what the user has inputted so far
     useEffect(() => {
         if (search) {
-            // cancelling any previous requests
             abortControllerRef.current?.abort();
             abortControllerRef.current = new AbortController();
-
             fetchBooks(search, abortControllerRef.current.signal);
-        } 
-        else {
+        } else {
             setSearchResults(null);
-            setisFetching(false);
+            setIsFetching(false);
         }
-
         return () => {
             abortControllerRef.current?.abort();
         }
-
     }, [search, fetchBooks]);
 
-    // saving any changes to the default books map to session storage 
     useEffect(() => {
         if (books.size > 0) {
             const defaultBooksObject = Object.fromEntries(books);
@@ -114,71 +94,45 @@ export const SearchPage: React.FC = () => {
         }
     }, [books]);
 
-    // fetching 14 more books in the background for each genre to optimize pagination (books stored in server cache)
     useEffect(() => {
-        if (initialBooksFetched) {
-            const caching = async () => { 
-                try {
-                    await initializeCaching();        // server side caching set up
-                }
-                catch (error: any) {
-                    console.error("Request for server to cache books has failed.");
-                }
-            }
-            caching();
+        if (initialBooksFetched && !cacheInitialized) {
+            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
         }
-    }, [initialBooksFetched]);
-
-    // effect calls a function that requests more books to be stored in the cache for the clicked genre
-    useEffect(() => {
-        if (paginatedGenre) {
-            const cacheUpdate = async () => {
-                try {
-                    await updateCache(paginatedGenre);
-                }
-                catch (error: any) {
-                    console.error(`Failed to update the cache for ${paginatedGenre} genre.`);
-                }
-            }   
-            cacheUpdate();
-        }
-
-        return () => {
-            setPaginatedGenre('');
-        }
-    }, [paginatedGenre]);
-
+    }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {
+        setPaginationLoading(genreName);
         try {
+            if (!cacheInitialized) {
+                await initializeCaching();
+                setCacheInitialized(true);
+            }
             const newBooks: Array<book> = await getCachedBooks(genreName);
+
             const updatedBooksMap: Map<string, Array<book>> = new Map(); 
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
-            setPaginatedGenre(genreName);
+            
+            await updateCache(genreName);
+        } catch (error) {
+            console.error(`Failed to fetch paginated books for ${genreName} genre.`, error);
+        } finally {
+            setPaginationLoading('');
         }
-        catch (error: any) {
-            console.error(`Failed to fetch paginated books for ${genreName} genre`);
-            setError('Pagination');
-        }
-    }
+    };
 
-    // Function memoizes the default content on the search page
     const content: Array<JSX.Element> = useMemo(() => {
         return genres.map(genre => 
-            <Genre key={genre} name={genre} books={books.get(genre) || []} svgClick={handlePagination}/>
+            <Genre key={genre} name={genre} books={books.get(genre) || []} svgClick={handlePagination} loading={genre === paginationLoading}/>
         )
-    }, [books, genres]);
+    }, [books, genres, paginationLoading]);
 
-
-    // Function updates search state as user is typing
     const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
-        setError('');
+        booksError === 'Search' && setBooksError('');
     }
-
 
     return (
         <div className="search-page-container">
@@ -199,10 +153,15 @@ export const SearchPage: React.FC = () => {
                         </div>
                     : ''  
                 }
-                {error === 'Search' && <div className="no-results-row">No search results found.</div>}
+                {booksError === 'Search' && <div className="no-results-row">No search results found.</div>}
             </div>
-            { loading ? <p className="loading">Loading.....</p> :
-                error === 'Default books' ? <div className="default-books-error">Failed to fetch default books. Please refresh the page.</div> :
+            { loading ? 
+                <div className="default-books-loading">
+                    <p>Loading</p>
+                    <LoadingIcon />
+                </div>
+                :
+                booksError === 'Default books' ? <div className="default-books-error">Failed to fetch default books. Please refresh the page.</div> :
                 <div className="search-default-content">
                     {content}
                 </div> 

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Book } from "./Book";
 import { book } from "../interfaces/BookInterface";
+import { LoadingIcon } from "./LoadingIcon";
 
 interface GenreProps {
     name: string
     books: Array<book>
     svgClick: (genreName: string) => void
+    loading: boolean
 }
 
-export const Genre: React.FC<GenreProps> = ( { name, books, svgClick } ) => {
+export const Genre: React.FC<GenreProps> = ( { name, books, svgClick, loading } ) => {
     const booksLength = books.length;
 
     return (
@@ -21,7 +23,12 @@ export const Genre: React.FC<GenreProps> = ( { name, books, svgClick } ) => {
 
                 {/* We only add the pagination svg if books exist in the genre */}
                 {booksLength > 0 && 
-                    <div className="load-more-icon">
+                    loading ? 
+                    <div className="load-more-or-loading">
+                        <LoadingIcon /> 
+                    </div>
+                    :
+                    <div className="load-more-or-loading">
                         <svg fill="#000000" height="100" width="100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" onClick={() => svgClick(name)}>
                             <path d="M250.606,154.389l-150-149.996c-5.857-5.858-15.355-5.858-21.213,0.001
                                 c-5.857,5.858-5.857,15.355,0.001,21.213l139.393,139.39L79.393,304.394c-5.857,5.858-5.857,15.355,0.001,21.213
