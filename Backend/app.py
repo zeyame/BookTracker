@@ -148,7 +148,7 @@ def formatSearchedBooks(books, limit, isbn=False):
         
 @app.route('/cache', methods=['GET'])
 async def setup_cache():
-    limit = int(request.args.get('limit', 14))
+    limit = int(request.args.get('limit', 7))
     async with aiohttp.ClientSession() as session:
         tasks = [fetchBooks(session, genre, limit, genre_offset[genre]) for genre in genre_offset.keys()]        # coroutine objects
         responses_json = await asyncio.gather(*tasks)       # array of json objects - each object represents the search result for books in one genre
@@ -165,7 +165,7 @@ async def setup_cache():
             else:
                 return jsonify({'error': f'Failed to cache books for {genre} genre due to a failed response from the Open Library API.'})
             
-    return jsonify({'Cache': cache}), 200
+    return jsonify({'Message': f"Cache has been successfully set up with {limit} books in every genre."}), 200
 
         
 async def fetchBooks(session, genre, limit, offset):

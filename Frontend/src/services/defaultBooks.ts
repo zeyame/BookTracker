@@ -43,7 +43,7 @@ export const fetchBooksByGenre = async (genre : string) => {
 // requests cache to be setup on the server
 export const initializeCaching = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/cache?limit=14`);
+        const response = await fetch(`${BASE_URL}/cache?limit=7`);
         if (!response.ok) {
             throw new Error(`Server failed to set up the cache`);
         }
