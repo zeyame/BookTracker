@@ -1,18 +1,22 @@
 import React from "react"
 import '../styles/book.css'
 import { book } from "../interfaces/BookInterface"
+import { Link } from "react-router-dom"
 
 interface BookProps {
     book: book
-    last: boolean
 }
 
-export const Book: React.FC<BookProps> = ({ book, last }) => {
+export const Book: React.FC<BookProps> = ({ book }) => {
     return (
         <div className="book-container">
-            <img className="book-cover" src={book.image_url} alt="Book" />
+            <Link to={`/book/${book.id}`} state={{ bookData: book }}>
+                <img className="book-cover" src={book.image_url} alt="Book" />
+            </Link>
             <div className="book-info">
-                <p className="book-title">{book.name}</p>
+                <Link to={`/book/${book.id}`} state={{ bookData: book }}>
+                    <p className="book-title">{book.name}</p>
+                </Link>
                 <p className="book-author">{book.author}</p>
             </div>
         </div>

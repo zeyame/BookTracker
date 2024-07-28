@@ -17,6 +17,11 @@
     scrollbar-width: none;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .search-bar-container {
     display: flex;
     flex-direction: column;

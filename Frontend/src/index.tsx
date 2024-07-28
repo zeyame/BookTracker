@@ -13,6 +13,7 @@ import { StatsPage } from './pages/activity/StatsPage';
 import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
+import { BookPage } from './pages/BookPage';
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: '/stats',
         element: <StatsPage />
+      },
+      {
+        path: '/book/:bookId',
+        element: <BookPage />
       }
     ],
     errorElement: <ErrorPage />

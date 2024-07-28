@@ -1,4 +1,9 @@
 /* Styles for the Book component */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .book-container {
     display: flex;
     flex-direction: column;

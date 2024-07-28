@@ -17,8 +17,8 @@ export const Genre: React.FC<GenreProps> = ( { name, books, svgClick, loading } 
         <div className="genre-section">
             <h3 className="genre-title">{name.charAt(0).toUpperCase() + name.slice(1)}</h3>
             <div className="genre-books">
-                {books.map((book, index) => 
-                    <Book key={book.id} book={book} last={index === booksLength-1 && true} />
+                {books.map(book => 
+                    <Book key={book.id} book={book} />
                 )}
 
                 {/* We only add the pagination svg if books exist in the genre */}
