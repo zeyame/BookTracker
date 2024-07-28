@@ -12,13 +12,16 @@ SEARCH_URL = "https://openlibrary.org/search.json"
 SUBJECTS_URL = "http://openlibrary.org/subjects"        # add /subject_name.json  to retrieve data about books of a specific genre
 COVERS_URL = "https://covers.openlibrary.org/b"      # add the cover id, the size and then .jpg to retrieve the image url for a book's cover
 
+GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
+API_KEY = "AIzaSyA_ZGJLkmhuHrFfmQaGBCu-Ug8O9SrpbHI"
+
 # Hashmaps
 
 # k = genre, v = books
 cache = defaultdict(list)
 
 # k = genre, v = current offset 
-genre_offset = {'romance': 7, 'fiction': 7, 'thriller': 7, 'action': 7, 'mystery': 7, 'history': 7, 'scifi': 7, 'horror': 7, 'fantasy': 7}
+genre_offset = {'romance': 7, 'fiction': 7, 'thriller': 7, 'action': 7, 'mystery': 7, 'history': 7, 'horror': 7, 'fantasy': 7}
 
 
 # SETTING UP THE ENDPOINTS FOR THE BACKEND
@@ -29,38 +32,35 @@ def getBooksByGenre(genre):
     limit = int(request.args.get('limit', 7))
     
     # requesting the API for a certain number of books for the specified genre
-    response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
     
     # we send back an error if request failed
     if response.status_code != 200:
         return jsonify({'error': f'An error occurred requesting books with subject: {genre}'}), response.status_code
     
-    data = response.json()      # a python dictionary of 5 key value pairs
-    books = data.get('docs', [])       # gets a python list of dictionaries of the 20 books, each dictionary storing metadata about a specific book
+    data = response.json()      # an object that has items array 
+    
+    # gets an array of objects and each object has properties: id, volumeInfo object with properties: title, authors[], imageLinks object with property thumbnail
+    books = data.get('items', [])       
     
     if not books:
         return jsonify({'error': f'No books were return for the {genre} genre from the API.'}), 404
     
-    books = formatDefaultBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
+    books = formatBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
     return jsonify(books)
 
-    
-
-def formatDefaultBooks(books, limit):
+def formatBooks(books, limit):
     result = []
     books = books[:int(limit)]
     for book in books:
-        book_name = book.get('title', 'Unknown')
-        book_author = book.get('author_name', ['Unknown'])[0]
-            
-        book_cover_id = book.get('cover_i', '')
-        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
-
+        book_title = book.get('volumeInfo', {}).get('title', 'Uknown')
+        book_authors = book.get('volumeInfo', {}).get('authors', [])
+        book_cover = book.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover')
             
         result.append({
             'id': uuid.uuid4(),
-            'name': book_name,
-            'author': book_author,
+            'title': book_title,
+            'authors': book_authors,
             'image_url': book_cover
         })
         
@@ -73,19 +73,20 @@ def getBook():
     search = request.args.get('search')
     limit = int(request.args.get('limit', 5))
 
-    book_response = requests.get(f"{SEARCH_URL}?q={search}&limit={limit}")
+    if isISBN(search):
+        book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
+    else:
+        book_response = requests.get(f"{GOOGLE_URL}?q={search}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/imageLinks/thumbnail)&maxResults={limit}&key={API_KEY}")
+        
     if book_response.status_code != 200:
-        return jsonify({'error': f'Failed response from the Open Library API with search {search}'}), book_response.status_code
+        return jsonify({'error': f'Failed response from the Google Books API with search {search}'}), book_response.status_code
     
-    books = book_response.json().get('docs', [])
+    books = book_response.json().get('items', [])
     
     if not books:
-        return jsonify({'error': f'No books with the search {search} could be found.'}), 404
+        return jsonify({'error': f'No books were return for the search {search} from the Google Books API.'}), 404
     
-    if isISBN(search):
-        books = formatSearchedBooks(books, limit, isbn=True)
-    else:
-        books = formatSearchedBooks(books, limit)
+    books = formatBooks(books, limit)
     
     # respond with an array of book(s)
     return jsonify(books)
@@ -102,50 +103,6 @@ def isISBN(search):
     return True
 
 
-# helper function that formats the docs property of a json object returned by a book search from the Open Library API
-def formatSearchedBooks(books, limit, isbn=False):
-    # if it was an isbn search
-    if isbn:
-        book_name = books[0].get('title', 'Unknown')
-        book_author = books[0].get('author_name', ['Unknown'])[0]
-        
-        book_cover_id = books[0].get('cover_i', '')
-        book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
-
-        return jsonify([{
-            'id': uuid.uuid4(),
-            'name': book_name,
-            'author': book_author,
-            'image_url': book_cover
-        }])
-        
-    # else we will make sure only the unique books of the 5 are returned - useful for typed user searches which may return repeated results
-    seen_books = set()
-    result = []
-    books = books[:int(limit)]       # extra safety so we dont end up looping over hundreds of books in case of error in limit parameter
-    for book in books:
-        book_isbn_list = book.get('isbn', [])
-        book_isbn = book_isbn_list[0] if book_isbn_list else ''
-        
-        if book_isbn and book_isbn not in seen_books:
-            seen_books.add(book_isbn)
-            
-            book_name = book.get('title', 'Unknown')
-            book_author = book.get('author_name', ['Unknown'])[0]
-            
-            book_cover_id = book.get('cover_i', '')
-            book_cover = f'{COVERS_URL}/id/{book_cover_id}-S.jpg' if book_cover_id else 'https://via.placeholder.com/200x300.png?text=No+Cover'
-
-            
-            result.append({
-                'id': uuid.uuid4(),
-                'name': book_name,
-                'author': book_author,
-                'image_url': book_cover
-            })
-            
-    return result
-        
 @app.route('/cache', methods=['GET'])
 async def setup_cache():
     limit = int(request.args.get('limit', 7))
@@ -155,7 +112,7 @@ async def setup_cache():
         
         for genre, response in zip(genre_offset.keys(), responses_json):
             if response:
-                formatted_books = formatDefaultBooks(response.get('docs', []), limit)
+                formatted_books = formatBooks(response.get('items', []), limit)
                 if formatted_books:
                     genre_offset[genre] += limit
                     cache[genre] = formatted_books
@@ -169,7 +126,7 @@ async def setup_cache():
 
         
 async def fetchBooks(session, genre, limit, offset):
-    url = f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={offset}"
+    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"
     
     async with session.get(url) as response:
         if response.status == 200:
@@ -202,29 +159,25 @@ def updateGenreCache(genre):
         return jsonify({'error': f'{genre} genre does not exist in the cache'}), 404
     
     limit = int(request.args.get('limit', 7))
-    genre_offset[genre] += limit        # avoids race condition - two quick requests having the same offset
     
-    # requesting the API for twenty romance books
-    response = requests.get(f"{SEARCH_URL}?subject={genre}&limit={limit}&offset={genre_offset[genre]}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
     
     # we send back an error if request failed
     if response.status_code != 200:
-        genre_offset[genre] -= limit        # remove offset update
         return jsonify({'error': f'An error occurred requesting books with subject: {genre}'}), response.status_code
     
     data = response.json()     
-    books = data.get('docs', [])       # gets a python list of dictionaries of the 'limit' books, each dictionary storing metadata about a specific book
+    books = data.get('items', [])
     
     if not books:
-        genre_offset[genre] -= limit        # remove offset update
         return jsonify({'error': f'Could not fetch new books for the {genre} genre when updating its cache.'}), 404
     
+    genre_offset[genre] += limit     
     
-    books = formatDefaultBooks(books, limit)
+    books = formatBooks(books, limit)
     cache[genre].extend(books)
     
-    return jsonify({f'{genre} cache': cache[genre]})
-    # return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
+    return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
     
         
 if __name__ == '__main__':

@@ -15,9 +15,9 @@ export const Book: React.FC<BookProps> = ({ book }) => {
             </Link>
             <div className="book-info">
                 <Link to={`/book/${book.id}`} state={{ bookData: book }}>
-                    <p className="book-title">{book.name}</p>
+                    <p className="book-title">{book.title}</p>
                 </Link>
-                <p className="book-author">{book.author}</p>
+                <p className="book-author">{book.authors[0]}</p>
             </div>
         </div>
     );

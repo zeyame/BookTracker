@@ -1,7 +1,8 @@
 import React from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
-
+import { SearchBar } from "../components/SearchBar";
+import '../styles/book-page.css';
 
 export const BookPage: React.FC = () => {
 
@@ -15,10 +16,21 @@ export const BookPage: React.FC = () => {
     }
 
     return (
-        <div>
-            Book title: {book.name}
-            Book author: {book.author}
-            <img src={`${book.image_url}`} alt="Book cover" />
+        <div className="book-page-container">
+            <SearchBar />
+            <div className="book-page-main">
+                <div className="book-page-left-column">
+                    <img className="book-cover" src={book.image_url} alt="Book cover" />
+                </div>
+                <div className="book-page-main-content">
+                    <div className="book-page-title-section">
+
+                    </div>
+                    <div className="book-page-metadata-section">
+
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

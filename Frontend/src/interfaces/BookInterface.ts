@@ -1,6 +1,6 @@
 export interface book {
     id: string
-    name: string
+    title: string
+    authors: Array<string>
     image_url: string
-    author: string
 }

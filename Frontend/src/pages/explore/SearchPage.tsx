@@ -7,7 +7,7 @@ import { LoadingIcon } from "../../components/LoadingIcon";
 import { SearchBar } from "../../components/SearchBar";
 
 export const SearchPage: React.FC = () => {
-    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
+    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
     // states
     const [books, setBooks] = useState<Map<string, Array<book>>>(new Map());
@@ -19,8 +19,8 @@ export const SearchPage: React.FC = () => {
 
     // use effects
     useEffect(() => {
-        if (sessionStorage.getItem('defaultBooksCache')) {
-            const defaultBooksCache: string | null = sessionStorage.getItem('defaultBooksCache');
+        if (localStorage.getItem('defaultBooksCache')) {
+            const defaultBooksCache: string | null = localStorage.getItem('defaultBooksCache');
             if (defaultBooksCache) {
                 const parsedCache = JSON.parse(defaultBooksCache);
                 const defaultBooks = new Map<string, Array<book>>(Object.entries(parsedCache));
@@ -47,15 +47,15 @@ export const SearchPage: React.FC = () => {
     useEffect(() => {
         if (books.size > 0) {
             const defaultBooksObject = Object.fromEntries(books);
-            sessionStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
+            localStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
         }
     }, [books]);
 
-    useEffect(() => {
-        if (initialBooksFetched && !cacheInitialized) {
-            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
-        }
-    }, [initialBooksFetched, cacheInitialized]);
+    // useEffect(() => {
+    //     if (initialBooksFetched && !cacheInitialized) {
+    //         initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
+    //     }
+    // }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {

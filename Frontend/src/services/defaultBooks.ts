@@ -3,7 +3,7 @@ import { book } from "../interfaces/BookInterface";
 
 const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
-const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'scifi', 'horror', 'fantasy'];
+const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
 export const fetchDefaultBooks = async () => {
     try {
@@ -17,7 +17,8 @@ export const fetchDefaultBooks = async () => {
         genres.forEach((genre, index) => {
             defaultBooks.set(genre, books[index]);
         });
-    
+        
+        console.log(defaultBooks);
         return defaultBooks;
     }
     catch (error) {
