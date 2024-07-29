@@ -63,7 +63,7 @@ export const SearchBar: React.FC = () => {
     // functions
     const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
-        error  && setError(false);
+        error && setError(false);
     }
 
     const customNavigate = (path: string, options: any) => {

@@ -21,9 +21,7 @@ export const BookPage: React.FC = () => {
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.image_url} alt="Book cover" />
-                    <div className="reading-status-btn">
-                        Want to read
-                    </div>
+                    <button className="reading-status-btn">Want to read</button>
                     <button className="buy-amazon-btn">Buy on Amazon</button>
                 </div>
                 <div className="book-page-main-content">
@@ -39,16 +37,20 @@ export const BookPage: React.FC = () => {
                         <div className="book-page-description">
                             <p>{book.description}</p>
                         </div>
-                        <div className="book-page-genres">
-                            <p>Genres:</p> 
-                            {book.categories.map(category =>
-                                <p className="book-page-genre" key={category}>{category}</p>
-                            )}
+                        {book.categories.length > 0 &&
+                            <div className="book-page-genres">
+                                <p>Genres:</p> 
+                                {book.categories.map(category =>
+                                    <p className="book-page-genre" key={category}>{category}</p>
+                                )}
+                            </div>
+                        }
+                        <div className="edition-details">
+                            <p className="edition-details-title">This edition</p>
+                            <p className="page-count">Page count: {book.pageCount}</p>
+                            <p className="published">Published {book.publishedDate} by {book.publisher}</p>
+                            <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>
-                        <p className="page-count">Page count: {book.pageCount}</p>
-                        <p className="published-date">First published: {book.publishedDate}</p>
-                        <p className="publisher">Published by: {book.publisher}</p>
-                        <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                     </div>
                 </div>
             </div>

@@ -4,13 +4,13 @@ import requests
 import uuid
 import asyncio, aiohttp
 from collections import defaultdict
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
 GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
-API_KEY = "AIzaSyA_ZGJLkmhuHrFfmQaGBCu-Ug8O9SrpbHI"
-
+API_KEY= "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
 # Hashmaps
 
 # k = genre, v = books
@@ -25,7 +25,12 @@ genre_offset = {'romance': 7, 'fiction': 7, 'thriller': 7, 'action': 7, 'mystery
 # Route handles fetching a set of books belonging to a specific genre from the Open Library API when application runs
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
-    limit = int(request.args.get('limit', 7))
+    limit = request.args.get('limit', 7)
+    
+    try:
+        limit = int(limit)
+    except:
+        return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/<genre>-books" is not a valid integer that can be parsed.'})
     
     # requesting the API for a certain number of books for the specified genre
     response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
@@ -51,6 +56,7 @@ def formatBooks(books, limit):
     for book in books:
         book_title = book.get('volumeInfo', {}).get('title', '')
         book_authors = book.get('volumeInfo', {}).get('authors', [])
+        book_series = book.get('volumeInfo', {}).get('series', [{}])[0]
         book_publisher = book.get('volumeInfo', {}).get('publisher', '')
         book_published_date = book.get('volumeInfo', {}).get('publishedDate', '')
         book_description = book.get('volumeInfo', {}).get('description', '')
@@ -59,28 +65,59 @@ def formatBooks(books, limit):
         book_cover = book.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover')
         book_language = book.get('volumeInfo', {}).get('language', '')
         
-        result.append({
-            'id': uuid.uuid4(),
+        if book_published_date:
+            book_published_date = format_date(book_published_date)
+            
+        book_data = {
+            'id': str(uuid.uuid4()),
             'title': book_title,
             'authors': book_authors,
+            'series': book_series,
             'publisher': book_publisher,
-            'publishedDate': book_published_date,
             'description': book_description,
             'pageCount': book_page_count,
             'categories': book_categories,
             'image_url': book_cover,
             'language': book_language
-        })
+        }
+        
+        if book_published_date:
+            book_data['publishedDate'] = book_published_date
+        
+        result.append(book_data)
         
     return result
+
+def format_date(date_str):
+    # Parse the input date string
+    try:
+        date_obj = datetime.strptime(date_str, '%y/%m/%d')
+    except ValueError:
+        try:
+            date_obj = datetime.strptime(date_str, '%Y/%m/%d')
+        except ValueError:
+            return None
+
+    # Format the date into the desired format
+    formatted_date = date_obj.strftime('%B %d, %Y')
+    
+    return formatted_date
     
     
 # Route handles fetching a book by title, author, or ISBN from the Open Library API when users inputs a search
 @app.route('/book', methods=['GET'])
 def getBook():
     search = request.args.get('search')
-    limit = int(request.args.get('limit', 5))
-
+    limit = request.args.get('limit', 5)
+    
+    if not search:
+        return jsonify({'error': 'Server did not receive a search parameter when contacted at endpoint "/book".'}), 400
+    
+    try:
+        limit = int(limit)
+    except ValueError:
+        return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/book" is not a valid integer that can be parsed.'}), 400
+    
     if isISBN(search):
         book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
     else:
@@ -92,7 +129,7 @@ def getBook():
     books = book_response.json().get('items', [])
     
     if not books:
-        return jsonify({'error': f'No books were return for the search {search} from the Google Books API.'}), 404
+        return jsonify({'error': f'No books were returned for the search {search} from the Google Books API.'}), 404
     
     books = formatBooks(books, limit)
     
@@ -113,7 +150,12 @@ def isISBN(search):
 
 @app.route('/cache', methods=['GET'])
 async def setup_cache():
-    limit = int(request.args.get('limit', 7))
+    limit = request.args.get('limit', 7)
+    try:
+        limit = int(limit)
+    except ValueError:
+        return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/cache" is not a valid integer that can be parsed.'}), 400
+    
     async with aiohttp.ClientSession() as session:
         tasks = [fetchBooks(session, genre, limit, genre_offset[genre]) for genre in genre_offset.keys()]        # coroutine objects
         responses_json = await asyncio.gather(*tasks)       # array of json objects - each object represents the search result for books in one genre
@@ -134,8 +176,7 @@ async def setup_cache():
 
         
 async def fetchBooks(session, genre, limit, offset):
-    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"
-    
+    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"    
     async with session.get(url) as response:
         if response.status == 200:
             return await response.json()

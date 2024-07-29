@@ -3,7 +3,7 @@ export interface book {
     title: string
     authors: Array<string>
     publisher: string
-    publishedDate: string
+    publishedDate?: string
     description: string
     pageCount: number
     categories: Array<string>
