@@ -75,7 +75,7 @@
 .book-page-author {
     margin-top: 4px;
     margin-bottom: 0px;
-    font-weight: 300;
+    font-weight: 500;
     cursor: pointer;
 }
 
@@ -93,8 +93,16 @@
 
 .book-page-genres p {
     font-size: 11px;
+    margin: 0px;
 }
 
 .book-page-genre {
     font-weight: 600;
 }
+
+.page-count, .published-date, .publisher, .language {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    font-size: 11px;
+}
+

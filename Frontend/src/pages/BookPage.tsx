@@ -45,6 +45,10 @@ export const BookPage: React.FC = () => {
                                 <p className="book-page-genre" key={category}>{category}</p>
                             )}
                         </div>
+                        <p className="page-count">Page count: {book.pageCount}</p>
+                        <p className="published-date">First published: {book.publishedDate}</p>
+                        <p className="publisher">Published by: {book.publisher}</p>
+                        <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                     </div>
                 </div>
             </div>
