@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { book } from "../interfaces/BookInterface";
 import { getBooks } from "../services/bookSearch";
 import { SearchRow } from "./SearchRow";
+import { useNavigate } from "react-router-dom";
 
 export const SearchBar: React.FC = () => {
     // states
@@ -9,6 +10,8 @@ export const SearchBar: React.FC = () => {
     const [searchResults, setSearchResults] = useState<Array<book> | null>(null);
     const [error, setError] = useState<boolean>(false);
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [isNavigating, setIsNavigating] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     // refs
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -50,11 +53,24 @@ export const SearchBar: React.FC = () => {
         }
     }, [search, fetchBooks]);
 
+    useEffect(() => {
+        if (isNavigating) {
+            setSearchResults(null);
+            setIsNavigating(false);
+        }
+    }, [isNavigating]);
+
     // functions
     const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
         error  && setError(false);
     }
+
+    const customNavigate = (path: string, options: any) => {
+        setIsNavigating(true);
+        navigate(path, options);
+    }
+
     return (
         <>
             <div className="search-bar">
@@ -68,7 +84,7 @@ export const SearchBar: React.FC = () => {
                 searchResults ? 
                     <div className="search-results-container">
                         {searchResults.map(book => 
-                            <SearchRow key={book.id} book={book} />
+                            <SearchRow key={book.id} book={book} customNavigate={customNavigate} />
                         )}
                     </div>
                 : ''  

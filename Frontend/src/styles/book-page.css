@@ -50,6 +50,7 @@
     display: flex;
     justify-content: center;
     gap: 4px;
+    margin-top: 15px;
 }
 
 .book-page-main-content {
@@ -91,7 +92,7 @@
 }
 
 .book-page-genres p {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .book-page-genre {
