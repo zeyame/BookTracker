@@ -33,7 +33,7 @@ def getBooksByGenre(genre):
         return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/<genre>-books" is not a valid integer that can be parsed.'})
     
     # requesting the API for a certain number of books for the specified genre
-    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -54,6 +54,7 @@ def formatBooks(books, limit):
     result = []
     books = books[:int(limit)]
     for book in books:
+        book_id = book.get('id', '')
         book_title = book.get('volumeInfo', {}).get('title', '')
         book_authors = book.get('volumeInfo', {}).get('authors', [])
         book_series = book.get('volumeInfo', {}).get('series', [{}])[0]
@@ -69,7 +70,7 @@ def formatBooks(books, limit):
             book_published_date = format_date(book_published_date)
             
         book_data = {
-            'id': str(uuid.uuid4()),
+            'id': book_id,
             'title': book_title,
             'authors': book_authors,
             'series': book_series,
@@ -119,9 +120,9 @@ def getBook():
         return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/book" is not a valid integer that can be parsed.'}), 400
     
     if isISBN(search):
-        book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+        book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
     else:
-        book_response = requests.get(f"{GOOGLE_URL}?q={search}&maxResults={limit}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+        book_response = requests.get(f"{GOOGLE_URL}?q={search}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
         
     if book_response.status_code != 200:
         return jsonify({'error': f'Failed response from the Google Books API with search {search}'}), book_response.status_code
@@ -176,7 +177,7 @@ async def setup_cache():
 
         
 async def fetchBooks(session, genre, limit, offset):
-    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"    
+    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"    
     async with session.get(url) as response:
         if response.status == 200:
             return await response.json()
@@ -209,7 +210,7 @@ def updateGenreCache(genre):
     
     limit = int(request.args.get('limit', 7))
     
-    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
     
     # we send back an error if request failed
     if response.status_code != 200:

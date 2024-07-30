@@ -15,6 +15,9 @@ export const BookPage: React.FC = () => {
         );
     }
 
+    // effect fetches the related editions for the searched book
+    
+
     return (
         <div className="book-page-container">
             <SearchBar />
@@ -50,6 +53,12 @@ export const BookPage: React.FC = () => {
                             <p className="page-count">Page count: {book.pageCount}</p>
                             <p className="published">Published {book.publishedDate} by {book.publisher}</p>
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
+                        </div>
+                        <div className="more-editions-container">
+                            <div>More editions</div>
+                            <div className="more-editions">
+
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -128,3 +128,13 @@
     font-size: 11px;
 }
 
+.more-editions-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 37px;
+    gap: 10px;
+}
+
+.more-editions {
+    display: flex;
+}
