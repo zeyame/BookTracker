@@ -1,8 +1,3 @@
-type Edition = {
-    publisher: string
-    publishedDate: string
-}
-
 export interface book {
     id: string
     title: string
@@ -14,5 +9,4 @@ export interface book {
     categories: Array<string>
     image_url: string
     language: string
-    editions?: Array<Edition> 
 }

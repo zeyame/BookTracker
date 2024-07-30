@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
 import { SearchBar } from "../components/SearchBar";
 import '../styles/book-page.css';
+import { fetchEditions } from "../services/editionSearch";
+import { edition } from "../interfaces/EditionInterface";
+import { LoadingIcon } from "../components/LoadingIcon";
+import { Edition } from "../components/Edition";
 
 export const BookPage: React.FC = () => {
 
@@ -15,8 +19,32 @@ export const BookPage: React.FC = () => {
         );
     }
 
+    const [editions, setEditions] = useState<Array<edition>>([]);
+    const [editionsError, setEditionsError] = useState<boolean>(false);
+    const [fetchingEditions, setFetchingEditions] = useState<boolean>(false);
+
     // effect fetches the related editions for the searched book
-    
+    useEffect(() => {
+        setFetchingEditions(true);
+        const getEditions = async () => {
+            try {
+                const editions = await fetchEditions(book.id);
+                setEditions(editions);
+            }
+            catch (error: any) {
+                setEditionsError(true);
+            }
+            finally {
+                setFetchingEditions(false);
+            }
+        }
+
+        getEditions();
+
+        return () => {
+            setEditions([]);
+        }
+    }, []);
 
     return (
         <div className="book-page-container">
@@ -56,9 +84,27 @@ export const BookPage: React.FC = () => {
                         </div>
                         <div className="more-editions-container">
                             <div>More editions</div>
-                            <div className="more-editions">
-
-                            </div>
+                            {
+                                fetchingEditions ? 
+                                <div className="editions-loading">
+                                    <p>Loading</p>
+                                    <LoadingIcon />
+                                </div>
+                                : editionsError ?
+                                <div className="editions-error">
+                                    An error occurred when fetching relevant editions. Please refresh to try again. 
+                                </div>
+                                :
+                                <div className="more-editions">
+                                    {editions.length > 0 ?
+                                        editions.map((edition, index) => 
+                                            <Edition key={index} edition={edition} />
+                                        )
+                                        :
+                                        <div className="no-editions-available">No editions available for this book.</div>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

@@ -229,7 +229,11 @@ def updateGenreCache(genre):
     
     return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
     
-        
+@app.route('/editions-<volumeId>')
+def getEditions(volumeId):
+    pass
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)
     
