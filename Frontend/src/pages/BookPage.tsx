@@ -4,11 +4,40 @@ import { book } from "../interfaces/BookInterface";
 import { SearchBar } from "../components/SearchBar";
 import '../styles/book-page.css';
 import { LoadingIcon } from "../components/LoadingIcon";
+import { fetchAuthorDescription } from "../services/authorSearch";
 
 export const BookPage: React.FC = () => {
 
     const location = useLocation();
     const book: book | undefined = location.state.bookData;
+    
+    const [aboutAuthor, setAboutAuthor] = useState<string>('');
+    const [fetchingAboutAuthor, setFetchingAboutAuthor] = useState<boolean>(false);
+    const [aboutAuthorError, setAboutAuthorError] = useState<boolean>(false);
+
+    // fetches description about the author of the book
+    useEffect(() => {
+        if (book) {
+            setFetchingAboutAuthor(true);
+            const getAboutAuthor = async () => {
+                try {
+                    const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
+                    setAboutAuthor(authorDescription);
+                }
+                catch (error: any) {
+                    setAboutAuthorError(true);
+                }
+                finally {
+                    setFetchingAboutAuthor(false);
+                }
+            }
+            getAboutAuthor();
+        }
+
+        return () => {
+            setAboutAuthor('');
+        }
+    }, []);
 
     if (!book) {
         return (
@@ -51,6 +80,29 @@ export const BookPage: React.FC = () => {
                             <p className="page-count">Page count: {book.pageCount}</p>
                             <p className="published">Published {book.publishedDate} by {book.publisher}</p>
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
+                        </div>
+                        <div className="about-author-container">
+                            {
+                                fetchingAboutAuthor ? 
+                                    <div className="loading-about-author">
+                                        <p>Loading</p>
+                                        <LoadingIcon />
+                                    </div>
+                                : 
+                                aboutAuthorError ?
+                                    <div className="about-author-error">
+                                        <p className="about-author-error-message">Failed to fetch author's description. Please refresh to try again.</p>
+                                    </div>
+                                :
+                                <div className="about-author-container">
+                                    <p className="about-author-header">
+                                        About the author
+                                    </p>
+                                    <p className="author-description">
+                                        {aboutAuthor}
+                                    </p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

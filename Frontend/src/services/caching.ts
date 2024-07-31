@@ -3,44 +3,6 @@ import { book } from "../interfaces/BookInterface";
 
 const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
-const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
-
-export const fetchDefaultBooks = async () => {
-    try {
-        const fetchPromises = genres.map(genre => {
-            const encodedGenre = encodeURIComponent(genre);
-            return fetchBooksByGenre(encodedGenre);
-        });
-        const books = await Promise.all(fetchPromises);
-
-        const defaultBooks: Map<string, Array<book>> = new Map();
-        genres.forEach((genre, index) => {
-            defaultBooks.set(genre, books[index]);
-        });
-        
-        console.log(defaultBooks);
-        return defaultBooks;
-    }
-    catch (error) {
-        throw error;        // error handled in search page component
-    }
-}
-
-export const fetchBooksByGenre = async (genre : string) => {
-    try {
-        const response = await fetch(`${BASE_URL}/${genre}-books?limit=7`);
-        if (!response.ok) {
-            throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
-        }
-        const data: Array<book> = await response.json();
-        return data;
-    }
-    catch (error) {
-        console.error(error);
-        throw error;
-    }
-}
-
 // requests cache to be setup on the server
 export const initializeCaching = async () => {
     try {
@@ -48,7 +10,8 @@ export const initializeCaching = async () => {
         if (!response.ok) {
             throw new Error(`Server failed to set up the cache`);
         }
-        console.log(await response.json());         // logging the cache if response was ok
+        const data = await response.json();
+        console.log(data.message);         // logging the cache if response was ok
     }
     catch (error: any) {
         throw error;
@@ -62,7 +25,8 @@ export const getCachedBooks = async (genreName: string) => {
         if (!response.ok) {
             throw new Error(`Response from backend failed when retrieving cached books for ${genreName} genre`);
         }
-        const cachedBooks: Array<book> = await response.json();
+        const data = await response.json();
+        const cachedBooks: Array<book> = data.cachedBooks;
         return cachedBooks;
     }
     catch (error: any) {
@@ -77,7 +41,8 @@ export const updateCache = async (genreName: string) => {
         if (!response.ok) {
             throw new Error(`Failed response from the backend when requested to update the cache for ${genreName} genre.`);
         }
-        console.log(await response.json());
+        const data = await response.json();
+        console.log(data.message);
     }
     catch (error: any) {
         throw error;

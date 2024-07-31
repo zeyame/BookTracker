@@ -164,3 +164,19 @@
     word-wrap: break-word;
     margin-top: 10px;
 }
+
+.about-author-container {
+    margin-top: 25px;
+}
+
+.about-author-header {
+    margin-top: 0px;
+    margin-bottom: 7px;
+    font-family: 'Georgia';
+}
+
+.author-description {
+    margin: 0px;
+    color: rgb(30, 25, 21);
+    font-size: 14px;
+}

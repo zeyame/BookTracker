@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
 import { Genre } from "../../components/Genre";
-import { fetchDefaultBooks, getCachedBooks, initializeCaching, updateCache } from "../../services/defaultBooks";
+import { fetchDefaultBooks } from "../../services/defaultBookSearch";
+import { initializeCaching, getCachedBooks, updateCache } from "../../services/caching";
 import { book } from "../../interfaces/BookInterface";
 import { LoadingIcon } from "../../components/LoadingIcon";
 import { SearchBar } from "../../components/SearchBar";

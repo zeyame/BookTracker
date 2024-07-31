@@ -11,6 +11,8 @@ CORS(app)
 
 GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
 SEARCH_URL = "https://openlibrary.org/search.json"
+WIKIPEDIA_URL = "https://en.wikipedia.org/w/api.php"
+
 API_KEY= "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
 # Hashmaps
 
@@ -44,49 +46,46 @@ def getBooksByGenre(genre):
     
     # gets an array of objects and each object has properties: id, volumeInfo object with properties: title, authors[], imageLinks object with property thumbnail
     books = data.get('items', [])       
-    
-    if not books:
-        return jsonify({'error': f'No books were return for the {genre} genre from the API.'}), 404
-    
     books = formatBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
-    return jsonify(books)
+    return jsonify({'books': books})
 
 def formatBooks(books, limit):
     result = []
-    books = books[:int(limit)]
-    for book in books:
-        book_id = book.get('id', '')
-        book_title = book.get('volumeInfo', {}).get('title', '')
-        book_authors = book.get('volumeInfo', {}).get('authors', [])
-        book_series = book.get('volumeInfo', {}).get('series', [{}])[0]
-        book_publisher = book.get('volumeInfo', {}).get('publisher', '')
-        book_published_date = book.get('volumeInfo', {}).get('publishedDate', '')
-        book_description = book.get('volumeInfo', {}).get('description', '')
-        book_page_count = book.get('volumeInfo', {}).get('pageCount', 0)
-        book_categories = book.get('volumeInfo', {}).get('categories', [])
-        book_cover = book.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover')
-        book_language = book.get('volumeInfo', {}).get('language', '')
-        
-        if book_published_date:
-            book_published_date = format_date(book_published_date)
+    if books:
+        books = books[:int(limit)] if limit < len(books) else books
+        for book in books:
+            book_id = book.get('id', '')
+            book_title = book.get('volumeInfo', {}).get('title', '')
+            book_authors = book.get('volumeInfo', {}).get('authors', [])
+            book_series = book.get('volumeInfo', {}).get('series', [{}])[0]
+            book_publisher = book.get('volumeInfo', {}).get('publisher', '')
+            book_published_date = book.get('volumeInfo', {}).get('publishedDate', '')
+            book_description = book.get('volumeInfo', {}).get('description', '')
+            book_page_count = book.get('volumeInfo', {}).get('pageCount', 0)
+            book_categories = book.get('volumeInfo', {}).get('categories', [])
+            book_cover = book.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover')
+            book_language = book.get('volumeInfo', {}).get('language', '')
             
-        book_data = {
-            'id': book_id,
-            'title': book_title,
-            'authors': book_authors,
-            'series': book_series,
-            'publisher': book_publisher,
-            'description': book_description,
-            'pageCount': book_page_count,
-            'categories': book_categories,
-            'image_url': book_cover,
-            'language': book_language
-        }
-        
-        if book_published_date:
-            book_data['publishedDate'] = book_published_date
-        
-        result.append(book_data)
+            if book_published_date:
+                book_published_date = format_date(book_published_date)
+                
+            book_data = {
+                'id': book_id,
+                'title': book_title,
+                'authors': book_authors,
+                'series': book_series,
+                'publisher': book_publisher,
+                'description': book_description,
+                'pageCount': book_page_count,
+                'categories': book_categories,
+                'image_url': book_cover,
+                'language': book_language
+            }
+            
+            if book_published_date:
+                book_data['publishedDate'] = book_published_date
+            
+            result.append(book_data)
         
     return result
 
@@ -132,14 +131,10 @@ def getBook():
         return jsonify({'error': f'Failed response from the Google Books API with search {search}'}), book_response.status_code
     
     books = book_response.json().get('items', [])
-    
-    if not books:
-        return jsonify({'error': f'No books were returned for the search {search} from the Google Books API.'}), 404
-    
     books = formatBooks(books, limit)
     
     # respond with an array of book(s)
-    return jsonify(books)
+    return jsonify({'books': books})
 
 # # helper function that checks if a user search has a valid format for an ISBN 
 def isISBN(search):
@@ -159,7 +154,7 @@ async def setup_cache():
     try:
         limit = int(limit)
     except ValueError:
-        return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/cache" is not a valid integer that can be parsed.'}), 400
+        return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/cache" is not a valid integer that can be parsed.'}), 404
     
     async with aiohttp.ClientSession() as session:
         tasks = [fetchBooks(session, genre, limit, genre_offset[genre]) for genre in genre_offset.keys()]        # coroutine objects
@@ -175,9 +170,9 @@ async def setup_cache():
                     print(f"No books were found in the returned json response for {genre} genre when caching.")
             
             else:
-                return jsonify({'error': f'Failed to cache books for {genre} genre due to a failed response from the Open Library API.'})
+                return jsonify({'error': f'Failed to cache books for {genre} genre due to a failed response from the Open Library API.'}), 400
             
-    return jsonify({'Message': f"Cache has been successfully set up with {limit} books in every genre."}), 200
+    return jsonify({'message': f"Cache has been successfully set up with {limit} books in every genre."}), 200
 
         
 async def fetchBooks(session, genre, limit, offset):
@@ -204,7 +199,7 @@ def getCachedBooks(genre):
     cached_books = cache[genre][-7:]        # get the last 7 elements to avoid any shifting for better performance
     del cache[genre][-7:]                   # delete the last 7 elements - O(1)        
     
-    return jsonify(cached_books)
+    return jsonify({'cachedBooks': cached_books})
         
         
 @app.route('/update-<genre>-cache', methods=['GET'])
@@ -224,15 +219,56 @@ def updateGenreCache(genre):
     books = data.get('items', [])
     
     if not books:
-        return jsonify({'error': f'Could not fetch new books for the {genre} genre when updating its cache.'}), 404
+        return jsonify({'message': f'No new books for the {genre} genre when updating its cache.'}), 200
     
     genre_offset[genre] += limit     
     
     books = formatBooks(books, limit)
     cache[genre].extend(books)
     
-    return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
+    return jsonify({'message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
+
+@app.route('/author', methods=['GET'])
+def getAuthorDescription():
+    author_name = request.args.get('authorName', '')
+    if not author_name:
+        return jsonify({'error': 'Author name is required to get their description.'}), 400
     
+    # making a request to wikipedia API to get the wikipedia page title for this author
+    title_response = requests.get(f"{WIKIPEDIA_URL}?action=query&list=search&srsearch={author_name}&format=json")
+    if title_response.status_code != 200:
+        return jsonify({"error": f"An unexpected error occurred from Wikipedia API when fetching page title for {author_name}."}), title_response.status_code
+    
+    search_results = title_response.json().get('query', {}).get('search', [])
+    if not search_results:
+        return jsonify({"message": f"No wikipedia page found for the author {author_name}."}), 200
+    
+    # Getting the first relevant title from the search results
+    page_title = search_results[0].get('title')
+    
+    # fetching the introduction for the author with wikipedia title 'page_title'
+    extract_url = f"{WIKIPEDIA_URL}?action=query&prop=extracts&exintro=true&explaintext=true&titles={page_title}&format=json"
+    
+    extract_response = requests.get(extract_url)
+    if extract_response.status_code != 200:
+        return jsonify({"error": f"An unexpected error occurred when fetching the introduction for author {author_name}."}), 400
+    
+    extract_data = extract_response.json()
+    
+    pages = extract_data.get('query', {}).get('pages', {})
+    if not pages:
+        return jsonify({'message': f'No pages found for the author {author_name}.'}), 200
+    
+    # Get the first (and only) page ID
+    page_id = list(pages.keys())[0]
+    extract = pages[page_id].get('extract', '')
+    
+    if not extract:
+        return jsonify({'message': f'No extract could be found for the author {author_name}.'}), 200
+    
+    return jsonify({'description': extract})
+
+
 if __name__ == '__main__':
     app.run(debug=True)
     
