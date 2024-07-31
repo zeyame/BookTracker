@@ -10,6 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
+SEARCH_URL = "https://openlibrary.org/search.json"
 API_KEY= "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
 # Hashmaps
 
@@ -231,45 +232,6 @@ def updateGenreCache(genre):
     cache[genre].extend(books)
     
     return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
-    
-@app.route('/editions')
-def getEditions():
-    book_title = request.args.get('title', '')
-    if not book_title:
-        return jsonify({"error": "Book title was not received by the server's '/editions' endpoint."})
-        
-    book_authors = request.args.get('authors', [])
-    if not book_authors:
-        return jsonify({"error": "No authors were sent to the server's '/editions' endpoint."}), 400
-    
-    search_query = book_title + ' ' + ' '.join(book_authors)
-    
-    # get 5 related editions to the provided title and authors for the book
-    response = requests.get(f"{GOOGLE_URL}?q={search_query}&maxResults=5&fields=items(volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/imageLinks/thumbnail)")
-    
-    if response.status_code != 200:
-        return jsonify({'error': f'Response from API failed when fetching related editions for the search query {search_query}.'}), response.status_code
-    
-    related_editions = response.json().get('items', [])
-    
-    if not related_editions:
-        return jsonify({'Message': f'No related editions could be found for search query {search_query}.'}), 200
-    
-    related_editions = formatEditions(related_editions)
-    
-    return jsonify(related_editions)
-
-def formatEditions(editions):
-    formattedEditions = []
-    for edition in editions:
-        edition_info = edition.get('volumeInfo', {})
-        formattedEditions.append({
-            'image_url': edition_info.get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover'),
-            'publisher': edition_info.get('publisher', ''),
-            'publishedYear': format_date(edition_info.get('publishedDate', ''), True)
-        })
-    return formattedEditions
-        
     
 if __name__ == '__main__':
     app.run(debug=True)
