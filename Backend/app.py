@@ -89,7 +89,7 @@ def formatBooks(books, limit):
         
     return result
 
-def format_date(date_str):
+def format_date(date_str, format_year_only=False):
     # Parse the input date string
     try:
         date_obj = datetime.strptime(date_str, '%y/%m/%d')
@@ -99,8 +99,11 @@ def format_date(date_str):
         except ValueError:
             return None
 
-    # Format the date into the desired format
-    formatted_date = date_obj.strftime('%B %d, %Y')
+    # Format the date into the desired format based on the flag
+    if format_year_only:
+        formatted_date = date_obj.strftime('%Y')
+    else:
+        formatted_date = date_obj.strftime('%B %d, %Y')
     
     return formatted_date
     
@@ -177,7 +180,7 @@ async def setup_cache():
 
         
 async def fetchBooks(session, genre, limit, offset):
-    url = f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}"    
+    url = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
     async with session.get(url) as response:
         if response.status == 200:
             return await response.json()
@@ -210,7 +213,7 @@ def updateGenreCache(genre):
     
     limit = int(request.args.get('limit', 7))
     
-    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/description,volumeInfo/imageLinks/thumbnail)&key={API_KEY}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -229,10 +232,44 @@ def updateGenreCache(genre):
     
     return jsonify({'Message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
     
-@app.route('/editions-<volumeId>')
-def getEditions(volumeId):
-    pass
+@app.route('/editions')
+def getEditions():
+    book_title = request.args.get('title', '')
+    if not book_title:
+        return jsonify({"error": "Book title was not received by the server's '/editions' endpoint."})
+        
+    book_authors = request.args.get('authors', [])
+    if not book_authors:
+        return jsonify({"error": "No authors were sent to the server's '/editions' endpoint."}), 400
     
+    search_query = book_title + ' ' + ' '.join(book_authors)
+    
+    # get 5 related editions to the provided title and authors for the book
+    response = requests.get(f"{GOOGLE_URL}?q={search_query}&maxResults=5&fields=items(volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/imageLinks/thumbnail)")
+    
+    if response.status_code != 200:
+        return jsonify({'error': f'Response from API failed when fetching related editions for the search query {search_query}.'}), response.status_code
+    
+    related_editions = response.json().get('items', [])
+    
+    if not related_editions:
+        return jsonify({'Message': f'No related editions could be found for search query {search_query}.'}), 200
+    
+    related_editions = formatEditions(related_editions)
+    
+    return jsonify(related_editions)
+
+def formatEditions(editions):
+    formattedEditions = []
+    for edition in editions:
+        edition_info = edition.get('volumeInfo', {})
+        formattedEditions.append({
+            'image_url': edition_info.get('imageLinks', {}).get('thumbnail', 'https://via.placeholder.com/200x300.png?text=No+Cover'),
+            'publisher': edition_info.get('publisher', ''),
+            'publishedYear': format_date(edition_info.get('publishedDate', ''), True)
+        })
+    return formattedEditions
+        
     
 if __name__ == '__main__':
     app.run(debug=True)

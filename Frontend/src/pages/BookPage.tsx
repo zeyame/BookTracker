@@ -28,7 +28,7 @@ export const BookPage: React.FC = () => {
         setFetchingEditions(true);
         const getEditions = async () => {
             try {
-                const editions = await fetchEditions(book.id);
+                const editions = await fetchEditions(book.title, book.authors);
                 setEditions(editions);
             }
             catch (error: any) {
