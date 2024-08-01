@@ -82,6 +82,10 @@ export const BookPage: React.FC = () => {
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>
                         <div className="about-author-container">
+                            <hr className="about-author-divider"/>
+                            <p className="about-author-header">
+                                About the author
+                            </p>
                             {
                                 fetchingAboutAuthor ? 
                                     <div className="loading-about-author">
@@ -94,14 +98,12 @@ export const BookPage: React.FC = () => {
                                         <p className="about-author-error-message">Failed to fetch author's description. Please refresh to try again.</p>
                                     </div>
                                 :
-                                <div className="about-author-container">
-                                    <p className="about-author-header">
-                                        About the author
-                                    </p>
+                                <>
                                     <p className="author-description">
                                         {aboutAuthor}
                                     </p>
-                                </div>
+                                    <hr className="about-author-divider"/>
+                                </>
                             }
                         </div>
                     </div>

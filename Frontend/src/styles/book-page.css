@@ -8,7 +8,14 @@
 
 .book-page-main {
     display: flex;
-    height: 100%;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.book-page-main::-webkit-scrollbar {
+    display: none;
 }
 
 .book-page-left-column {
@@ -73,17 +80,25 @@
 .book-page-main-content {
     display: flex;
     flex-direction: column;
-    width: 900px;
+    width: 1000px;
     padding-left: 80px;
     padding-top: 40px;
     overflow-wrap: break-word;
     word-wrap: break-word;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.book-page-main-content::-webkit-scrollbar {
+    display: none;
 }
 
 .book-title-header {
     font-weight: 600;
     margin: 0px;
     font-family: 'Georgia';
+    font-size: 40px;
 }
 
 .book-page-authors {
@@ -93,7 +108,7 @@
 .book-page-author {
     margin-top: 4px;
     margin-bottom: 0px;
-    font-size: 20px;
+    font-size: 18px;
     margin-bottom: 20px;
     font-weight: 500;
     cursor: pointer;
@@ -125,7 +140,7 @@
     margin-top: 25px;
     margin-bottom: 4px;
     font-family: 'Georgia';
-    font-size: 17px;
+    font-size: 18px;
 }
 
 .page-count, .published, .language {
@@ -134,18 +149,6 @@
     font-size: 11px;
 }
 
-.more-editions-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 37px;
-    gap: 10px;
-}
-
-.more-editions {
-    display: flex;
-    gap: 20px;
-    margin-top: 7px;
-}
 
 .edition {
     display: flex;
@@ -177,13 +180,32 @@
 
 .about-author-header {
     margin-top: 0px;
-    margin-bottom: 7px;
+    margin-bottom: 14px;
     font-family: 'Georgia';
-    font-size: 17px;
+    font-size: 18px;
 }
 
 .author-description {
     margin: 0px;
+    margin-bottom: 25px;
     color: rgb(30, 25, 21);
-    font-size: 14px;
+    font-size: 13px;
+}
+
+.loading-about-author {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 300px;
+}
+
+.loading-about-author p {
+    margin-bottom: 7px;
+    font-size: 15px;
+}
+
+.about-author-divider {
+    border: 0;
+    border-top: 1px solid #dcdcdc; /* Thin light gray border */
+    margin-bottom: 20px;
 }

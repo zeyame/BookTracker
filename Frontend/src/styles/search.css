@@ -30,8 +30,9 @@ a {
 .search-bar {
     display: flex;
     align-items: center;
-    height: 25px;
-    width: 15%;
+    height: 30px;
+    width: 18%;
+    margin-left: 530px;
     flex-shrink: 0;
     margin-top: 10px;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -122,11 +123,6 @@ a {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 12px;
-}
-
-.search-bar {
-    width: 15%;
-    margin-left: 450px;
 }
 
 .searching-message {

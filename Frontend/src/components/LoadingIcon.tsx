@@ -1,8 +1,13 @@
 import React from 'react';
 
-export const LoadingIcon = () => {
+interface LoadingIconProps {
+  width?: string
+  height?: string
+}
+
+export const LoadingIcon: React.FC<LoadingIconProps> = ({ width, height }) => {
   return (
-      <svg width="35" height="20" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#000">
+      <svg width={width ? width : '35'} height={height ? height : '20'} viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#000">
         <g fill="none" fillRule="evenodd">
           <g transform="translate(1 1)" strokeWidth="2">
             <circle strokeOpacity=".5" cx="18" cy="18" r="18"/>
