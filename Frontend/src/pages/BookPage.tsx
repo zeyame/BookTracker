@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
 import { SearchBar } from "../components/SearchBar";
@@ -16,7 +16,7 @@ export const BookPage: React.FC = () => {
     const [aboutAuthor, setAboutAuthor] = useState<string>('');
     const [fetchingAboutAuthor, setFetchingAboutAuthor] = useState<boolean>(false);
     const [aboutAuthorError, setAboutAuthorError] = useState<boolean>(false);
-    const [sliced, setSliced] = useState<boolean>(false);
+    const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
 
     // refs
     const fullAuthorDescription = useRef<string>('');
@@ -25,55 +25,36 @@ export const BookPage: React.FC = () => {
     // effects
     // fetches description about the author of the book
     useEffect(() => {
-        if (book) {
-            if (sessionStorage.getItem(`author-${book.authors[0]}`)) {
-                const aboutAuthorObject: string | null = sessionStorage.getItem(`author-${book.authors[0]}`);
-                if (aboutAuthorObject) {
-                    const storedAuthorDescription: string = JSON.parse(aboutAuthorObject);
-                    fullAuthorDescription.current = storedAuthorDescription;
-                    const slicedDescription = sliceAuthorDescription(storedAuthorDescription);
-                    setAboutAuthor(slicedDescription);
-                    
-                    // Slicing was 'useful'
-                    slicedDescription.length < storedAuthorDescription.length && setSliced(true);
-                    
-                }
-            }
-            else {
-                setFetchingAboutAuthor(true);
-                const getAboutAuthor = async () => {
-                    try {
-                        const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
+        const fetchDescription = async () => {
+            try {
+                if (book) {
+                    const storedAuthorDescription = sessionStorage.getItem(`author-${book.authors[0]}`);
+                    if (storedAuthorDescription) {
+                        const parsedDescription = JSON.parse(storedAuthorDescription);
+                        fullAuthorDescription.current = parsedDescription;
+                        setAboutAuthor(sliceAuthorDescription(parsedDescription));
+                    } else {
+                        setFetchingAboutAuthor(true);
+                        const authorDescription = await fetchAuthorDescription(book.authors[0]);
                         fullAuthorDescription.current = authorDescription;
-                        const slicedDescription = sliceAuthorDescription(authorDescription);
-                        setAboutAuthor(slicedDescription);
-
-                        // Slicing was 'useful'
-                        slicedDescription.length < authorDescription.length && setSliced(true);
-                    }
-                    catch (error: any) {
-                        setAboutAuthorError(true);
-                    }
-                    finally {
-                        setFetchingAboutAuthor(false);
+                        setAboutAuthor(sliceAuthorDescription(authorDescription));
+                        sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify(authorDescription));
                     }
                 }
-                getAboutAuthor();
+            } catch (error) {
+                setAboutAuthorError(true);
+            } finally {
+                setFetchingAboutAuthor(false);
             }
-        }
-
+        };
+    
+        fetchDescription();
+    
         return () => {
             setAboutAuthor('');
-        }
-    }, []);
-
-    // stores author description in session storage
-    useEffect(() => {
-        if (aboutAuthor) {
-            sessionStorage.setItem(`author-${book?.authors[0]}`, JSON.stringify(fullAuthorDescription.current));
-        }
-    }, [aboutAuthor]);
-
+        };
+    }, [book]);
+    
 
     // functions
     const sliceAuthorDescription = (description: string): string => {
@@ -88,7 +69,17 @@ export const BookPage: React.FC = () => {
     }
 
     const handleShowMore = () => {
+        console.log(`Current full author description ref: ${fullAuthorDescription.current}`);
         setAboutAuthor(fullAuthorDescription.current);
+        setShowMoreButtonClicked(true);
+    }
+
+    const handleShowLess = () => {
+        const currentDescription = aboutAuthor;
+        console.log(`Show less clicked. Current description to be sliced: ${currentDescription}`);
+        const slicedDescription = sliceAuthorDescription(currentDescription);
+        setAboutAuthor(slicedDescription);
+        setShowMoreButtonClicked(false);
     }
     
 
@@ -170,9 +161,9 @@ export const BookPage: React.FC = () => {
                                                 {aboutAuthor}
                                             </p>
                                             {
-                                                sliced &&
+                                                showMoreButtonClicked &&
                                                 <>
-                                                    <button className="show-more-btn">Show less</button>
+                                                    <button className="show-more-btn" onClick={handleShowLess}>Show less</button>
                                                     <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                                     </svg>
