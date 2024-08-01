@@ -16,7 +16,7 @@ export const BookPage: React.FC = () => {
     const [aboutAuthor, setAboutAuthor] = useState<string>('');
     const [fetchingAboutAuthor, setFetchingAboutAuthor] = useState<boolean>(false);
     const [aboutAuthorError, setAboutAuthorError] = useState<boolean>(false);
-
+    const [sliced, setSliced] = useState<boolean>(false);
 
     // refs
     const fullAuthorDescription = useRef<string>('');
@@ -31,7 +31,12 @@ export const BookPage: React.FC = () => {
                 if (aboutAuthorObject) {
                     const storedAuthorDescription: string = JSON.parse(aboutAuthorObject);
                     fullAuthorDescription.current = storedAuthorDescription;
-                    setAboutAuthor(sliceAuthorDescription(storedAuthorDescription));
+                    const slicedDescription = sliceAuthorDescription(storedAuthorDescription);
+                    setAboutAuthor(slicedDescription);
+                    
+                    // Slicing was 'useful'
+                    slicedDescription.length < storedAuthorDescription.length && setSliced(true);
+                    
                 }
             }
             else {
@@ -40,7 +45,11 @@ export const BookPage: React.FC = () => {
                     try {
                         const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
                         fullAuthorDescription.current = authorDescription;
-                        setAboutAuthor(sliceAuthorDescription(authorDescription));
+                        const slicedDescription = sliceAuthorDescription(authorDescription);
+                        setAboutAuthor(slicedDescription);
+
+                        // Slicing was 'useful'
+                        slicedDescription.length < authorDescription.length && setSliced(true);
                     }
                     catch (error: any) {
                         setAboutAuthorError(true);
@@ -143,16 +152,32 @@ export const BookPage: React.FC = () => {
                                     </div>
                                 :
                                 <div>
-                                    <p className= {aboutAuthor.length < fullAuthorDescription.current.length ? "author-description-faded" : "author-description"}>
-                                        {aboutAuthor}
-                                    </p>
                                     {
-                                        aboutAuthor.length < fullAuthorDescription.current.length && 
+                                        aboutAuthor.length < fullAuthorDescription.current.length ?
                                         <>
+                                            <p className= "author-description-faded" >
+                                                {aboutAuthor}
+                                            </p>
+
                                             <button className="show-more-btn" onClick={handleShowMore}>Show more</button>
                                             <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                             </svg>
+                                        </>
+                                        :
+                                        <>
+                                            <p className= "author-description" >
+                                                {aboutAuthor}
+                                            </p>
+                                            {
+                                                sliced &&
+                                                <>
+                                                    <button className="show-more-btn">Show less</button>
+                                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                                    </svg>
+                                                </>
+                                            }
                                         </>
                                     }
                                     <hr className="about-author-divider"/>

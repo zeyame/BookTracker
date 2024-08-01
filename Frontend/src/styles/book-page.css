@@ -82,7 +82,7 @@
     flex-direction: column;
     width: 1000px;
     padding-left: 80px;
-    padding-top: 40px;
+    padding-top: 30px;
     overflow-wrap: break-word;
     word-wrap: break-word;
     overflow-y: auto;
@@ -115,11 +115,12 @@
 }
 
 .book-page-description p {
-    font-size: 15px;
+    font-size: 13px;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     margin-bottom: 20px;
+    margin-top: 3px;
 }
 
 .book-page-genres {
