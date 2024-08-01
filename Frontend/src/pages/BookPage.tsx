@@ -26,27 +26,44 @@ export const BookPage: React.FC = () => {
     // fetches description about the author of the book
     useEffect(() => {
         if (book) {
-            setFetchingAboutAuthor(true);
-            const getAboutAuthor = async () => {
-                try {
-                    const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
-                    fullAuthorDescription.current = authorDescription;
-                    setAboutAuthor(sliceAuthorDescription(authorDescription));
-                }
-                catch (error: any) {
-                    setAboutAuthorError(true);
-                }
-                finally {
-                    setFetchingAboutAuthor(false);
+            if (sessionStorage.getItem(`author-${book.authors[0]}`)) {
+                const aboutAuthorObject: string | null = sessionStorage.getItem(`author-${book.authors[0]}`);
+                if (aboutAuthorObject) {
+                    const storedAuthorDescription: string = JSON.parse(aboutAuthorObject);
+                    fullAuthorDescription.current = storedAuthorDescription;
+                    setAboutAuthor(sliceAuthorDescription(storedAuthorDescription));
                 }
             }
-            getAboutAuthor();
+            else {
+                setFetchingAboutAuthor(true);
+                const getAboutAuthor = async () => {
+                    try {
+                        const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
+                        fullAuthorDescription.current = authorDescription;
+                        setAboutAuthor(sliceAuthorDescription(authorDescription));
+                    }
+                    catch (error: any) {
+                        setAboutAuthorError(true);
+                    }
+                    finally {
+                        setFetchingAboutAuthor(false);
+                    }
+                }
+                getAboutAuthor();
+            }
         }
 
         return () => {
             setAboutAuthor('');
         }
     }, []);
+
+    // stores author description in session storage
+    useEffect(() => {
+        if (aboutAuthor) {
+            sessionStorage.setItem(`author-${book?.authors[0]}`, JSON.stringify(fullAuthorDescription.current));
+        }
+    }, [aboutAuthor]);
 
 
     // functions
