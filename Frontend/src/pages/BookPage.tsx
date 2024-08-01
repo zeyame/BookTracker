@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
 import { SearchBar } from "../components/SearchBar";
@@ -11,10 +11,18 @@ export const BookPage: React.FC = () => {
     const location = useLocation();
     const book: book | undefined = location.state.bookData;
     
+
+    // states
     const [aboutAuthor, setAboutAuthor] = useState<string>('');
     const [fetchingAboutAuthor, setFetchingAboutAuthor] = useState<boolean>(false);
     const [aboutAuthorError, setAboutAuthorError] = useState<boolean>(false);
 
+
+    // refs
+    const fullAuthorDescription = useRef<string>('');
+
+
+    // effects
     // fetches description about the author of the book
     useEffect(() => {
         if (book) {
@@ -22,7 +30,8 @@ export const BookPage: React.FC = () => {
             const getAboutAuthor = async () => {
                 try {
                     const authorDescription: string = await fetchAuthorDescription(book.authors[0]);
-                    setAboutAuthor(authorDescription);
+                    fullAuthorDescription.current = authorDescription;
+                    setAboutAuthor(sliceAuthorDescription(authorDescription));
                 }
                 catch (error: any) {
                     setAboutAuthorError(true);
@@ -38,6 +47,24 @@ export const BookPage: React.FC = () => {
             setAboutAuthor('');
         }
     }, []);
+
+
+    // functions
+    const sliceAuthorDescription = (description: string): string => {
+        // Split the description into sentences using regex to account for various sentence endings
+        const sentences = description.split(/(?<=[.!?])\s+/);
+    
+        // Slice the array to get the first 5 sentences
+        const slicedSentences = sentences.slice(0, 5);
+    
+        // Join the sentences back into a single string
+        return slicedSentences.join(' ');
+    }
+
+    const handleShowMore = () => {
+        setAboutAuthor(fullAuthorDescription.current);
+    }
+    
 
     if (!book) {
         return (
@@ -82,7 +109,7 @@ export const BookPage: React.FC = () => {
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>
                         <div className="about-author-container">
-                            <hr className="about-author-divider"/>
+                            <hr className="about-author-divider" />
                             <p className="about-author-header">
                                 About the author
                             </p>
@@ -98,12 +125,21 @@ export const BookPage: React.FC = () => {
                                         <p className="about-author-error-message">Failed to fetch author's description. Please refresh to try again.</p>
                                     </div>
                                 :
-                                <>
-                                    <p className="author-description">
+                                <div>
+                                    <p className= {aboutAuthor.length < fullAuthorDescription.current.length ? "author-description-faded" : "author-description"}>
                                         {aboutAuthor}
                                     </p>
+                                    {
+                                        aboutAuthor.length < fullAuthorDescription.current.length && 
+                                        <>
+                                            <button className="show-more-btn" onClick={handleShowMore}>Show more</button>
+                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                            </svg>
+                                        </>
+                                    }
                                     <hr className="about-author-divider"/>
-                                </>
+                                </div>
                             }
                         </div>
                     </div>
@@ -112,3 +148,4 @@ export const BookPage: React.FC = () => {
         </div>
     );
 }
+
