@@ -234,7 +234,7 @@ def getAuthorDescription():
     if not author_name:
         return jsonify({'error': 'Author name is required to get their description.'}), 400
     
-    # making a request to wikipedia API to get the wikipedia page title for this author
+    # Making a request to Wikipedia API to get the Wikipedia page title for this author
     title_response = requests.get(f"{WIKIPEDIA_URL}?action=query&list=search&srsearch={author_name}&format=json")
     if title_response.status_code != 200:
         return jsonify({"error": f"An unexpected error occurred when fetching page title for {author_name}."}), title_response.status_code
@@ -246,12 +246,12 @@ def getAuthorDescription():
     # Getting the first relevant title from the search results
     page_title = search_results[0].get('title')
     
-    # fetching the introduction for the author with wikipedia title 'page_title'
-    extract_url = f"{WIKIPEDIA_URL}?action=query&prop=extracts&exintro=true&explaintext=true&titles={page_title}&format=json"
+    # Fetching the introduction and image for the author using the Wikipedia title
+    extract_url = f"{WIKIPEDIA_URL}?action=query&prop=extracts|pageimages&exintro=true&explaintext=true&titles={page_title}&pithumbsize=500&format=json"
     
     extract_response = requests.get(extract_url)
     if extract_response.status_code != 200:
-        return jsonify({"error": f"An unexpected error occurred when fetching the introduction for author {author_name}."}), 400
+        return jsonify({"error": f"An unexpected error occurred when fetching the details for author {author_name}."}), 400
     
     extract_data = extract_response.json()
     

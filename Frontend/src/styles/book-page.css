@@ -141,7 +141,7 @@
     margin-top: 25px;
     margin-bottom: 4px;
     font-family: 'Georgia';
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .page-count, .published, .language {
@@ -182,21 +182,26 @@
 .about-author-header {
     margin-top: 0px;
     font-family: 'Georgia';
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .book-page-author-details {
     display: flex;
+    align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
 .book-page-author-name {
-    margin-top: 0px;
+    margin: 0px;
+    font-size: 14px;
 }
 
 .book-page-author-picture {
-    width: 15px;
-    height: 20px;
+    width: 54px;
+    height: 54px;
+    border: none;
+    border-radius: 50px;
 }
 
 .author-description, .author-description-faded {
