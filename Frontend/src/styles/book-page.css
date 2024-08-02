@@ -181,9 +181,22 @@
 
 .about-author-header {
     margin-top: 0px;
-    margin-bottom: 14px;
     font-family: 'Georgia';
     font-size: 18px;
+}
+
+.book-page-author-details {
+    display: flex;
+    gap: 10px;
+}
+
+.book-page-author-name {
+    margin-top: 0px;
+}
+
+.book-page-author-picture {
+    width: 15px;
+    height: 20px;
 }
 
 .author-description, .author-description-faded {

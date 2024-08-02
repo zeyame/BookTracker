@@ -237,11 +237,11 @@ def getAuthorDescription():
     # making a request to wikipedia API to get the wikipedia page title for this author
     title_response = requests.get(f"{WIKIPEDIA_URL}?action=query&list=search&srsearch={author_name}&format=json")
     if title_response.status_code != 200:
-        return jsonify({"error": f"An unexpected error occurred from Wikipedia API when fetching page title for {author_name}."}), title_response.status_code
+        return jsonify({"error": f"An unexpected error occurred when fetching page title for {author_name}."}), title_response.status_code
     
     search_results = title_response.json().get('query', {}).get('search', [])
     if not search_results:
-        return jsonify({"message": f"No wikipedia page found for the author {author_name}."}), 200
+        return jsonify({"message": f"No details found for the author {author_name}."}), 200
     
     # Getting the first relevant title from the search results
     page_title = search_results[0].get('title')
@@ -261,12 +261,19 @@ def getAuthorDescription():
     
     # Get the first (and only) page ID
     page_id = list(pages.keys())[0]
-    extract = pages[page_id].get('extract', '')
+    page_data = pages[page_id]
     
-    if not extract:
-        return jsonify({'message': f'No extract could be found for the author {author_name}.'}), 200
+    extract = page_data.get('extract', '')
+    image_info = page_data.get('thumbnail', {})
+    image_url = image_info.get('source', '')
     
-    return jsonify({'description': extract})
+    if not extract and not image_url:
+        return jsonify({'message': f'No details could be found for the author {author_name}.'}), 200
+    
+    return jsonify({
+        'description': extract,
+        'image_url': image_url
+    })
 
 
 if __name__ == '__main__':
