@@ -44,9 +44,9 @@ def getBooksByGenre(genre):
     
     data = response.json()      # an object that has items array 
     
-    # gets an array of objects and each object has properties: id, volumeInfo object with properties: title, authors[], imageLinks object with property thumbnail
+    # gets an array of objects and each object has properties: id, volumeInfo object with properties
     books = data.get('items', [])       
-    books = formatBooks(books, limit)       # array of objects with each object representing a book in the requested genre with its name, author, image url 
+    books = formatBooks(books, limit)       # array of objects with each object representing a book in the requested genre
     return jsonify({'books': books})
 
 def formatBooks(books, limit):
@@ -229,7 +229,7 @@ def updateGenreCache(genre):
     return jsonify({'message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
 
 @app.route('/author', methods=['GET'])
-def getAuthorDescription():
+def getAuthorDetails():
     author_name = request.args.get('authorName', '')
     if not author_name:
         return jsonify({'error': 'Author name is required to get their description.'}), 400
@@ -275,6 +275,41 @@ def getAuthorDescription():
         'image_url': image_url
     })
 
+
+@app.route('/similar-books', methods=['POST'])
+def getSimilarBooks():
+    author_names = request.json.get('authors', [])
+    categories = request.json.get('categories', [])
+    language = request.json.get('language', '')
+    
+    if not author_names or not categories or not language:
+        return jsonify({'error': 'Author name, book categories, and language all need to be provided to fetch similar books.'}), 400
+    
+    author_query = ' '.join(f'inauthor:{author}' for author in author_names)
+    subject_query = ' '.join(f'subject:{category}' for category in categories)
+
+    query = f'{author_query} {subject_query}'.strip()
+    similar_books_response = requests.get(
+        GOOGLE_URL, 
+        params={
+            'q' : query,
+            'langRestrict': language,
+            'maxResults': 5,
+            'orderBy': 'relevance',
+            'fields': 'items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)',
+            'key': {API_KEY}
+        }
+    )
+    if similar_books_response.status_code != 200:
+        return jsonify({'error': f'Unexpected error occurred when fetching similar books from API.'}), 404
+    
+    similar_books = similar_books_response.json().get('items', [])
+    if not similar_books:
+        return jsonify({'message': f'Could not find any similar books with query: {query}'}), 200
+    
+    formatted_books = formatBooks(similar_books, 5)
+    return jsonify({'similarBooks': formatted_books})
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,13 +1,15 @@
+/* Remove scaling from #root */
 #root {
-    transform: scale(1.2);
-    transform-origin: top left;
-    width: calc(100%/1.2);  /* 100% / scale factor */
-    height: calc(100%/1.2); /* 100% / scale factor */
-  }
-  .app-container {
-    display: grid;
-    grid-template-columns: 0.33fr 3fr;
-    grid-template-rows: 0.33fr min-content;
-    width: 100%;
-    height: 100%;
-  }
+  width: 100vw;  /* Full viewport width */
+  height: 100vh; /* Full viewport height */
+}
+
+/* Adjust the app container to use full viewport size */
+.app-container {
+  display: grid;
+  grid-template-columns: 0.33fr 3fr;
+  grid-template-rows: auto min-content; /* Adjust rows to fit content */
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Allow scrolling if content overflows */
+}
