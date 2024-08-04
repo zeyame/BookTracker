@@ -128,7 +128,7 @@ export const BookPage: React.FC = () => {
                             ...prevState,
                             similarBooks: true
                         }));
-                        const similarBooks: Array<book> | null = await fetchSimilarBooks(book.authors, book.categories, book.language, 7);
+                        const similarBooks: Array<book> | null = await fetchSimilarBooks(book.authors, book.categories, book.language, 5);
                         if (similarBooks) {
                             setSimilarBooks(similarBooks);
                             sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(similarBooks));
