@@ -2,7 +2,7 @@ import { book } from "../interfaces/BookInterface";
 
 const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 
-export const fetchSimilarBooks = async (authors: Array<string>, categories: Array<string>, language: string): Promise<Array<book> | null> => {
+export const fetchSimilarBooks = async (authors: Array<string>, categories: Array<string>, language: string, limit: number): Promise<Array<book> | null> => {
     try {
         const response = await fetch(`${BASE_URL}/similar-books`, {
             method: 'POST',
@@ -13,7 +13,8 @@ export const fetchSimilarBooks = async (authors: Array<string>, categories: Arra
             body: JSON.stringify({
                 authors,
                 categories,
-                language
+                language,
+                limit
             })
         });
 

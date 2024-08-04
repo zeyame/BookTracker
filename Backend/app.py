@@ -281,9 +281,15 @@ def getSimilarBooks():
     author_names = request.json.get('authors', [])
     categories = request.json.get('categories', [])
     language = request.json.get('language', '')
+    limit = request.json.get('limit', 7)
     
     if not author_names or not categories or not language:
         return jsonify({'error': 'Author name, book categories, and language all need to be provided to fetch similar books.'}), 400
+    
+    try:
+        limit = int(limit)
+    except ValueError as e:
+        return jsonify({'error': 'Limit provided for fetching similar books is not a valid integer.'})
     
     author_query = ' '.join(f'inauthor:{author}' for author in author_names)
     subject_query = ' '.join(f'subject:{category}' for category in categories)
@@ -294,7 +300,7 @@ def getSimilarBooks():
         params={
             'q' : query,
             'langRestrict': language,
-            'maxResults': 5,
+            'maxResults': limit,
             'orderBy': 'relevance',
             'fields': 'items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)',
             'key': {API_KEY}
@@ -307,7 +313,7 @@ def getSimilarBooks():
     if not similar_books:
         return jsonify({'message': f'Could not find any similar books with query: {query}'}), 200
     
-    formatted_books = formatBooks(similar_books, 5)
+    formatted_books = formatBooks(similar_books, limit)
     return jsonify({'similarBooks': formatted_books})
     
 
