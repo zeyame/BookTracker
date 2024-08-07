@@ -10,10 +10,12 @@ app = Flask(__name__)
 CORS(app)
 
 GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
-SEARCH_URL = "https://openlibrary.org/search.json"
+OPENLIBRARY_URL = "https://openlibrary.org/search.json"
 WIKIPEDIA_URL = "https://en.wikipedia.org/w/api.php"
+TASTEDIVE_URL = "https://tastedive.com/api/similar"
 
-API_KEY= "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
+GOOGLE_KEY = "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
+TASTEDIVE_KEY = "1033070-BookTrac-59A622F3"
 # Hashmaps
 
 # k = genre, v = books
@@ -36,7 +38,7 @@ def getBooksByGenre(genre):
         return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/<genre>-books" is not a valid integer that can be parsed.'})
     
     # requesting the API for a certain number of books for the specified genre
-    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -123,9 +125,9 @@ def getBook():
         return jsonify({'error': f'Limit parameter {limit} sent to endpoint "/book" is not a valid integer that can be parsed.'}), 400
     
     if isISBN(search):
-        book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+        book_response = requests.get(f"{GOOGLE_URL}?q=isbn:{search}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
     else:
-        book_response = requests.get(f"{GOOGLE_URL}?q={search}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+        book_response = requests.get(f"{GOOGLE_URL}?q={search}&maxResults={limit}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
         
     if book_response.status_code != 200:
         return jsonify({'error': f'Failed response from the Google Books API with search {search}'}), book_response.status_code
@@ -176,7 +178,7 @@ async def setup_cache():
 
         
 async def fetchBooks(session, genre, limit, offset):
-    url = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+    url = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
     async with session.get(url) as response:
         if response.status == 200:
             return await response.json()
@@ -209,7 +211,7 @@ def updateGenreCache(genre):
     
     limit = int(request.args.get('limit', 7))
     
-    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={API_KEY}")
+    response = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={genre_offset[genre]}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
     
     # we send back an error if request failed
     if response.status_code != 200:
@@ -277,45 +279,53 @@ def getAuthorDetails():
 
 
 @app.route('/similar-books', methods=['POST'])
-def getSimilarBooks():
-    author_names = request.json.get('authors', [])
-    categories = request.json.get('categories', [])
-    language = request.json.get('language', '')
-    limit = request.json.get('limit', 7)
+async def getSimilarBooks():
+    book_title = request.json.get('title')
+    search_type = request.json.get('type')
+    if not book_title or not search_type:
+        return jsonify({'error': 'Book title and search type are required to look for similar books.'}), 400
     
-    if not author_names or not categories or not language:
-        return jsonify({'error': 'Author name, book categories, and language all need to be provided to fetch similar books.'}), 400
-    
+    limit = request.json.get('limit')
     try:
         limit = int(limit)
-    except ValueError as e:
-        return jsonify({'error': 'Limit provided for fetching similar books is not a valid integer.'})
+    except ValueError:
+        return jsonify({'error': 'Limit provided for similar books is not a valid integer.'}), 400
     
-    author_query = ' '.join(f'inauthor:{author}' for author in author_names)
-    subject_query = ' '.join(f'subject:{category}' for category in categories)
-
-    query = f'{author_query} {subject_query}'.strip()
-    similar_books_response = requests.get(
-        GOOGLE_URL, 
-        params={
-            'q' : query,
-            'langRestrict': language,
-            'maxResults': limit,
-            'orderBy': 'relevance',
-            'fields': 'items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)',
-            'key': {API_KEY}
-        }
-    )
+    similar_books_response = requests.get(f'{TASTEDIVE_URL}?q={book_title}&type={search_type}&limit={limit}&k={TASTEDIVE_KEY}')
     if similar_books_response.status_code != 200:
-        return jsonify({'error': f'Unexpected error occurred when fetching similar books from API.'}), 404
+        return jsonify({'error': f'Failed request to retrieve similar books to {book_title}.'}), 400
     
-    similar_books = similar_books_response.json().get('items', [])
+    similar_books = similar_books_response.json().get('similar', {}).get('results', [])
     if not similar_books:
-        return jsonify({'message': f'Could not find any similar books with query: {query}'}), 200
+        return jsonify({'message': f'No similar books were found for {book_title}.'}), 200
     
-    formatted_books = formatBooks(similar_books, limit)
-    return jsonify({'similarBooks': formatted_books})
+    book_names = [book.get('name') for book in similar_books if book.get('name')]
     
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetchBook(session, book) for book in book_names]
+        book_responses = await asyncio.gather(*tasks)
+        
+        similar_books = []
+        for response in book_responses:
+            if response:
+                book = response.get('items', [])
+                book = formatBooks(book, 1)     # array of 1 book object
+                book = book[0] if book else {}
+                similar_books.append(book)
+            else:
+                return jsonify({'error': f"Error occurred when fetching similar books to {book_title}."}), 404
+            
+        return jsonify({'similarBooks': similar_books}), 200
+            
+    
+async def fetchBook(session, title):
+    url = f"{GOOGLE_URL}?q=intitle:{title}&maxResults=1&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY}"    
+    async with session.get(url) as book_response:
+        if book_response.status == 200:
+            return await book_response.json()
+        else:
+            print(f"Failed to fetch book with title: {title}.")
+            return None
 
 if __name__ == '__main__':
     app.run(debug=True)
