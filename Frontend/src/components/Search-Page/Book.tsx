@@ -1,6 +1,6 @@
 import React from "react"
 import '../styles/book.css'
-import { book } from "../interfaces/BookInterface"
+import { book } from "../../interfaces/BookInterface"
 import { Link } from "react-router-dom"
 
 interface BookProps {
