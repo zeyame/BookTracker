@@ -98,6 +98,8 @@ a {
     flex-direction: column;
     margin-left: 11px;
     height: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .search-row-title {

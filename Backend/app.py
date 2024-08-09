@@ -9,13 +9,16 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+# External API endpoints
 GOOGLE_URL = "https://www.googleapis.com/books/v1/volumes"
 OPENLIBRARY_URL = "https://openlibrary.org/search.json"
 WIKIPEDIA_URL = "https://en.wikipedia.org/w/api.php"
 TASTEDIVE_URL = "https://tastedive.com/api/similar"
 
+# API KEYS
 GOOGLE_KEY = "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
 TASTEDIVE_KEY = "1033070-BookTrac-59A622F3"
+
 # Hashmaps
 
 # k = genre, v = books
@@ -25,12 +28,12 @@ cache = defaultdict(list)
 genre_offset = {'romance': 7, 'fiction': 7, 'thriller': 7, 'action': 7, 'mystery': 7, 'history': 7, 'horror': 7, 'fantasy': 7}
 
 
-# SETTING UP THE ENDPOINTS FOR THE BACKEND
+# SETTING UP ENDPOINTS 
 
-# Route handles fetching a set of books belonging to a specific genre from the Open Library API when application runs
+# fetches a specified number of books to be displayed on the application's default search page
 @app.route('/<genre>-books', methods=['GET'])
 def getBooksByGenre(genre):
-    limit = request.args.get('limit', 7)
+    limit = request.args.get('limit', 9)
     
     try:
         limit = int(limit)
@@ -51,6 +54,8 @@ def getBooksByGenre(genre):
     books = formatBooks(books, limit)       # array of objects with each object representing a book in the requested genre
     return jsonify({'books': books})
 
+
+# helper function that formats a given list of books into a specified format
 def formatBooks(books, limit):
     result = []
     if books:
@@ -70,7 +75,8 @@ def formatBooks(books, limit):
             
             if book_published_date:
                 book_published_date = format_date(book_published_date)
-                
+            
+            # format
             book_data = {
                 'id': book_id,
                 'title': book_title,
@@ -91,6 +97,7 @@ def formatBooks(books, limit):
         
     return result
 
+# helper function that returns dates in specified format
 def format_date(date_str, format_year_only=False):
     # Parse the input date string
     try:
@@ -110,7 +117,7 @@ def format_date(date_str, format_year_only=False):
     return formatted_date
     
     
-# Route handles fetching a book by title, author, or ISBN from the Open Library API when users inputs a search
+# fetches a specific number of books from the Google Books API based on a user's search 
 @app.route('/book', methods=['GET'])
 def getBook():
     search = request.args.get('search')
@@ -138,7 +145,8 @@ def getBook():
     # respond with an array of book(s)
     return jsonify({'books': books})
 
-# # helper function that checks if a user search has a valid format for an ISBN 
+
+# helper function that checks if a user search has a valid format for an ISBN 
 def isISBN(search):
     if len(search) != 10 and len(search) != 13:
         return False
@@ -150,6 +158,7 @@ def isISBN(search):
     return True
 
 
+# sets up the in-memory cache with a specified number of books for each genre 
 @app.route('/cache', methods=['GET'])
 async def setup_cache():
     limit = request.args.get('limit', 7)
@@ -176,7 +185,8 @@ async def setup_cache():
             
     return jsonify({'message': f"Cache has been successfully set up with {limit} books in every genre."}), 200
 
-        
+
+# fetches a specified number of books starting at a specific index from the Google Books API
 async def fetchBooks(session, genre, limit, offset):
     url = requests.get(f"{GOOGLE_URL}?q=subject:{genre}&maxResults={limit}&startIndex={offset}&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY }")
     async with session.get(url) as response:
@@ -187,6 +197,7 @@ async def fetchBooks(session, genre, limit, offset):
             return None
         
 
+# retrieves a specified number of books for a single genre stored in memory cache 
 @app.route('/cached-<genre>', methods=['GET'])
 def getCachedBooks(genre):
     books = cache.get(genre, [])
@@ -203,7 +214,8 @@ def getCachedBooks(genre):
     
     return jsonify({'cachedBooks': cached_books})
         
-        
+
+# fetches 7 more books to be stored in memory cache for a single genre 
 @app.route('/update-<genre>-cache', methods=['GET'])
 def updateGenreCache(genre):
     if genre not in cache:
@@ -230,6 +242,8 @@ def updateGenreCache(genre):
     
     return jsonify({'message': f'Successfully updated the cache for {genre} genre with {limit} more books.'}), 200
 
+
+# fetches brief description of a single author from Wikipedia API
 @app.route('/author', methods=['GET'])
 def getAuthorDetails():
     author_name = request.args.get('authorName', '')
@@ -278,6 +292,7 @@ def getAuthorDetails():
     })
 
 
+# fetches up to 5 similar books for a given book from Tastedive API
 @app.route('/similar-books', methods=['POST'])
 async def getSimilarBooks():
     book_title = request.json.get('title')
@@ -291,7 +306,7 @@ async def getSimilarBooks():
     except ValueError:
         return jsonify({'error': 'Limit provided for similar books is not a valid integer.'}), 400
     
-    similar_books_response = requests.get(f'{TASTEDIVE_URL}?q={book_title}&type={search_type}&limit={limit}&k={TASTEDIVE_KEY}')
+    similar_books_response = requests.get(f'{TASTEDIVE_URL}?q=book:{book_title}&type={search_type}&limit={limit}&k={TASTEDIVE_KEY}')
     if similar_books_response.status_code != 200:
         return jsonify({'error': f'Failed request to retrieve similar books to {book_title}.'}), 400
     
@@ -305,26 +320,31 @@ async def getSimilarBooks():
         tasks = [fetchBook(session, book) for book in book_names]
         book_responses = await asyncio.gather(*tasks)
         
+        errors = []
         similar_books = []
         for response in book_responses:
             if response:
-                book = response.get('items', [])
-                book = formatBooks(book, 1)     # array of 1 book object
-                book = book[0] if book else {}
+                books = response.get('items', [])
+                if not books:
+                    print("No data could be found for a similar book.")
+                    continue
+                book = formatBooks(books, 1)     # returns an array of 1 book object
+                book = book[0]
                 similar_books.append(book)
             else:
-                return jsonify({'error': f"Error occurred when fetching similar books to {book_title}."}), 404
+                errors.append({'error': f'Unexpected error occurred when fetching details about a similar book to {book_title}'})
+        
+        return jsonify({'similarBooks': similar_books, 'errors': errors}), 200
             
-        return jsonify({'similarBooks': similar_books}), 200
-            
-    
+
+# fetches details about one book from Google Books API
 async def fetchBook(session, title):
     url = f"{GOOGLE_URL}?q=intitle:{title}&maxResults=1&fields=items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail, volumeInfo/language)&key={GOOGLE_KEY}"    
     async with session.get(url) as book_response:
         if book_response.status == 200:
             return await book_response.json()
         else:
-            print(f"Failed to fetch book with title: {title}.")
+            print(f"Unexpected error occurred when fetching details about {title}.")
             return None
 
 if __name__ == '__main__':

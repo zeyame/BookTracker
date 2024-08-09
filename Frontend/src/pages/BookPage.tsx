@@ -112,6 +112,7 @@ export const BookPage: React.FC = () => {
     }, [book]);
 
 
+    // fetches a specified number of similar books 
     useEffect(() => {
         const getSimilarBooks = async () => {
             if (book) {
@@ -129,7 +130,7 @@ export const BookPage: React.FC = () => {
                             similarBooks: true
                         }));
                         const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 6);
-                        if (similarBooks) {
+                        if (similarBooks && similarBooks.length > 0) {
                             setSimilarBooks(similarBooks);
                             sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(similarBooks));
                         }
@@ -250,7 +251,7 @@ export const BookPage: React.FC = () => {
                                 <div>
                                     {aboutAuthor.image_url &&
                                         <div className="book-page-author-details">
-                                            <img className="book-page-author-picture" src={aboutAuthor.image_url} />
+                                            <img className="book-page-author-picture" src={aboutAuthor.image_url} alt="Author's image" />
                                             <p className="book-page-author-name">{book.authors[0]}</p>
                                         </div>
                                     }
@@ -289,12 +290,14 @@ export const BookPage: React.FC = () => {
                             <div className="similar-books-container">
                                 <p className="similar-books-header">Readers also enjoyed</p>
                                 {
+                                    // request to fetch similar books in progress
                                     loading.similarBooks ? 
                                         <div className="loading-similar-books">
                                             <p>Loading</p>
                                             <LoadingIcon />
                                         </div>
                                     :
+                                    // request to fetch similar books unexpectedly fails
                                     error.similarBooks ? 
                                         <div className="similar-books-error">
                                             <p className="about-author-error-message">Failed to fetch similar books. Please refresh to try again.</p>
@@ -302,9 +305,13 @@ export const BookPage: React.FC = () => {
                                     :
                                     <div className="similar-books">
                                         {
-                                            similarBooks.map(book => 
-                                                <SimilarBook book={book} />
-                                            )
+                                            // attempting to fetch similar books successful but might return nothing if no books found
+                                            similarBooks ?
+                                                similarBooks.map(book => 
+                                                    <SimilarBook key={book.id} book={book} />
+                                                )
+                                            :
+                                            <div className="no-similar-books-found">No similar books could be found for {book.title}</div>
                                         }
                                     </div>   
                                 }
