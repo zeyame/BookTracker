@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState, useRef } from "react";
 import { fetchAuthorDetails } from "../../services/authorSearch";
 import { Author } from "../../interfaces/AuthorInterface";
-import { LoadingIcon } from "../LoadingIcon";
+import { LoadingIcon } from "../Global/LoadingIcon";
 
 interface AboutAuthorProps {
     authorName: string

@@ -1,5 +1,5 @@
 import React from "react";
-import { book } from "../interfaces/BookInterface";
+import { book } from "../../interfaces/BookInterface";
 
 interface SearchRowProps {
     book: book

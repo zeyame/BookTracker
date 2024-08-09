@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
-import { SearchBar } from "../components/SearchBar";
+import { SearchBar } from "../components/Global/SearchBar";
 import '../styles/book-page.css';
-import { LoadingIcon } from "../components/LoadingIcon";
+import { LoadingIcon } from "../components/Global/LoadingIcon";
 import { fetchSimilarBooks } from "../services/similarBookSearch";
 import { SimilarBook } from "../components/Book-Page/SimilarBook";
 import { AboutAuthor } from "../components/Book-Page/AboutAuthor";

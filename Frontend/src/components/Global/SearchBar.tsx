@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { book } from "../interfaces/BookInterface";
-import { getBooks } from "../services/userBookSearch";
+import { book } from "../../interfaces/BookInterface";
+import { getBooks } from "../../services/userBookSearch";
 import { SearchRow } from "./SearchRow";
 import { useNavigate } from "react-router-dom";
 
