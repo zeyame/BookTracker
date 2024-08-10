@@ -398,8 +398,8 @@ export const BookPage: React.FC = () => {
                                         {
                                             // attempting to fetch similar books successful but might return nothing if no books found
                                             similarBooks.length > 0 ?
-                                                similarBooks.map(book => 
-                                                    <SimilarBook key={book.id} book={book} />
+                                                similarBooks.map((book, index) => 
+                                                    <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} />
                                                 )
                                             :
                                             <div className="no-similar-books-found">No similar books could be found for {book.title}</div>

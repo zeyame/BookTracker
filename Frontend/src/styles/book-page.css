@@ -310,6 +310,11 @@
     padding-bottom: 10px;
 }
 
+.similar-books-pagination-arrows {
+    margin-top: -50px;
+    margin-left: -70px;
+}
+
 .similar-books-left-arrow-pagination, .similar-books-right-arrow-pagination {
     cursor: pointer;
 }
