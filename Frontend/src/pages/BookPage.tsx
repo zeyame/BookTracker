@@ -5,7 +5,7 @@ import { SearchBar } from "../components/Global/SearchBar";
 import '../styles/book-page.css';
 import { LoadingIcon } from "../components/Global/LoadingIcon";
 import { fetchSimilarBooks } from "../services/similarBookSearch";
-import { SimilarBook } from "../components/SimilarBook";
+import { SimilarBook } from "../components/Book-Page/SimilarBook";
 import { Author } from "../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../services/authorSearch";
 
@@ -21,94 +21,97 @@ type customError = {
 
 type showMoreButton = {
     aboutAuthor: boolean
-    similarBooks: boolean
+    bookDescription: boolean
 }
 
 export const BookPage: React.FC = () => {
 
     const location = useLocation();
     const book: book | undefined = location.state.bookData;
-    
-    // states
-    const [aboutAuthor, setAboutAuthor] = useState<Author>({
-        description: '',
-        image_url: ''
-    });
-    const [loading, setLoading] = useState<Loading>({
-        aboutAuthor: false,
-        similarBooks: false
-    });
-    const [error, setError] = useState<customError>({
-        aboutAuthor: false,
-        similarBooks: false
-    });
-    const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<showMoreButton>({
-        aboutAuthor: false,
-        similarBooks: false
-    });
-    const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
 
-    // refs 
-    const fullAuthorDescription = useRef<string>('');
+        // states
+        const [aboutAuthor, setAboutAuthor] = useState<Author>({
+            description: '',
+            image_url: ''
+        });
+        const [loading, setLoading] = useState<Loading>({
+            aboutAuthor: false,
+            similarBooks: false
+        });
+        const [error, setError] = useState<customError>({
+            aboutAuthor: false,
+            similarBooks: false
+        });
+        const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<showMoreButton>({
+            aboutAuthor: false,
+            bookDescription: false
+        });
+        const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
+        const [bookDescription, setBookDescription] = useState<string>('');
 
-    // effects
-    // fetches description about the author of the book
-    useEffect(() => {
-        const fetchDescription = async () => {
-            try {
-                if (book) {
-                    const storedAuthorDetails = sessionStorage.getItem(`author-${book.authors[0]}`);
-                    if (storedAuthorDetails) {
-                        const parsedDetails: Author = JSON.parse(storedAuthorDetails);
-                        const storedDescription = parsedDetails.description;
-                        const storedImage = parsedDetails.image_url;
-                        fullAuthorDescription.current = storedDescription;
-                        setAboutAuthor(prevState => ({
-                            ...prevState,
-                            'description': sliceDescription(storedDescription),
-                            'image_url': storedImage
-                        }));
-                    } 
-                    else {
-                        setLoading(prevState => ({
-                            ...prevState,
-                            aboutAuthor: true
-                        }));
-                        const authorDetails: Author | null = await fetchAuthorDetails(book.authors[0]);
+        // refs 
+        const fullAuthorDescriptionRef = useRef<string>('');
 
-                        // if fetching author details did not return empty, we get the description
-                        if (authorDetails) {
-                            const authorDescription = authorDetails.description;
-                            const image_url = authorDetails.image_url;
-                            fullAuthorDescription.current = authorDescription;
-
+        // effects
+        // fetches description about the author of the book
+        useEffect(() => {
+            const fetchDescription = async () => {
+                try {
+                    if (book) {
+                        const storedAuthorDetails = sessionStorage.getItem(`author-${book.authors[0]}`);
+                        if (storedAuthorDetails) {
+                            const parsedDetails: Author = JSON.parse(storedAuthorDetails);
+                            const storedDescription = parsedDetails.description;
+                            const storedImage = parsedDetails.image_url;
+                            fullAuthorDescriptionRef.current = storedDescription;
                             setAboutAuthor(prevState => ({
                                 ...prevState,
-                                description: sliceDescription(authorDescription),
-                                image_url: image_url
+                                'description': sliceDescription(storedDescription),
+                                'image_url': storedImage
                             }));
-                            sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify({
-                                'description': authorDescription,
-                                'image_url': image_url
+                        } 
+                        else {
+                            setLoading(prevState => ({
+                                ...prevState,
+                                aboutAuthor: true
                             }));
+                            const authorDetails: Author | null = await fetchAuthorDetails(book.authors[0]);
+
+                            // if fetching author details did not return empty, we get the description
+                            if (authorDetails) {
+                                const authorDescription = authorDetails.description;
+                                const image_url = authorDetails.image_url;
+                                fullAuthorDescriptionRef.current = authorDescription;
+
+                                setAboutAuthor(prevState => ({
+                                    ...prevState,
+                                    description: sliceDescription(authorDescription),
+                                    image_url: image_url
+                                }));
+                                sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify({
+                                    'description': authorDescription,
+                                    'image_url': image_url
+                                }));
+                            }
                         }
                     }
+                } 
+                catch (error) {
+                    setError(prevState => ({
+                        ...prevState,
+                        aboutAuthor: true
+                    }));
+                } 
+                finally {
+                    setLoading(prevState => ({
+                        ...prevState,
+                        aboutAuthor: false
+                    }));
                 }
-            } catch (error) {
-                setError(prevState => ({
-                    ...prevState,
-                    aboutAuthor: true
-                }));
-            } finally {
-                setLoading(prevState => ({
-                    ...prevState,
-                    aboutAuthor: false
-                }));
-            }
-        };
+            };
     
         fetchDescription();
-    
+        
         return () => {
             setAboutAuthor(prevState => ({
                 ...prevState,
@@ -163,11 +166,22 @@ export const BookPage: React.FC = () => {
             setSimilarBooks([]);
         }
     }, [book]);
+
+
+    useEffect(() => {
+        if (book) {
+            setBookDescription(sliceDescription(book.description));
+        }
+
+        return () => {
+            setBookDescription('');
+        }
+    }, [book]);
     
 
     // functions
     // slices the book and author descriptions
-    const sliceDescription = (description: string): string => {
+    function sliceDescription (description: string ): string  {
         // Split the description into sentences using regex to account for various sentence endings
         const sentences = description.split(/(?<=[.!?])\s+/);
     
@@ -183,7 +197,7 @@ export const BookPage: React.FC = () => {
         if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
             setAboutAuthor(prevState => ({
                 ...prevState,
-                'description': fullAuthorDescription.current
+                'description': fullAuthorDescriptionRef.current
             }));
             setShowMoreButtonClicked(prevState => ({
                 ...prevState,
@@ -191,7 +205,13 @@ export const BookPage: React.FC = () => {
             }));
         }
         else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
-            // write code
+            if (book) {
+                setBookDescription(book.description);
+                setShowMoreButtonClicked(prevState => ({
+                    ...prevState, 
+                    bookDescription: true
+                }));  
+            }
         }
         else {
             console.log("Parameter given to handleShowMore function must either be 'about author' or 'book description'.");
@@ -213,14 +233,20 @@ export const BookPage: React.FC = () => {
             }));
         }
         else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
-            // write code
+            if (book) {
+                setBookDescription(sliceDescription(bookDescription));
+                setShowMoreButtonClicked(prevState => ({
+                    ...prevState, 
+                    bookDescription: false
+                }));           
+            } 
         }
         else {
             console.log("Parameter given to handleShowLess function must either be 'about author' or 'book description'.");
         }
     }
-    
 
+    
     if (!book) {
         return (
             <div>Book Not Found.</div>
@@ -247,7 +273,34 @@ export const BookPage: React.FC = () => {
                             )}
                         </div>
                         <div className="book-page-description">
-                            <p>{book.description}</p>
+                            {
+                                bookDescription.length < book.description.length ?
+                                <>
+                                    <p className= "author-description-faded" >
+                                        {bookDescription}
+                                    </p>
+
+                                    <button className="show-more-btn" onClick={() => handleShowMore('bookDescription')}>Show more</button>
+                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowMore('bookDescription')} >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                    </svg>
+                                </>
+                                :
+                                <>
+                                    <p className= "author-description" >
+                                        {bookDescription}
+                                    </p>
+                                    {
+                                        showMoreButtonClicked.bookDescription &&
+                                        <>
+                                            <button className="show-more-btn" onClick={() => handleShowLess('bookDescription')}>Show less</button>
+                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowLess('bookDescription')} >
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                            </svg>
+                                        </>
+                                    }
+                                </>
+                            }                        
                         </div>
                         {book.categories.length > 0 &&
                             <div className="book-page-genres">
@@ -288,7 +341,7 @@ export const BookPage: React.FC = () => {
                                         </div>
                                     }
                                     {
-                                        aboutAuthor.description.length < fullAuthorDescription.current.length ?
+                                        aboutAuthor.description.length < fullAuthorDescriptionRef.current.length ?
                                         <>
                                             <p className= "author-description-faded" >
                                                 {aboutAuthor.description}
