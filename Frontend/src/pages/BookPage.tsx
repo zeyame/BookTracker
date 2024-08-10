@@ -8,6 +8,8 @@ import { fetchSimilarBooks } from "../services/similarBookSearch";
 import { SimilarBook } from "../components/Book-Page/SimilarBook";
 import { Author } from "../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../services/authorSearch";
+import { RightArrowIcon } from "../components/Global/RightArrowIcon";
+import { LeftArrowIcon } from "../components/Global/LeftArrowIcon";
 
 type Loading = {
     aboutAuthor: boolean
@@ -139,7 +141,7 @@ export const BookPage: React.FC = () => {
                             ...prevState,
                             similarBooks: true
                         }));
-                        const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 6);
+                        const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 5);
                         if (similarBooks && similarBooks.length > 0) {
                             setSimilarBooks(similarBooks);
                             sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(similarBooks));
@@ -276,7 +278,7 @@ export const BookPage: React.FC = () => {
                             {
                                 bookDescription.length < book.description.length ?
                                 <>
-                                    <p className= "author-description-faded" >
+                                    <p className= "description-faded" >
                                         {bookDescription}
                                     </p>
 
@@ -287,7 +289,7 @@ export const BookPage: React.FC = () => {
                                 </>
                                 :
                                 <>
-                                    <p className= "author-description" >
+                                    <p className= "description" >
                                         {bookDescription}
                                     </p>
                                     {
@@ -343,7 +345,7 @@ export const BookPage: React.FC = () => {
                                     {
                                         aboutAuthor.description.length < fullAuthorDescriptionRef.current.length ?
                                         <>
-                                            <p className= "author-description-faded" >
+                                            <p className= "description-faded" >
                                                 {aboutAuthor.description}
                                             </p>
 
@@ -354,7 +356,7 @@ export const BookPage: React.FC = () => {
                                         </>
                                         :
                                         <>
-                                            <p className= "author-description" >
+                                            <p className= "description" >
                                                 {aboutAuthor.description}
                                             </p>
                                             {
@@ -373,7 +375,11 @@ export const BookPage: React.FC = () => {
                             }
 
                             <div className="similar-books-container">
-                                <p className="similar-books-header">Readers also enjoyed</p>
+                                <div className="similar-books-header-div">
+                                    <p className="similar-books-header">
+                                        Readers also enjoyed
+                                    </p>
+                                </div>
                                 {
                                     // request to fetch similar books in progress
                                     loading.similarBooks ? 
@@ -391,7 +397,7 @@ export const BookPage: React.FC = () => {
                                     <div className="similar-books">
                                         {
                                             // attempting to fetch similar books successful but might return nothing if no books found
-                                            similarBooks ?
+                                            similarBooks.length > 0 ?
                                                 similarBooks.map(book => 
                                                     <SimilarBook key={book.id} book={book} />
                                                 )

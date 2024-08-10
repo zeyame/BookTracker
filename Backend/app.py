@@ -300,7 +300,7 @@ async def getSimilarBooks():
     if not book_title or not search_type:
         return jsonify({'error': 'Book title and search type are required to look for similar books.'}), 400
     
-    limit = request.json.get('limit')
+    limit = request.json.get('limit', '6')
     try:
         limit = int(limit)
     except ValueError:
