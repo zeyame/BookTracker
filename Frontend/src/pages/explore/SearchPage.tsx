@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import '../../styles/search.css';
-import { Genre } from "../../components/Genre";
+import { Genre } from "../../components/Search-Page/Genre";
 import { fetchDefaultBooks } from "../../services/defaultBookSearch";
 import { initializeCaching, getCachedBooks, updateCache } from "../../services/caching";
 import { book } from "../../interfaces/BookInterface";
-import { LoadingIcon } from "../../components/LoadingIcon";
-import { SearchBar } from "../../components/SearchBar";
+import { LoadingIcon } from "../../components/Global/LoadingIcon";
+import { SearchBar } from "../../components/Global/SearchBar";
 
 export const SearchPage: React.FC = () => {
     const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];

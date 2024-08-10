@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Book } from "./Book";
-import { book } from "../interfaces/BookInterface";
-import { LoadingIcon } from "./LoadingIcon";
+import { book } from "../../interfaces/BookInterface";
+import { LoadingIcon } from "../Global/LoadingIcon";
 
 interface GenreProps {
     name: string

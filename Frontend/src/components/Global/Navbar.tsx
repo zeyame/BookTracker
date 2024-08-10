@@ -1,6 +1,6 @@
 import React from "react"
 import { NavButton } from "./NavButton"
-import '../styles/nav.css'
+import '../../styles/nav.css'
 import { MenuHeader } from "./MenuHeader"
 
 export const Navbar: React.FC = () => {

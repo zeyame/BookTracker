@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
-import { SearchBar } from "../components/SearchBar";
+import { SearchBar } from "../components/Global/SearchBar";
 import '../styles/book-page.css';
-import { LoadingIcon } from "../components/LoadingIcon";
-import { fetchAuthorDetails } from "../services/authorSearch";
-import { Author } from "../interfaces/AuthorInterface";
+import { LoadingIcon } from "../components/Global/LoadingIcon";
 import { fetchSimilarBooks } from "../services/similarBookSearch";
 import { SimilarBook } from "../components/SimilarBook";
+import { Author } from "../interfaces/AuthorInterface";
+import { fetchAuthorDetails } from "../services/authorSearch";
 
 type Loading = {
     aboutAuthor: boolean
@@ -29,7 +29,6 @@ export const BookPage: React.FC = () => {
     const location = useLocation();
     const book: book | undefined = location.state.bookData;
     
-
     // states
     const [aboutAuthor, setAboutAuthor] = useState<Author>({
         description: '',
