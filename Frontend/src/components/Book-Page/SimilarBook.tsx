@@ -7,10 +7,12 @@ import { RightArrowIcon } from "../Global/RightArrowIcon";
 interface SimilarBookProps {
     book: book
     isLast: boolean
+    handleLeftArrowClick: () => void
+    handleRightArrowClick: () => void
 }
 
 
-export const SimilarBook: React.FC<SimilarBookProps> = ({ book, isLast }) => {
+export const SimilarBook: React.FC<SimilarBookProps> = ({ book, isLast, handleLeftArrowClick, handleRightArrowClick }) => {
     return (
         <>
             <div className="similar-book">
@@ -31,8 +33,8 @@ export const SimilarBook: React.FC<SimilarBookProps> = ({ book, isLast }) => {
             {   
                 isLast && 
                     <div className="similar-books-pagination-arrows">
-                        <LeftArrowIcon />
-                        <RightArrowIcon />
+                        <LeftArrowIcon leftArrowClicked={handleLeftArrowClick} />
+                        <RightArrowIcon rightArrowClicked={handleRightArrowClick} />
                     </div>
             }
         </>
