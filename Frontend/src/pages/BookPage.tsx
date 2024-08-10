@@ -19,6 +19,11 @@ type customError = {
     similarBooks: boolean
 }
 
+type showMoreButton = {
+    aboutAuthor: boolean
+    similarBooks: boolean
+}
+
 export const BookPage: React.FC = () => {
 
     const location = useLocation();
@@ -27,8 +32,8 @@ export const BookPage: React.FC = () => {
 
     // states
     const [aboutAuthor, setAboutAuthor] = useState<Author>({
-        'description': '',
-        'image_url': ''
+        description: '',
+        image_url: ''
     });
     const [loading, setLoading] = useState<Loading>({
         aboutAuthor: false,
@@ -38,7 +43,10 @@ export const BookPage: React.FC = () => {
         aboutAuthor: false,
         similarBooks: false
     });
-    const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
+    const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<showMoreButton>({
+        aboutAuthor: false,
+        similarBooks: false
+    });
     const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
 
     // refs 
@@ -58,7 +66,7 @@ export const BookPage: React.FC = () => {
                         fullAuthorDescription.current = storedDescription;
                         setAboutAuthor(prevState => ({
                             ...prevState,
-                            'description': sliceAuthorDescription(storedDescription),
+                            'description': sliceDescription(storedDescription),
                             'image_url': storedImage
                         }));
                     } 
@@ -77,7 +85,7 @@ export const BookPage: React.FC = () => {
 
                             setAboutAuthor(prevState => ({
                                 ...prevState,
-                                description: sliceAuthorDescription(authorDescription),
+                                description: sliceDescription(authorDescription),
                                 image_url: image_url
                             }));
                             sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify({
@@ -159,7 +167,8 @@ export const BookPage: React.FC = () => {
     
 
     // functions
-    const sliceAuthorDescription = (description: string): string => {
+    // slices the book and author descriptions
+    const sliceDescription = (description: string): string => {
         // Split the description into sentences using regex to account for various sentence endings
         const sentences = description.split(/(?<=[.!?])\s+/);
     
@@ -170,22 +179,46 @@ export const BookPage: React.FC = () => {
         return slicedSentences.join(' ');
     }
 
-    const handleShowMore = () => {
-        setAboutAuthor(prevState => ({
-            ...prevState,
-            'description': fullAuthorDescription.current
-        }));
-        setShowMoreButtonClicked(true);
+    // handles the show more button of book and author descriptions
+    const handleShowMore = (descriptionType: string) => {
+        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
+            setAboutAuthor(prevState => ({
+                ...prevState,
+                'description': fullAuthorDescription.current
+            }));
+            setShowMoreButtonClicked(prevState => ({
+                ...prevState,
+                aboutAuthor: true
+            }));
+        }
+        else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
+            // write code
+        }
+        else {
+            console.log("Parameter given to handleShowMore function must either be 'about author' or 'book description'.");
+        }
     }
 
-    const handleShowLess = () => {
-        const currentDescription = aboutAuthor.description;
-        const slicedDescription = sliceAuthorDescription(currentDescription);
-        setAboutAuthor(prevState => ({
-            ...prevState,
-            'description': slicedDescription
-        }));
-        setShowMoreButtonClicked(false);
+    // handles the show less button of book and author descriptions
+    const handleShowLess = (descriptionType: string) => {
+        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
+            const currentDescription = aboutAuthor.description;
+            const slicedDescription = sliceDescription(currentDescription);
+            setAboutAuthor(prevState => ({
+                ...prevState,
+                'description': slicedDescription
+            }));
+            setShowMoreButtonClicked(prevState => ({
+                ...prevState,
+                aboutAuthor: false
+            }));
+        }
+        else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
+            // write code
+        }
+        else {
+            console.log("Parameter given to handleShowLess function must either be 'about author' or 'book description'.");
+        }
     }
     
 
@@ -262,7 +295,7 @@ export const BookPage: React.FC = () => {
                                                 {aboutAuthor.description}
                                             </p>
 
-                                            <button className="show-more-btn" onClick={handleShowMore}>Show more</button>
+                                            <button className="show-more-btn" onClick={() => handleShowMore('aboutAuthor')}>Show more</button>
                                             <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                             </svg>
@@ -273,9 +306,9 @@ export const BookPage: React.FC = () => {
                                                 {aboutAuthor.description}
                                             </p>
                                             {
-                                                showMoreButtonClicked &&
+                                                showMoreButtonClicked.aboutAuthor &&
                                                 <>
-                                                    <button className="show-more-btn" onClick={handleShowLess}>Show less</button>
+                                                    <button className="show-more-btn" onClick={() => handleShowLess('aboutAuthor')}>Show less</button>
                                                     <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                                     </svg>
