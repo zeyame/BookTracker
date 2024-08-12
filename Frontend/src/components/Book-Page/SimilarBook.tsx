@@ -34,7 +34,7 @@ export const SimilarBook: React.FC<SimilarBookProps> = ({ book, isLast, handleLe
                 isLast && 
                     <div className="similar-books-pagination-arrows">
                         <LeftArrowIcon leftArrowClicked={handleLeftArrowClick} />
-                        <RightArrowIcon rightArrowClicked={handleRightArrowClick} />
+                        <RightArrowIcon className="similar-books-right-arrow-pagination" rightArrowClicked={handleRightArrowClick} />
                     </div>
             }
         </>

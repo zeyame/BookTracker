@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { book } from "../interfaces/BookInterface";
 import { SearchBar } from "../components/Global/SearchBar";
 import '../styles/book-page.css';
@@ -8,6 +8,7 @@ import { fetchSimilarBooks } from "../services/similarBookSearch";
 import { SimilarBook } from "../components/Book-Page/SimilarBook";
 import { Author } from "../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../services/authorSearch";
+import { RightArrowIcon } from "../components/Global/RightArrowIcon";
 
 type Loading = {
     aboutAuthor: boolean
@@ -49,11 +50,11 @@ export const BookPage: React.FC = () => {
         const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
         const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
-        console.log(similarBooksHistory);
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
-        const similarBooksCacheRef = useRef<Array<book>>([]);
+        const similarBooksCacheRef = useRef<Array<book>>([]);       // dynamic cache for similar books that is added to and removed from
+        const allSimilarBooksRef = useRef<Array<book>>([]);
 
         // effects
         // fetches description about the author of the book
@@ -124,7 +125,6 @@ export const BookPage: React.FC = () => {
         };
     }, [book]);
 
-
     // fetches a specified number of similar books 
     useEffect(() => {
         const getSimilarBooks = async () => {
@@ -134,7 +134,9 @@ export const BookPage: React.FC = () => {
                         const storedSimilarBooks = sessionStorage.getItem(`${book.title}-similar-books`);
                         if (storedSimilarBooks) {
                             const similarBooks: Array<book> = JSON.parse(storedSimilarBooks);
+                            allSimilarBooksRef.current = similarBooks;
                             similarBooksCacheRef.current = similarBooks;
+
                             const newSimilarBooks = similarBooksCacheRef.current.slice(-5);
 
                             // updating history
@@ -150,6 +152,7 @@ export const BookPage: React.FC = () => {
                         }));
                         const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 20);
                         if (similarBooks && similarBooks.length > 0) {
+                            allSimilarBooksRef.current = similarBooks;
                             similarBooksCacheRef.current = similarBooks;
 
                             const newSimilarBooks = similarBooksCacheRef.current.slice(0, 5);
@@ -291,6 +294,10 @@ export const BookPage: React.FC = () => {
         }
     }
 
+    const renderAllSimilarBooks = () => {
+
+    }
+
     
     if (!book) {
         return (
@@ -317,36 +324,37 @@ export const BookPage: React.FC = () => {
                                 <h3 className="book-page-author" key={author}>{index > 0 && ', '}{author}</h3>
                             )}
                         </div>
-                        <div className="book-page-description">
-                            {
-                                bookDescription.length < book.description.length ?
-                                <>
-                                    <p className= "description-faded" >
-                                        {bookDescription}
-                                    </p>
-
-                                    <button className="show-more-btn" onClick={() => handleShowMore('bookDescription')}>Show more</button>
-                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowMore('bookDescription')} >
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                    </svg>
-                                </>
-                                :
-                                <>
-                                    <p className= "description" >
-                                        {bookDescription}
-                                    </p>
-                                    {
-                                        showMoreButtonClicked.bookDescription &&
+                            { bookDescription &&
+                                <div className="book-page-description">
+                                    { bookDescription.length < book.description.length ?
                                         <>
-                                            <button className="show-more-btn" onClick={() => handleShowLess('bookDescription')}>Show less</button>
-                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowLess('bookDescription')} >
+                                            <p className= "description-faded" >
+                                                {bookDescription}
+                                            </p>
+
+                                            <button className="show-more-btn" onClick={() => handleShowMore('bookDescription')}>Show more</button>
+                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowMore('bookDescription')} >
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                             </svg>
                                         </>
+                                        :
+                                        <>
+                                            <p className= "description" >
+                                                {bookDescription}
+                                            </p>
+                                            {
+                                                showMoreButtonClicked.bookDescription &&
+                                                <>
+                                                    <button className="show-more-btn" onClick={() => handleShowLess('bookDescription')}>Show less</button>
+                                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowLess('bookDescription')} >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                                    </svg>
+                                                </>
+                                            }
+                                        </>
                                     }
-                                </>
+                                </div>
                             }                        
-                        </div>
                         {book.categories.length > 0 &&
                             <div className="book-page-genres">
                                 <p>Genres:</p> 
@@ -449,7 +457,14 @@ export const BookPage: React.FC = () => {
                                         }
                                     </div>   
                                 }
+                                <Link to={`/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
+                                    <div className="all-similar-books-btn-container">
+                                        <button className="all-similar-books-btn">All similar books</button>
+                                        <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />
+                                    </div>
+                                </Link>
                             </div>
+                            <hr className="similar-books-divider" />
                         </div>
                     </div>
                 </div>

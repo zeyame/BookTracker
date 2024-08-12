@@ -1,0 +1,48 @@
+.all-similar-books-page-container {
+    height: 100vh;
+    width: 100%;
+}
+
+.all-similar-books-page-main-content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 50px;
+    margin-top: 50px;
+}
+
+.expanded-similar-book {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.expanded-similar-book-cover {
+    height: 140px;
+    width: 90px;
+    box-shadow: 4px 5px 5px rgba(0,0,0,0.1);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.expanded-similar-book-title {
+    margin: 0px;
+}
+
+.expanded-similar-book-authors {
+    display: flex;
+    font-size: 14px;
+}
+
+.expanded-similar-book-author {
+    margin: 0px;
+    margin-left: 6px;
+}
+
+.expanded-similar-book-reading-status-btn {
+    color: white;
+    border: 1px solid rgba(55, 116, 88, 0.5);
+    padding: 10px;
+    background-color: rgb(63, 131, 99);
+    border-radius: 3px;
+}

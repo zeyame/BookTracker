@@ -14,6 +14,7 @@ import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
 import { BookPage } from './pages/BookPage';
+import { AllSimilarBooksPage } from './pages/AllSimilarBooksPage';
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: '/book/:bookId',
         element: <BookPage />
+      },
+      {
+        path: '/similar-books/:bookId',
+        element: <AllSimilarBooksPage />
       }
     ],
     errorElement: <ErrorPage />

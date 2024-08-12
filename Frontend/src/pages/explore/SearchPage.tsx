@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import '../../styles/search.css';
+import '../../styles/search-page.css';
 import { Genre } from "../../components/Search-Page/Genre";
 import { fetchDefaultBooks } from "../../services/defaultBookSearch";
 import { initializeCaching, getCachedBooks, updateCache } from "../../services/caching";
