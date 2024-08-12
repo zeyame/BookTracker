@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { book } from "../../interfaces/BookInterface";
 import { sliceDescription } from "../../utils/sliceDescription";
+import { Link } from "react-router-dom";
 
 interface ExpandedSimilarBookProps {
     similarBook: book
@@ -33,11 +34,15 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
 
     return (
         <div className="expanded-similar-book">
-            <img className="expanded-similar-book-cover" src={similarBook.image_url} alt="Book cover" />
+            <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
+                <img className="expanded-similar-book-cover" src={similarBook.image_url} alt="Book cover" />    
+            </Link>
             <div className="expanded-similar-book-details">
-                <h3 className="expanded-similar-book-title">
-                    {similarBook.title}
-                </h3>
+                <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
+                    <h3 className="expanded-similar-book-title">
+                        {similarBook.title}
+                    </h3>
+                </Link>
                 <div className="expanded-similar-book-authors">
                     by {similarBook.authors.map((author, index) => 
                         <p key={author} className="expanded-similar-book-author">

@@ -41,6 +41,7 @@
     margin: 0px;
     font-family: 'Georgia';
     cursor: pointer;
+    font-size: 21px;
 }
 
 .expanded-similar-book-title:hover {
