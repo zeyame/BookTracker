@@ -96,7 +96,7 @@
     pointer-events: none;
 }
 
-.expanded-similar-book-showmore-btn {
+.expanded-similar-book-show-btn {
     border: 0;
     background-color: inherit;
     padding-left: 0px;
@@ -106,7 +106,7 @@
     cursor: pointer;
 }
 
-.expanded-similar-book-showmore-btn:hover {
+.expanded-similar-book-show-btn:hover {
     text-decoration: underline;
 }
 

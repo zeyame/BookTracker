@@ -200,11 +200,6 @@ export const BookPage: React.FC = () => {
             setBookDescription('');
         }
     }, [book]);
-
-
-    useEffect(() => {
-        console.log("allSimilarBooksRef changed! New ref values: ", allSimilarBooksRef.current);
-    }, [allSimilarBooksRef.current]);
     
 
     // functions

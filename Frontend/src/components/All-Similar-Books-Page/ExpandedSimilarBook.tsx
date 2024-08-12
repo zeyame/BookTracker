@@ -10,6 +10,7 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
 
     // states
     const [bookDescription, setBookDescription] = useState<string>('');
+    const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
 
     // refs
     const fullBookDescriptionRef = useRef<string>(similarBook.description);
@@ -18,6 +19,17 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
     useEffect(() => {
         setBookDescription(sliceDescription(similarBook.description));
     }, [similarBook]);
+
+    // functions
+    const handleShowMore = () => {
+        setBookDescription(fullBookDescriptionRef.current);
+        setShowMoreButtonClicked(true);
+    };
+
+    const handleShowLess = () => {
+        setBookDescription(sliceDescription(fullBookDescriptionRef.current));
+        setShowMoreButtonClicked(false);
+    }
 
     return (
         <div className="expanded-similar-book">
@@ -41,7 +53,7 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
                         </p>
                         
                         <div>
-                            <button className="expanded-similar-book-showmore-btn">Show more</button>
+                            <button className="expanded-similar-book-show-btn" onClick={handleShowMore}>Show more</button>
                             <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                             </svg>
@@ -49,9 +61,20 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
                     
                     </>
                     :
-                        <p className="expanded-similar-book-description">
-                            {bookDescription}
-                        </p>
+                        <>
+                            <p className="expanded-similar-book-description">
+                                {bookDescription}
+                            </p>
+                            {
+                                showMoreButtonClicked && 
+                                <div>
+                                    <button className="expanded-similar-book-show-btn" onClick={handleShowLess}>Show less</button>
+                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                    </svg>
+                                </div>
+                            }
+                        </>
                 }
                 <button className="expanded-similar-book-reading-status-btn">
                     Want to Read
