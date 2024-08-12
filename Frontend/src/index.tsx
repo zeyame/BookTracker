@@ -15,6 +15,8 @@ import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
 import { BookPage } from './pages/BookPage';
 import { AllSimilarBooksPage } from './pages/AllSimilarBooksPage';
+import { AboutAuthor } from './components/Book-Page/AboutAuthor';
+import { AuthorPage } from './pages/AuthorPage';
 
 const router = createBrowserRouter([
   {
@@ -64,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: '/similar-books/:bookId',
         element: <AllSimilarBooksPage />
+      },
+      {
+        path: '/author/:authorName',
+        element: <AuthorPage />
       }
     ],
     errorElement: <ErrorPage />

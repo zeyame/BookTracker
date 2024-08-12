@@ -200,7 +200,7 @@ export const BookPage: React.FC = () => {
             setBookDescription('');
         }
     }, [book]);
-    
+
 
     // functions
 
@@ -306,7 +306,9 @@ export const BookPage: React.FC = () => {
                     <div className="book-page-metadata-section">
                         <div className="book-page-authors">
                             {book.authors.map((author, index) => 
-                                <h3 className="book-page-author" key={author}>{index > 0 && ', '}{author}</h3>
+                                <Link to={`/author/${author}`} state={ {authorData: author} }>
+                                    <h3 className="book-page-author" key={author}>{index > 0 && ', '}{author}</h3>
+                                </Link>
                             )}
                         </div>
                             { bookDescription &&
@@ -375,7 +377,9 @@ export const BookPage: React.FC = () => {
                                     {aboutAuthor.image_url &&
                                         <div className="book-page-author-details">
                                             <img className="book-page-author-picture" src={aboutAuthor.image_url} alt="Author's image" />
-                                            <p className="book-page-author-name">{book.authors[0]}</p>
+                                            <Link to={`/author/${book.authors[0]}`} state={ { authorData: book.authors[0] } }>
+                                                <p className="book-page-author-name">{book.authors[0]}</p>
+                                            </Link>
                                         </div>
                                     }
                                     {
