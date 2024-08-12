@@ -1,10 +1,9 @@
 export const sliceDescription = (description: string): string => {
-    // Split the description into sentences using regex to account for various sentence endings
-    const sentences = description.split(/(?<=[.!?])\s+/);
-        
-    // Slice the array to get the first 5 sentences
-    const slicedSentences = sentences.slice(0, 5);
+    // Split the description into words 
+    const words: Array<string> = description.split(/\s+/);
 
-    // Join the sentences back into a single string
-    return slicedSentences.join(' ');
+    // Get the first 100 words
+    const slicedDescription = words.slice(0, 60);
+
+    return slicedDescription.join(' ');
 }

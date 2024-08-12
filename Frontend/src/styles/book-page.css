@@ -118,6 +118,10 @@
     cursor: pointer;
 }
 
+.book-page-author:hover {
+    text-decoration: underline;
+}
+
 .book-page-description p {
     font-size: 15px;
     white-space: normal;
@@ -151,7 +155,7 @@
 .page-count, .published, .language {
     margin-top: 10px;
     margin-bottom: 0px;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 
