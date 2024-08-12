@@ -135,8 +135,8 @@ export const BookPage: React.FC = () => {
                         const storedSimilarBooks = sessionStorage.getItem(`${book.title}-similar-books`);
                         if (storedSimilarBooks) {
                             const similarBooks: Array<book> = JSON.parse(storedSimilarBooks);
-                            allSimilarBooksRef.current = similarBooks;
-                            similarBooksCacheRef.current = similarBooks;
+                            allSimilarBooksRef.current = [...similarBooks];
+                            similarBooksCacheRef.current = [...similarBooks];
 
                             const newSimilarBooks = similarBooksCacheRef.current.slice(-5);
 
@@ -153,8 +153,8 @@ export const BookPage: React.FC = () => {
                         }));
                         const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 20);
                         if (similarBooks && similarBooks.length > 0) {
-                            allSimilarBooksRef.current = similarBooks;
-                            similarBooksCacheRef.current = similarBooks;
+                            allSimilarBooksRef.current = [...similarBooks];
+                            similarBooksCacheRef.current = [...similarBooks];
 
                             const newSimilarBooks = similarBooksCacheRef.current.slice(0, 5);
                             
@@ -164,7 +164,7 @@ export const BookPage: React.FC = () => {
                             setSimilarBooks(newSimilarBooks);
 
                             // saving full cache to storage and removing the retrieved books 
-                            sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(similarBooksCacheRef.current));
+                            sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(allSimilarBooksRef.current));
                             similarBooksCacheRef.current.splice(0, 5);
                         }
                     }
@@ -200,6 +200,11 @@ export const BookPage: React.FC = () => {
             setBookDescription('');
         }
     }, [book]);
+
+
+    useEffect(() => {
+        console.log("allSimilarBooksRef changed! New ref values: ", allSimilarBooksRef.current);
+    }, [allSimilarBooksRef.current]);
     
 
     // functions
@@ -283,11 +288,6 @@ export const BookPage: React.FC = () => {
             similarBooksCacheRef.current.splice(0, 5);
         }
     }
-
-    const renderAllSimilarBooks = () => {
-
-    }
-
     
     if (!book) {
         return (
@@ -440,7 +440,7 @@ export const BookPage: React.FC = () => {
                                             // attempting to fetch similar books successful but might return nothing if no books found
                                             similarBooks.length > 0 ?
                                                 similarBooks.map((book, index) => 
-                                                    index < 5 && <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} />
+                                                    <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} />
                                                 )
                                             :
                                             <div className="no-similar-books-found">No similar books could be found for {book.title}</div>
