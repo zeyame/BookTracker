@@ -9,6 +9,7 @@ import { SimilarBook } from "../components/Book-Page/SimilarBook";
 import { Author } from "../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../services/authorSearch";
 import { RightArrowIcon } from "../components/Global/RightArrowIcon";
+import { sliceDescription } from "../utils/sliceDescription";
 
 type Loading = {
     aboutAuthor: boolean
@@ -202,17 +203,6 @@ export const BookPage: React.FC = () => {
     
 
     // functions
-    // slices the book and author descriptions
-    function sliceDescription (description: string ): string  {
-        // Split the description into sentences using regex to account for various sentence endings
-        const sentences = description.split(/(?<=[.!?])\s+/);
-    
-        // Slice the array to get the first 5 sentences
-        const slicedSentences = sentences.slice(0, 5);
-    
-        // Join the sentences back into a single string
-        return slicedSentences.join(' ');
-    }
 
     // handles the show more button of book and author descriptions
     const handleShowMore = (descriptionType: string) => {
