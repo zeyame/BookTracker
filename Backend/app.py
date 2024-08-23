@@ -15,9 +15,6 @@ OPENLIBRARY_URL = "https://openlibrary.org/search.json"
 WIKIPEDIA_URL = "https://en.wikipedia.org/w/api.php"
 TASTEDIVE_URL = "https://tastedive.com/api/similar"
 
-# API KEYS
-GOOGLE_KEY = "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec"
-TASTEDIVE_KEY = "1033070-BookTrac-59A622F3"
 
 # Hashmaps
 
