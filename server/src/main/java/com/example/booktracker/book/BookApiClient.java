@@ -35,6 +35,20 @@ public class BookApiClient {
                 .bodyToMono(JsonNode.class)
                 .flatMapMany(this::parseBookItems);
     }
+    
+    public Flux<BookDTO> fetchBooks(String search) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/volumes")
+                        .queryParam("q", search)
+                        .queryParam("maxResults", 5)
+                        .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                        .queryParam("key", GOOGLE_KEY)
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .flatMapMany(this::parseBookItems);
+    }
 
     private Flux<BookDTO> parseBookItems(JsonNode response) {
         JsonNode items = response.get("items");
@@ -57,6 +71,7 @@ public class BookApiClient {
                 getTextOrEmpty(volumeInfo, "language")
         );
     }
+    
 
     private List<String> getAuthors(JsonNode authorsNode) {
         if (authorsNode != null && authorsNode.isArray()) {
