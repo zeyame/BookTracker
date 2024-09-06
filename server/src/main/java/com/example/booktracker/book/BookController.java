@@ -15,9 +15,21 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // endpoint responsible for returning books from a requested genre
     @GetMapping("/books/{genre}")
     public Flux<BookDTO> getBooksByGenre(@PathVariable String genre, @RequestParam int limit) {
+<<<<<<< HEAD
         // call BookApiClient method to fetch books for a given genre
         return bookService.getBooksByGenre(genre, limit);
     }
+=======
+        return bookService.getBooksByGenre(genre, limit);
+    }
+
+    // endpoint responsible for returning 5 books based on a user's search
+    @GetMapping("/books")
+    public Flux<BookDTO> getBooks(@RequestParam String search) {
+        return bookService.getBooks(search);
+    }
+>>>>>>> 26059fa66784c93e113096c84b0140bfe6f48c0b
 }

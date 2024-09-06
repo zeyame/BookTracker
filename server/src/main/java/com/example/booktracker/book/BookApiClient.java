@@ -27,7 +27,7 @@ public class BookApiClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", "subject:" + genre)
-                        .queryParam("maxResults", limit)
+                        .queryParam("maxResults", "10")
                         .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
                         .queryParam("key", GOOGLE_KEY)
                         .build())
