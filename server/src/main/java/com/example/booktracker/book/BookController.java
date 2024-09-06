@@ -1,9 +1,6 @@
 package com.example.booktracker.book;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -19,9 +16,8 @@ public class BookController {
     }
 
     @GetMapping("/books/{genre}")
-    public Flux<BookDTO> getBooksByGenre(@PathVariable String genre) {
+    public Flux<BookDTO> getBooksByGenre(@PathVariable String genre, @RequestParam int limit) {
         // call BookApiClient method to fetch books for a given genre
-        return bookService.getBooksByGenre(genre);
+        return bookService.getBooksByGenre(genre, limit);
     }
-
 }

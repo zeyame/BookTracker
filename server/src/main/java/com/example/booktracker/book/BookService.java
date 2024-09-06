@@ -14,7 +14,7 @@ public class BookService {
         this.bookApiClient = bookApiClient;
     }
 
-    public Flux<BookDTO> getBooksByGenre(String genre) {
-        return bookApiClient.fetchBooksByGenre(genre);
+    public Flux<BookDTO> getBooksByGenre(String genre, int limit) {
+        return bookApiClient.fetchBooksByGenre(genre, limit);
     }
 }

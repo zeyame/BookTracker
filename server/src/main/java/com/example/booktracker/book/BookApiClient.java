@@ -22,12 +22,12 @@ public class BookApiClient {
         this.webClient = webClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
     }
 
-    public Flux<BookDTO> fetchBooksByGenre(String genre) {
+    public Flux<BookDTO> fetchBooksByGenre(String genre, int limit) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", "subject:" + genre)
-                        .queryParam("maxResults", "10")
+                        .queryParam("maxResults", limit)
                         .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
                         .queryParam("key", GOOGLE_KEY)
                         .build())
