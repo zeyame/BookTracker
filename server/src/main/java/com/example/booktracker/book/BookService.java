@@ -17,4 +17,9 @@ public class BookService {
     public Flux<BookDTO> getBooksByGenre(String genre, int limit) {
         return bookApiClient.fetchBooksByGenre(genre, limit);
     }
+
+    // method responsible for requesting books based on a user search from the BookApiClient
+    public Flux<BookDTO> getBooks(String search) {
+        return bookApiClient.fetchBooks(search);
+    }
 }
