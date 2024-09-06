@@ -35,7 +35,7 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
     return (
         <div className="expanded-similar-book">
             <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
-                <img className="expanded-similar-book-cover" src={similarBook.image_url} alt="Book cover" />    
+                <img className="expanded-similar-book-cover" src={similarBook.imageUrl} alt="Book cover" />    
             </Link>
             <div className="expanded-similar-book-details">
                 <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>

@@ -7,6 +7,6 @@ export interface book {
     description: string
     pageCount: number
     categories: Array<string>
-    image_url: string
+    imageUrl: string
     language: string
 }

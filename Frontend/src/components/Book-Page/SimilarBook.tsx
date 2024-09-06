@@ -17,7 +17,7 @@ export const SimilarBook: React.FC<SimilarBookProps> = ({ book, isLast, handleLe
         <>
             <div className="similar-book">
                 <Link to={`/book/${book.id}`} state={ {bookData: book}}>
-                    <img src={book.image_url} alt="Similar book to original book." className="similar-book-cover" />
+                    <img src={book.imageUrl} alt="Similar book to original book." className="similar-book-cover" />
                 </Link>
                 <div className="similar-book-info">
                     <Link to={`/book/${book.id}`} state={ {bookData: book}}>

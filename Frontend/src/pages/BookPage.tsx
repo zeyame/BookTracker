@@ -295,7 +295,7 @@ export const BookPage: React.FC = () => {
             <SearchBar />
             <div className="book-page-main">
                 <div className="book-page-left-column">
-                    <img className="book-page-book-cover" src={book.image_url} alt="Book cover" />
+                    <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
                     <button className="reading-status-btn">Want to read</button>
                     <button className="buy-amazon-btn">Buy on Amazon</button>
                 </div>

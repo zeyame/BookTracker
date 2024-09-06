@@ -11,7 +11,7 @@ export const Book: React.FC<BookProps> = ({ book }) => {
     return (
         <div className="book-container">
             <Link to={`/book/${book.id}`} state={{ bookData: book }}>
-                <img className="book-cover" src={book.image_url} alt="Book" />
+                <img className="book-cover" src={book.imageUrl} alt="Book" />
             </Link>
             <div className="book-info">
                 <Link to={`/book/${book.id}`} state={{ bookData: book }}>
