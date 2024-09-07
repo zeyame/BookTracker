@@ -20,7 +20,7 @@ export const SearchPage: React.FC = () => {
 
     // use effects
     useEffect(() => {
-        if (localStorage.getItem('defaultBooksCache')) {
+        if (localStorage.getItem('defaultBooksCached')) {
             const defaultBooksCache: string | null = localStorage.getItem('defaultBooksCache');
             if (defaultBooksCache) {
                 const parsedCache = JSON.parse(defaultBooksCache);
@@ -52,11 +52,12 @@ export const SearchPage: React.FC = () => {
         }
     }, [books]);
 
-    // useEffect(() => {
-    //     if (initialBooksFetched && !cacheInitialized) {
-    //         initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
-    //     }
-    // }, [initialBooksFetched, cacheInitialized]);
+    useEffect(() => {
+        if (initialBooksFetched && !cacheInitialized) {
+            console.log("setting up cache...");
+            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
+        }
+    }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {

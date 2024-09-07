@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +28,22 @@ public class BookApiClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", "subject:" + genre)
-                        .queryParam("maxResults", "10")
+                        .queryParam("maxResults", limit)
+                        .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                        .queryParam("key", GOOGLE_KEY)
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .flatMapMany(this::parseBookItems);
+    }
+
+    public Flux<BookDTO> fetchBooksByGenre(String genre, int limit, int offset) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/volumes")
+                        .queryParam("q", "subject:" + genre)
+                        .queryParam("maxResults", limit)
+                        .queryParam("startIndex", offset)
                         .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
                         .queryParam("key", GOOGLE_KEY)
                         .build())
@@ -65,7 +81,7 @@ public class BookApiClient {
                 getAuthors(volumeInfo.get("authors")),
                 getTextOrEmpty(volumeInfo, "publisher"),
                 getTextOrEmpty(volumeInfo, "description"),
-                volumeInfo.get("pageCount").asInt(0),
+                getPageCount(volumeInfo),
                 getCategories(volumeInfo.get("categories")),
                 getImageUrl(volumeInfo),
                 getTextOrEmpty(volumeInfo, "language")
@@ -108,4 +124,8 @@ public class BookApiClient {
         return (fieldValue != null) ? fieldValue.asText() : "";
     }
 
+    private int getPageCount(JsonNode volumeInfo) {
+        JsonNode pageCountNode = volumeInfo != null ? volumeInfo.get("pageCount") : null;
+        return (pageCountNode != null && pageCountNode.isNumber()) ? pageCountNode.asInt(0) : 0;
+    }
 }

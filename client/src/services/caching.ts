@@ -6,12 +6,12 @@ const BASE_URL: string = "http://127.0.0.1:5000";       // flask server
 // requests cache to be setup on the server
 export const initializeCaching = async () => {
     try {
-        const response = await fetch(`${BASE_URL}/cache?limit=7`);
+        const response = await fetch(`http://127.0.0.1:8080/api/books/cache`);
         if (!response.ok) {
             throw new Error(`Server failed to set up the cache`);
         }
-        const data = await response.json();
-        console.log(data.message);         // logging the cache if response was ok
+        const data = await response.text();
+        console.log(data);         // logging the cache if response was ok
     }
     catch (error: any) {
         throw error;

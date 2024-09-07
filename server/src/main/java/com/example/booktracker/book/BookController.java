@@ -2,6 +2,7 @@ package com.example.booktracker.book;
 
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -26,5 +27,11 @@ public class BookController {
     @GetMapping("/books")
     public Flux<BookDTO> getBooks(@RequestParam String search) {
         return bookService.getBooks(search);
+    }
+
+    // endpoint responsible for setting up an in-memory cache for default books in each genre
+    @GetMapping("/books/cache")
+    public Mono<String> setUpCache() {
+        return bookService.setUpCache();
     }
 }
