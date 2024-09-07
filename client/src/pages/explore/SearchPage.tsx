@@ -52,12 +52,12 @@ export const SearchPage: React.FC = () => {
         }
     }, [books]);
 
-    useEffect(() => {
-        if (initialBooksFetched && !cacheInitialized) {
-            console.log("setting up cache...");
-            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
-        }
-    }, [initialBooksFetched, cacheInitialized]);
+    // useEffect(() => {
+    //     if (initialBooksFetched && !cacheInitialized) {
+    //         console.log("setting up cache...");
+    //         initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
+    //     }
+    // }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {

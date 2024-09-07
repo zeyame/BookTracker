@@ -1,15 +1,21 @@
 package com.example.booktracker.book;
 
+import com.example.booktracker.GenreNotInCacheException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -18,33 +24,72 @@ public class BookService {
     private final BookCache bookCache;
 
     @Autowired
-    public BookService(BookApiClient bookApiClient, BookCache bookCache) {
+    public BookService(BookApiClient bookApiClient, BookCache bookCache, ObjectMapper objectMapper) {
         this.bookApiClient = bookApiClient;
         this.bookCache = bookCache;
     }
 
-    public Flux<BookDTO> getBooksByGenre(String genre, int limit) {
-        return bookApiClient.fetchBooksByGenre(genre, limit);
-    }
-
     // method responsible for requesting books based on a user search from the BookApiClient
-    public Flux<BookDTO> getBooks(String search) {
+    public List<BookDTO> getBooks(String search) {
         return bookApiClient.fetchBooks(search);
     }
 
-    public Mono<String> setUpCache() {
+    // method is responsible for requesting books for a specific genre from the BookApiClient
+    public List<BookDTO> getBooksByGenre(String genre, int limit) {
+        return bookApiClient.fetchBooksByGenre(genre, limit);
+    }
+
+    // method is responsible for setting up the intial cache in the BookCache repository
+    public void setUpCache() {
+        HashMap<String, List<BookDTO>> cache = new HashMap<>();
         String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};
 
-        return Flux.fromArray(genres)
-                .flatMap(genre -> bookApiClient.fetchBooksByGenre(genre, 7, 7)
-                        .collectList()
-                        .map(books -> Map.entry(genre, books)))
-                .collectMap(Map.Entry::getKey, Map.Entry::getValue)
-                .doOnNext(cache -> {
-                    Map<String, Flux<BookDTO>> fluxCache = new ConcurrentHashMap<>();
-                    cache.forEach((genre, books) -> fluxCache.put(genre, Flux.fromIterable(books)));
-                    bookCache.setUpCache(fluxCache);
-                })
-                .thenReturn("Cache set up successfully.");
+        // Create a map of genre to future, where each future fetches books asynchronously
+        Map<String, CompletableFuture<JsonNode>> futureMap = Arrays.stream(genres)
+                .collect(Collectors.toMap(
+                        genre -> genre,
+                        genre -> bookApiClient.fetchBooksByGenreAsync(genre, 7, 7)
+                ));
+
+        // Wait for all the futures to complete
+        CompletableFuture<Void> jsonResponses = CompletableFuture.allOf(
+                futureMap.values().toArray(new CompletableFuture[0])
+        );
+
+        // Once all futures complete, process each response and populate the cache
+        jsonResponses.thenRun(() -> {
+            futureMap.forEach((genre, future) -> {
+                try {
+                    // Get the completed result from each future
+                    JsonNode jsonResponse = future.get();
+                    JsonNode bookItems = jsonResponse.get("items");
+
+                    // Check if there are book items and process them
+                    if (bookItems != null && bookItems.isArray()) {
+                        List<BookDTO> books = new ArrayList<>();
+                        for (JsonNode bookItem : bookItems) {
+                            books.add(bookApiClient.mapToBookDTO(bookItem));
+                        }
+                        cache.put(genre, books);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }).join();
+
+        bookCache.setUpCache(cache);
+
     }
+
+    // method responsible for getting cached books in a specific genre from the BookCache repository
+    public List<BookDTO> getCachedBooksByGenre(String genre) throws GenreNotInCacheException {
+        List<BookDTO> cachedBooks = bookCache.getCachedBooksByGenre(genre);     // possible exception thrown if genre not in cache
+        return cachedBooks;
+    }
+
+    public Map<String, List<BookDTO>> getEntireCache() {
+        return bookCache.getCache();
+    }
+
 }
