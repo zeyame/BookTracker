@@ -47,6 +47,31 @@ public class BookApiClient {
         return books;
     }
 
+    public List<BookDTO> fetchBooksByGenre(String genre, int limit, int offset) {
+        JsonNode response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/volumes")
+                        .queryParam("q", "subject:" + genre)
+                        .queryParam("maxResults", limit)
+                        .queryParam("startIndex", offset)
+                        .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                        .queryParam("key", GOOGLE_KEY)
+                        .build())
+                .retrieve()
+                .body(JsonNode.class);
+
+        if (response == null || !response.has("items")) {
+            return Collections.emptyList();
+        }
+
+        List<BookDTO> books = new ArrayList<>();
+        for (JsonNode bookItem: response.get("items")) {
+            books.add(mapToBookDTO(bookItem));
+        }
+
+        return books;
+    }
+
     public CompletableFuture<JsonNode> fetchBooksByGenreAsync(String genre, int limit, int offset) {
         return CompletableFuture.supplyAsync(() ->
                 restClient.get()

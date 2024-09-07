@@ -64,12 +64,27 @@ public class BookController {
         }
     }
 
+    @GetMapping("/books/cache/{genre}/update")
+    public ResponseEntity<?> updateCachedBooksByGenre(@PathVariable String genre, @RequestParam int limit) throws GenreNotInCacheException {
+        Map<String, String> responseMap = new HashMap<>();
+        try {
+            bookService.updateCachedBooksByGenre(genre, limit);
+            responseMap.put("message", genre + " genre has been successfully updated in the cache");
+
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
+        }
+        catch (GenreNotInCacheException e) {
+            responseMap.put("error", genre + " is not an existing genre in the cache.");
+            return new ResponseEntity<>(responseMap, HttpStatus.NOT_FOUND);
+        }
+    }
+
     // testing endpoint to check out the state of the server cache
-//    @GetMapping("/books/cache/full")
-//    public ResponseEntity<Map<String, List<BookDTO>>> getAllCache() {
-//        Map<String, List<BookDTO>> cache =  bookService.getEntireCache();
-//        return new ResponseEntity<>(cache, HttpStatus.OK);
-//    }
+    @GetMapping("/books/cache/full")
+    public ResponseEntity<Map<String, List<BookDTO>>> getAllCache() {
+        Map<String, List<BookDTO>> cache =  bookService.getEntireCache();
+        return new ResponseEntity<>(cache, HttpStatus.OK);
+    }
 
 
 }

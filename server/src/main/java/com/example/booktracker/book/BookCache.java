@@ -53,6 +53,27 @@ public class BookCache {
         return booksToReturn;
     }
 
+    public void updateCachedBooksByGenre(String genre, List<BookDTO> newBooks) throws GenreNotInCacheException {
+        List<BookDTO> currentCachedBooks = cache.get(genre);
+        if (currentCachedBooks == null) {
+            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
+        }
+
+        // adding new set of books to the end of current set of cached books
+        currentCachedBooks.addAll(newBooks);
+
+        // incrementing the current offset of the genre so that next set of books will be new
+        genreOffset.put(genre, genreOffset.get(genre) + newBooks.size());
+    }
+
+    public int getOffsetForGenre(String genre) throws GenreNotInCacheException {
+        Integer offset = genreOffset.get(genre);
+        if (offset == null) {
+            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache.");
+        }
+        return offset;
+    }
+
     private void initializeGenreOffset() {
         genreOffset.put("romance", 7);
         genreOffset.put("fiction", 7);

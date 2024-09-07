@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,6 +89,14 @@ public class BookService {
         return cachedBooks;
     }
 
+    public void updateCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
+        int currentOffset = bookCache.getOffsetForGenre(genre);
+
+        List<BookDTO> newBooksToCache = bookApiClient.fetchBooksByGenre(genre, limit, currentOffset);
+        bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
+    }
+
+    // helper method to test cache availability
     public Map<String, List<BookDTO>> getEntireCache() {
         return bookCache.getCache();
     }
