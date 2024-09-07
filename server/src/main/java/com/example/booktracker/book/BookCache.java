@@ -21,8 +21,9 @@ public class BookCache {
         initializeGenreOffset();
     }
 
-    public void setUpCache(Map<String, List<BookDTO>> newCache) {
+    public void setUpCache(Map<String, List<BookDTO>> newCache, int offset) {
         this.cache = newCache;
+        updateOffsetForAllGenres(offset);
     }
 
     public Map<String, List<BookDTO>> getCache() {
@@ -33,7 +34,7 @@ public class BookCache {
         return genreOffset;
     }
 
-    public List<BookDTO> getCachedBooksByGenre (String genre, int limit) throws GenreNotInCacheException{
+    public List<BookDTO> getCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
         List<BookDTO> books = cache.get(genre);
         if (books == null) {
             throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
@@ -42,17 +43,20 @@ public class BookCache {
         int size = books.size();
         List<BookDTO> booksToReturn = new ArrayList<>();
 
+        // Retrieve the last `limit` books if available
         if (size > limit) {
-            booksToReturn = books.subList(size - limit, size);
-            books.subList(size-limit, size).clear();
-        }
-        else {
+            booksToReturn = new ArrayList<>(books.subList(size - limit, size));
+            // Remove the last `limit` books from the cache
+            books.subList(size - limit, size).clear();
+        } else {
             booksToReturn = new ArrayList<>(books);
+            // Clear all books if there are fewer than `limit` books
             books.clear();
         }
 
         return booksToReturn;
     }
+
 
     public void updateCachedBooksByGenre(String genre, List<BookDTO> newBooks) throws GenreNotInCacheException {
         List<BookDTO> currentCachedBooks = cache.get(genre);
@@ -64,7 +68,7 @@ public class BookCache {
         currentCachedBooks.addAll(newBooks);
 
         // incrementing the current offset of the genre so that next set of books will be new
-        genreOffset.put(genre, genreOffset.get(genre) + newBooks.size());
+        updateOffsetForGenre(genre, newBooks.size());
     }
 
     public int getOffsetForGenre(String genre) throws GenreNotInCacheException {
@@ -73,6 +77,22 @@ public class BookCache {
             throw new GenreNotInCacheException(genre + " is not an existing genre in the cache.");
         }
         return offset;
+    }
+
+    public List<BookDTO> viewBooksInAGenre(String genre) {
+        return cache.get(genre);
+    }
+
+    private void updateOffsetForGenre(String genre, int value) {
+        genreOffset.put(genre, genreOffset.get(genre) + value);
+    }
+
+    private void updateOffsetForAllGenres(int value) {
+        for (Map.Entry<String, Integer> entry : genreOffset.entrySet()) {
+            String genre = entry.getKey();
+            Integer currentOffset = entry.getValue();
+            genreOffset.put(genre, currentOffset + value);
+        }
     }
 
     private void initializeGenreOffset() {

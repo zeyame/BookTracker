@@ -31,7 +31,7 @@ export const SearchPage: React.FC = () => {
         } else {
             const getDefaultBooks = async () => {
                 try {
-                    const newBooks: Map<string, Array<book>> = await fetchDefaultBooks();
+                    const newBooks: Map<string, Array<book>> = await fetchDefaultBooks(9);
                     setBooks(newBooks);
                     setInitialBooksFetched(true);
                 } catch (error: any) {
@@ -55,7 +55,7 @@ export const SearchPage: React.FC = () => {
     useEffect(() => {
         if (initialBooksFetched && !cacheInitialized) {
             console.log("setting up cache...");
-            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
+            initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
         }
     }, [initialBooksFetched, cacheInitialized]);
 
@@ -64,17 +64,17 @@ export const SearchPage: React.FC = () => {
         setPaginationLoading(genreName);
         try {
             if (!cacheInitialized) {
-                await initializeCaching();
+                await initializeCaching(9);
                 setCacheInitialized(true);
             }
-            const newBooks: Array<book> = await getCachedBooks(genreName, 7);
+            const newBooks: Array<book> = await getCachedBooks(genreName, 9);
 
             const updatedBooksMap: Map<string, Array<book>> = new Map(); 
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
             
-            await updateCache(genreName, 7);
+            await updateCache(genreName, 9);
         } catch (error) {
             console.error(`Failed to fetch paginated books for ${genreName} genre.`, error);
         } finally {

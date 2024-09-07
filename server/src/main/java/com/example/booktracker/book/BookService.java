@@ -41,7 +41,7 @@ public class BookService {
     }
 
     // method is responsible for setting up the intial cache in the BookCache repository
-    public void setUpCache() {
+    public void setUpCache(int limit) {
         HashMap<String, List<BookDTO>> cache = new HashMap<>();
         String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};
 
@@ -49,7 +49,7 @@ public class BookService {
         Map<String, CompletableFuture<JsonNode>> futureMap = Arrays.stream(genres)
                 .collect(Collectors.toMap(
                         genre -> genre,
-                        genre -> bookApiClient.fetchBooksByGenreAsync(genre, 7, 7)
+                        genre -> bookApiClient.fetchBooksByGenreAsync(genre, limit,  limit)
                 ));
 
         // Wait for all the futures to complete
@@ -79,7 +79,7 @@ public class BookService {
             });
         }).join();
 
-        bookCache.setUpCache(cache);
+        bookCache.setUpCache(cache, limit);
 
     }
 
@@ -99,6 +99,10 @@ public class BookService {
     // helper method to test cache availability
     public Map<String, List<BookDTO>> getEntireCache() {
         return bookCache.getCache();
+    }
+
+    public List<BookDTO> viewBooksInAGenre(String genre) {
+        return bookCache.viewBooksInAGenre(genre);
     }
 
 }

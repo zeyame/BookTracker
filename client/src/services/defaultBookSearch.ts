@@ -5,11 +5,11 @@ const BASE_URL: string = "http://localhost:8080";       // Spring server
 
 const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
-export const fetchDefaultBooks = async () => {
+export const fetchDefaultBooks = async (limit: number) => {
     try {
         const fetchPromises = genres.map(genre => {
             const encodedGenre = encodeURIComponent(genre);
-            return fetchBooksByGenre(encodedGenre, 9);
+            return fetchBooksByGenre(encodedGenre, limit);
         });
         const books = await Promise.all(fetchPromises);
 
