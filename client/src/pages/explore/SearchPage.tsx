@@ -52,12 +52,12 @@ export const SearchPage: React.FC = () => {
         }
     }, [books]);
 
-    // useEffect(() => {
-    //     if (initialBooksFetched && !cacheInitialized) {
-    //         console.log("setting up cache...");
-    //         initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
-    //     }
-    // }, [initialBooksFetched, cacheInitialized]);
+    useEffect(() => {
+        if (initialBooksFetched && !cacheInitialized) {
+            console.log("setting up cache...");
+            initializeCaching().then(() => setCacheInitialized(true)).catch(console.error);
+        }
+    }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {
@@ -67,14 +67,14 @@ export const SearchPage: React.FC = () => {
                 await initializeCaching();
                 setCacheInitialized(true);
             }
-            const newBooks: Array<book> = await getCachedBooks(genreName);
+            const newBooks: Array<book> = await getCachedBooks(genreName, 7);
 
             const updatedBooksMap: Map<string, Array<book>> = new Map(); 
             books.forEach((books, genre) => 
                 genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
             setBooks(updatedBooksMap);
             
-            await updateCache(genreName);
+            await updateCache(genreName, 7);
         } catch (error) {
             console.error(`Failed to fetch paginated books for ${genreName} genre.`, error);
         } finally {

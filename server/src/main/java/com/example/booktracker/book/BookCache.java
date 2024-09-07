@@ -33,7 +33,7 @@ public class BookCache {
         return genreOffset;
     }
 
-    public List<BookDTO> getCachedBooksByGenre (String genre) throws GenreNotInCacheException{
+    public List<BookDTO> getCachedBooksByGenre (String genre, int limit) throws GenreNotInCacheException{
         List<BookDTO> books = cache.get(genre);
         if (books == null) {
             throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
@@ -41,9 +41,10 @@ public class BookCache {
 
         int size = books.size();
         List<BookDTO> booksToReturn = new ArrayList<>();
-        if (size > 7) {
-            booksToReturn = books.subList(size - 7, size);
-            books.subList(size-7, size).clear();
+
+        if (size > limit) {
+            booksToReturn = books.subList(size - limit, size);
+            books.subList(size-limit, size).clear();
         }
         else {
             booksToReturn = new ArrayList<>(books);

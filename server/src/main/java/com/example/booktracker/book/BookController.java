@@ -49,9 +49,9 @@ public class BookController {
 
     // endpoint responsible for retrieving books in a specific genre from the in-memory cache
     @GetMapping("/books/cache/{genre}")
-    public ResponseEntity<?> getCachedBooksByGenre(@PathVariable String genre) throws GenreNotInCacheException {
+    public ResponseEntity<?> getCachedBooksByGenre(@PathVariable String genre, @RequestParam int limit) throws GenreNotInCacheException {
         try {
-            List<BookDTO> cachedBooks = bookService.getCachedBooksByGenre(genre);
+            List<BookDTO> cachedBooks = bookService.getCachedBooksByGenre(genre, limit);
             Map<String, List<BookDTO>> cachedBooksResponseMap = new HashMap<>();
             cachedBooksResponseMap.put("cachedBooks", cachedBooks);
             return new ResponseEntity<>(cachedBooksResponseMap, HttpStatus.OK);
