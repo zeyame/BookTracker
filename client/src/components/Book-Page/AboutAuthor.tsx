@@ -13,7 +13,7 @@ export const AboutAuthor: React.FC<AboutAuthorProps> = ({ authorName, sliceDescr
     // states
     const [aboutAuthor, setAboutAuthor] = useState<Author>({
         'description': '',
-        'image_url': ''
+        'imageUrl': ''
     });
     const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
     const [error, setError] = useState<boolean>(false);
@@ -30,12 +30,12 @@ export const AboutAuthor: React.FC<AboutAuthorProps> = ({ authorName, sliceDescr
                 if (storedAuthorDetails) {
                     const parsedDetails: Author = JSON.parse(storedAuthorDetails);
                     const storedDescription = parsedDetails.description;
-                    const storedImage = parsedDetails.image_url;
+                    const storedImage = parsedDetails.imageUrl;
                     fullAuthorDescription.current = storedDescription;
                     setAboutAuthor(prevState => ({
                         ...prevState,
                         'description': sliceDescription(storedDescription),
-                        'image_url': storedImage
+                        'imageUrl': storedImage
                     }));
                 } 
                 else {
@@ -45,17 +45,17 @@ export const AboutAuthor: React.FC<AboutAuthorProps> = ({ authorName, sliceDescr
                     // if fetching author details did not return empty, we get the description
                     if (authorDetails) {
                         const authorDescription = authorDetails.description;
-                        const image_url = authorDetails.image_url;
+                        const imageUrl = authorDetails.imageUrl;
                         fullAuthorDescription.current = authorDescription;
 
                         setAboutAuthor(prevState => ({
                             ...prevState,
                             description: sliceDescription(authorDescription),
-                            image_url: image_url
+                            imageUrl: imageUrl
                         }));
                         sessionStorage.setItem(`author-${authorName}`, JSON.stringify({
                             'description': authorDescription,
-                            'image_url': image_url
+                            'imageUrl': imageUrl
                         }));
                     }
                 }
@@ -73,7 +73,7 @@ export const AboutAuthor: React.FC<AboutAuthorProps> = ({ authorName, sliceDescr
             setAboutAuthor(prevState => ({
                 ...prevState,
                 'description': '',
-                'image_url': ''
+                'imageUrl': ''
             }));
         };
     }, []);
@@ -116,9 +116,9 @@ export const AboutAuthor: React.FC<AboutAuthorProps> = ({ authorName, sliceDescr
                     </div>
                 :
                 <div>
-                    {aboutAuthor.image_url &&
+                    {aboutAuthor.imageUrl &&
                         <div className="book-page-author-details">
-                            <img className="book-page-author-picture" src={aboutAuthor.image_url} alt="Author's image" />
+                            <img className="book-page-author-picture" src={aboutAuthor.imageUrl} alt="Author's image" />
                             <p className="book-page-author-name">{authorName}</p>
                         </div>
                     }

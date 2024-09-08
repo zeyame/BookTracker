@@ -34,7 +34,7 @@ export const BookPage: React.FC = () => {
         // states
         const [aboutAuthor, setAboutAuthor] = useState<Author>({
             description: '',
-            image_url: ''
+            imageUrl: ''
         });
         const [loading, setLoading] = useState<Loading>({
             aboutAuthor: false,
@@ -67,12 +67,12 @@ export const BookPage: React.FC = () => {
                         if (storedAuthorDetails) {
                             const parsedDetails: Author = JSON.parse(storedAuthorDetails);
                             const storedDescription = parsedDetails.description;
-                            const storedImage = parsedDetails.image_url;
+                            const storedImage = parsedDetails.imageUrl;
                             fullAuthorDescriptionRef.current = storedDescription;
                             setAboutAuthor(prevState => ({
                                 ...prevState,
                                 'description': sliceDescription(storedDescription),
-                                'image_url': storedImage
+                                'imageUrl': storedImage
                             }));
                         } 
                         else {
@@ -85,17 +85,17 @@ export const BookPage: React.FC = () => {
                             // if fetching author details did not return empty, we get the description
                             if (authorDetails) {
                                 const authorDescription = authorDetails.description;
-                                const image_url = authorDetails.image_url;
+                                const imageUrl = authorDetails.imageUrl;
                                 fullAuthorDescriptionRef.current = authorDescription;
 
                                 setAboutAuthor(prevState => ({
                                     ...prevState,
                                     description: sliceDescription(authorDescription),
-                                    image_url: image_url
+                                    imageUrl: imageUrl
                                 }));
                                 sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify({
                                     'description': authorDescription,
-                                    'image_url': image_url
+                                    'imageUrl': imageUrl
                                 }));
                             }
                         }
@@ -121,7 +121,7 @@ export const BookPage: React.FC = () => {
             setAboutAuthor(prevState => ({
                 ...prevState,
                 'description': '',
-                'image_url': ''
+                'imageUrl': ''
             }));
         };
     }, [book]);
@@ -374,9 +374,9 @@ export const BookPage: React.FC = () => {
                                     </div>
                                 :
                                 <div>
-                                    {aboutAuthor.image_url &&
+                                    {aboutAuthor.imageUrl &&
                                         <div className="book-page-author-details">
-                                            <img className="book-page-author-picture" src={aboutAuthor.image_url} alt="Author's image" />
+                                            <img className="book-page-author-picture" src={aboutAuthor.imageUrl} alt="Author's image" />
                                             <Link to={`/author/${book.authors[0]}`} state={ { authorData: book.authors[0] } }>
                                                 <p className="book-page-author-name">{book.authors[0]}</p>
                                             </Link>
