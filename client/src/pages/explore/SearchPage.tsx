@@ -20,12 +20,13 @@ export const SearchPage: React.FC = () => {
 
     // use effects
     useEffect(() => {
-        if (localStorage.getItem('defaultBooksCached')) {
+        if (localStorage.getItem('defaultBooksCache')) {
             const defaultBooksCache: string | null = localStorage.getItem('defaultBooksCache');
             if (defaultBooksCache) {
                 const parsedCache = JSON.parse(defaultBooksCache);
                 const defaultBooks = new Map<string, Array<book>>(Object.entries(parsedCache));
                 setBooks(defaultBooks);
+                setInitialBooksFetched(true);
                 setLoading(false);
             }
         } else {
@@ -68,7 +69,6 @@ export const SearchPage: React.FC = () => {
                 setCacheInitialized(true);
             }
             const newBooks: Array<book> = await getCachedBooks(genreName, 9);
-            console.log(newBooks);
             
             setBooks(prevBooks => {
                 const updatedBooks = new Map(prevBooks);

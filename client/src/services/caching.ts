@@ -21,14 +21,13 @@ export const initializeCaching = async (limit: number) => {
 // retrieves a specified number of cached books for a specific genre which the user requested
 export const getCachedBooks = async (genreName: string, limit: number) => {
     try {
-        const response = await fetch(`${BASE_URL}/api/books/${genreName}?limit=${limit}`);
+        const response = await fetch(`http://localhost:8080/api/books/cache/${genreName}?limit=9`);
         if (!response.ok) {
             throw new Error(`Response from backend failed when retrieving cached books for ${genreName} genre`);
         }
         const data = await response.json();
-        console.log(data);
-        console.log(data.cachedBooks);
-        return data;
+        const cachedBooks: Array<book> = data.cachedBooks;
+        return cachedBooks;
     }
     catch (error: any) {
         throw error;

@@ -43,8 +43,7 @@ public class BookCache {
 
         // Remove the returned books from the cache
         books.subList(books.size() - booksToReturn, books.size()).clear();
-
-
+        
         return returnBooks;
     }
 
