@@ -1,7 +1,7 @@
 // File handles fetching the initially displayed books for the user 
 import { book } from "../interfaces/BookInterface";
 
-const BASE_URL: string = "http://127.0.0.1:8080";       // Spring server
+const BASE_URL: string = "http://localhost:8080";       // Spring server
 
 // requests cache to be setup on the server
 export const initializeCaching = async (limit: number) => {
@@ -11,7 +11,7 @@ export const initializeCaching = async (limit: number) => {
             throw new Error(`Server failed to set up the cache`);
         }
         const data = await response.json();
-        console.log(data.message);         // logging the cache if response was ok
+        console.log(data.cache);         // logging the cache if response was ok
     }
     catch (error: any) {
         throw error;
@@ -25,7 +25,9 @@ export const getCachedBooks = async (genreName: string, limit: number) => {
         if (!response.ok) {
             throw new Error(`Response from backend failed when retrieving cached books for ${genreName} genre`);
         }
-        const data: Array<book> = await response.json();
+        const data = await response.json();
+        console.log(data);
+        console.log(data.cachedBooks);
         return data;
     }
     catch (error: any) {

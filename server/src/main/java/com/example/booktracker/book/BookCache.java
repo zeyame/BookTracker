@@ -5,10 +5,7 @@ import com.example.booktracker.GenreNotInCacheException;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
@@ -16,14 +13,15 @@ public class BookCache {
 
     private Map<String, List<BookDTO>> cache = new HashMap<>();         // stores the current books in the cache
     private Map<String, Integer> genreOffset = new HashMap<>();         // keeps track of the offset for each genre in the cache
-    private final int INITIAL_OFFSET = 9;
     public BookCache() {
-        initializeGenreOffset();
+        // Initialize offsets to 0 for all genres
+        Arrays.asList("romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy")
+                .forEach(genre -> genreOffset.put(genre, 9));
     }
 
-    public void setUpCache(Map<String, List<BookDTO>> newCache, int offset) {
+    public void setUpCache(Map<String, List<BookDTO>> newCache) {
         this.cache = newCache;
-        updateOffsetForAllGenres(offset);
+        newCache.forEach((genre, books) -> genreOffset.put(genre, genreOffset.get(genre) + books.size()));
     }
 
     public Map<String, List<BookDTO>> getCache() {
@@ -36,38 +34,28 @@ public class BookCache {
 
     public List<BookDTO> getCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
         List<BookDTO> books = cache.get(genre);
-        if (books == null) {
-            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
+        if (books == null || books.isEmpty()) {
+            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache or is empty");
         }
 
-        int size = books.size();
-        List<BookDTO> booksToReturn = new ArrayList<>();
+        int booksToReturn = Math.min(limit, books.size());
+        List<BookDTO> returnBooks = new ArrayList<>(books.subList(books.size() - booksToReturn, books.size()));
 
-        // Retrieve the last `limit` books if available
-        if (size > limit) {
-            booksToReturn = new ArrayList<>(books.subList(size - limit, size));
-            // Remove the last `limit` books from the cache
-            books.subList(size - limit, size).clear();
-        } else {
-            booksToReturn = new ArrayList<>(books);
-            // Clear all books if there are fewer than `limit` books
-            books.clear();
-        }
+        // Remove the returned books from the cache
+        books.subList(books.size() - booksToReturn, books.size()).clear();
 
-        return booksToReturn;
+
+        return returnBooks;
     }
 
 
     public void updateCachedBooksByGenre(String genre, List<BookDTO> newBooks) throws GenreNotInCacheException {
-        List<BookDTO> currentCachedBooks = cache.get(genre);
-        if (currentCachedBooks == null) {
-            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
+        List<BookDTO> existingBooks = cache.get(genre);
+        if (existingBooks == null) {
+            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache.");
         }
-
-        // adding new set of books to the end of current set of cached books
-        currentCachedBooks.addAll(newBooks);
-
-        // incrementing the current offset of the genre so that next set of books will be new
+        existingBooks.addAll(newBooks);
+        cache.put(genre, existingBooks);
         updateOffsetForGenre(genre, newBooks.size());
     }
 
@@ -81,18 +69,6 @@ public class BookCache {
 
     public List<BookDTO> viewBooksInAGenre(String genre) {
         return cache.get(genre);
-    }
-
-
-    private void initializeGenreOffset() {
-        genreOffset.put("romance", INITIAL_OFFSET);
-        genreOffset.put("fiction", INITIAL_OFFSET);
-        genreOffset.put("thriller", INITIAL_OFFSET);
-        genreOffset.put("action", INITIAL_OFFSET);
-        genreOffset.put("mystery", INITIAL_OFFSET);
-        genreOffset.put("history", INITIAL_OFFSET);
-        genreOffset.put("horror", INITIAL_OFFSET);
-        genreOffset.put("fantasy", INITIAL_OFFSET);
     }
 
     private void updateOffsetForGenre(String genre, int value) {

@@ -41,7 +41,7 @@ public class BookService {
     }
 
     // method is responsible for setting up the intial cache in the BookCache repository
-    public void setUpCache(int limit) {
+    public Map<String, List<BookDTO>> setUpCache(int limit) {
         HashMap<String, List<BookDTO>> cache = new HashMap<>();
         String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};
 
@@ -79,7 +79,9 @@ public class BookService {
             });
         }).join();
 
-        bookCache.setUpCache(cache, limit);
+        bookCache.setUpCache(cache);
+
+        return cache;
 
     }
 

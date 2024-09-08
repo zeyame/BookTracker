@@ -38,11 +38,11 @@ public class BookController {
 
      // endpoint responsible for setting up an in-memory cache for default books in each genre
     @GetMapping("/books/cache")
-    public ResponseEntity<Map<String, String>> setUpCache(@RequestParam int limit) {
-        bookService.setUpCache(limit);
+    public ResponseEntity<?> setUpCache(@RequestParam int limit) {
+        Map<String, List<BookDTO>> cacheSetUp = bookService.setUpCache(limit);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Cache set up successfuly");
+        Map<String, Map<String, List<BookDTO>>> response = new HashMap<>();
+        response.put("cache", cacheSetUp);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

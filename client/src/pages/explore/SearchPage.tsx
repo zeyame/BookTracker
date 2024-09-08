@@ -68,11 +68,14 @@ export const SearchPage: React.FC = () => {
                 setCacheInitialized(true);
             }
             const newBooks: Array<book> = await getCachedBooks(genreName, 9);
-
-            const updatedBooksMap: Map<string, Array<book>> = new Map(); 
-            books.forEach((books, genre) => 
-                genre === genreName ? updatedBooksMap.set(genre, [...books, ...newBooks]) : updatedBooksMap.set(genre, books));
-            setBooks(updatedBooksMap);
+            console.log(newBooks);
+            
+            setBooks(prevBooks => {
+                const updatedBooks = new Map(prevBooks);
+                const existingBooks = updatedBooks.get(genreName) || [];
+                updatedBooks.set(genreName, [...existingBooks, ...newBooks]);
+                return updatedBooks;
+            });
             
             await updateCache(genreName, 9);
         } catch (error) {
