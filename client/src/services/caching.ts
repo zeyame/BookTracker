@@ -11,7 +11,7 @@ export const initializeCaching = async (limit: number) => {
             throw new Error(`Server failed to set up the cache`);
         }
         const data = await response.json();
-        console.log(data.cache);         // logging the cache if response was ok
+        console.log(data.message);         // logging the cache if response was ok
     }
     catch (error: any) {
         throw error;
@@ -21,7 +21,7 @@ export const initializeCaching = async (limit: number) => {
 // retrieves a specified number of cached books for a specific genre which the user requested
 export const getCachedBooks = async (genreName: string, limit: number) => {
     try {
-        const response = await fetch(`http://localhost:8080/api/books/cache/${genreName}?limit=9`);
+        const response = await fetch(`${BASE_URL}/api/books/cache/${genreName}?limit=${limit}`);
         if (!response.ok) {
             throw new Error(`Response from backend failed when retrieving cached books for ${genreName} genre`);
         }

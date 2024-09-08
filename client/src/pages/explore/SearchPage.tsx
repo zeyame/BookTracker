@@ -55,7 +55,6 @@ export const SearchPage: React.FC = () => {
 
     useEffect(() => {
         if (initialBooksFetched && !cacheInitialized) {
-            console.log("setting up cache...");
             initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
         }
     }, [initialBooksFetched, cacheInitialized]);
