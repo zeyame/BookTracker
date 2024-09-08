@@ -95,6 +95,10 @@ public class BookService {
         bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
     }
 
+    public List<BookDTO> getSimilarBooks(String title, String type, int limit) {
+        return bookApiClient.fetchSimilarBooks(title, type, limit);
+    }
+
     // helper method to test cache availability
     public Map<String, List<BookDTO>> getEntireCache() {
         return bookCache.getCache();

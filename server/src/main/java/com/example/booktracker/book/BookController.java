@@ -79,6 +79,14 @@ public class BookController {
         }
     }
 
+    @GetMapping("/books/similar")
+    public ResponseEntity<?> getSimilarBooks(@RequestParam String title, @RequestParam String type, @RequestParam int limit) {
+        List<BookDTO> similarBooks = bookService.getSimilarBooks(title, type, limit);
+        Map<String, List<BookDTO>> response = new HashMap<>();
+        response.put("similarBooks", similarBooks);
+        return ResponseEntity.ok(response);
+    }
+
     // testing endpoint to check out the state of the server cache
     @GetMapping("/books/cache/full")
     public ResponseEntity<Map<String, List<BookDTO>>> getAllCache() {

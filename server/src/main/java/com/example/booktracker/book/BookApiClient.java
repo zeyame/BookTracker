@@ -3,28 +3,62 @@ package com.example.booktracker.book;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class BookApiClient {
-    private final String GOOGLE_KEY = "AIzaSyBeNJgzSObopgk16PTMPShYOLGwDNt24Ec";
-    private final RestClient restClient;
+    private static final String TASTEDIVE_BASE_URL = "https://tastedive.com/api";
+    private static final String GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1";
+
+    private final String TASTEDIVE_KEY = "1033070-BookTrac-59A622F3";
+    private final String GOOGLE_KEY = "AIzaSyD7tk0i-j5aVlJtsyTuZeGI5Y--C-9AWJE";
+
+    private final RestClient tasteDiveClient;
+    private final RestClient googleBooksClient;
+
     @Autowired
     public BookApiClient(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
+        this.tasteDiveClient = restClientBuilder
+                .baseUrl(TASTEDIVE_BASE_URL)
+                .build();
+
+        // Create a new builder for the Google Books client
+        this.googleBooksClient = RestClient.builder()
+                .baseUrl(GOOGLE_BOOKS_BASE_URL)
+                .build();
+    }
+    public CompletableFuture<BookDTO> fetchBookAsync(String title) {
+        return CompletableFuture.supplyAsync(() -> {
+            // Make the async API call
+            JsonNode response = googleBooksClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/volumes")
+                            .queryParam("q", "intitle:" + title)
+                            .queryParam("maxResults", 1)
+                            .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                            .queryParam("key", GOOGLE_KEY)
+                            .build())
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            // Process the response
+            if (response == null || !response.has("items")) {
+                return null; // Handle no items found
+            }
+
+            JsonNode bookItem = response.get("items").get(0);
+            return mapToBookDTO(bookItem); // Convert to BookDTO
+        });
     }
 
+
     public List<BookDTO> fetchBooksByGenre(String genre, int limit) {
-        JsonNode response = restClient.get()
+
+        JsonNode response = googleBooksClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", "subject:" + genre)
@@ -48,7 +82,7 @@ public class BookApiClient {
     }
 
     public List<BookDTO> fetchBooksByGenre(String genre, int limit, int offset) {
-        JsonNode response = restClient.get()
+        JsonNode response = googleBooksClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", "subject:" + genre)
@@ -74,7 +108,7 @@ public class BookApiClient {
 
     public CompletableFuture<JsonNode> fetchBooksByGenreAsync(String genre, int limit, int offset) {
         return CompletableFuture.supplyAsync(() ->
-                restClient.get()
+                googleBooksClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("/volumes")
                                 .queryParam("q", "subject:" + genre)
@@ -90,7 +124,7 @@ public class BookApiClient {
 
     
     public List<BookDTO> fetchBooks(String search) {
-        JsonNode response = restClient.get()
+        JsonNode response = googleBooksClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/volumes")
                         .queryParam("q", search)
@@ -111,6 +145,54 @@ public class BookApiClient {
         }
 
         return books;
+
+    }
+
+    public List<BookDTO> fetchSimilarBooks(String title, String type, int limit) {
+
+        String tasteDiveUrl = "https://tastedive.com/api/similar";
+
+        JsonNode response = tasteDiveClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/similar")
+                        .queryParam("q", "book:" + title)
+                        .queryParam("type", type)
+                        .queryParam("limit", limit)
+                        .queryParam("k", TASTEDIVE_KEY)
+                        .build())
+                .retrieve()
+                .body(JsonNode.class);
+
+        if (response == null || !response.has("similar")) {
+            return null;
+        }
+        JsonNode similarBooksJson = response.get("similar").get("results");
+
+        List<String> bookNames = new ArrayList<>();
+        if (similarBooksJson != null && similarBooksJson.isArray()) {
+            for (JsonNode bookItem: similarBooksJson) {
+                bookNames.add(getTextOrEmpty(bookItem, "name"));
+            }
+        }
+
+        // gathering the async calls for all book names
+        List<CompletableFuture<BookDTO>> bookDTOCalls = bookNames.stream()
+                .map(this::fetchBookAsync)
+                .collect(Collectors.toList());
+
+        // executing all the calls asynchronously at once and waiting for them to finish - this is our 'sync' point
+        CompletableFuture<Void> allFutureBooks = CompletableFuture.allOf(
+                bookDTOCalls.toArray(new CompletableFuture[0])
+        );
+
+        // extracting the actual BookDTOs from the bookDTOCalls once allFutureBooks signals 'complete'
+        CompletableFuture<List<BookDTO>> allFutures = allFutureBooks.thenApply(v ->
+                bookDTOCalls.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList())
+                );
+
+        return allFutures.join();
 
     }
 
