@@ -51,7 +51,7 @@ export const SearchPage: React.FC = () => {
             const defaultBooksObject = Object.fromEntries(books);
             localStorage.setItem('defaultBooksCache', JSON.stringify(defaultBooksObject));
         }
-    }, [books]);
+    }, [initialBooksFetched]);
 
     useEffect(() => {
         if (initialBooksFetched && !cacheInitialized) {
