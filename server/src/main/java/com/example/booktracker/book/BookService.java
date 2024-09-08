@@ -85,8 +85,7 @@ public class BookService {
 
     // method responsible for getting cached books in a specific genre from the BookCache repository
     public List<BookDTO> getCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
-        List<BookDTO> cachedBooks = bookCache.getCachedBooksByGenre(genre, limit);     // possible exception thrown if genre not in cache
-        return cachedBooks;
+        return bookCache.getCachedBooksByGenre(genre, limit);     // possible exception thrown if genre not in cache
     }
 
     public void updateCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {

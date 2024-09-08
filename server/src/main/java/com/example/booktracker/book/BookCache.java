@@ -14,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class BookCache {
 
-    private Map<String, List<BookDTO>> cache = new HashMap<>();
-    private Map<String, Integer> genreOffset = new HashMap<>();
-
+    private Map<String, List<BookDTO>> cache = new HashMap<>();         // stores the current books in the cache
+    private Map<String, Integer> genreOffset = new HashMap<>();         // keeps track of the offset for each genre in the cache
+    private final int INITIAL_OFFSET = 9;
     public BookCache() {
         initializeGenreOffset();
     }
@@ -83,6 +83,18 @@ public class BookCache {
         return cache.get(genre);
     }
 
+
+    private void initializeGenreOffset() {
+        genreOffset.put("romance", INITIAL_OFFSET);
+        genreOffset.put("fiction", INITIAL_OFFSET);
+        genreOffset.put("thriller", INITIAL_OFFSET);
+        genreOffset.put("action", INITIAL_OFFSET);
+        genreOffset.put("mystery", INITIAL_OFFSET);
+        genreOffset.put("history", INITIAL_OFFSET);
+        genreOffset.put("horror", INITIAL_OFFSET);
+        genreOffset.put("fantasy", INITIAL_OFFSET);
+    }
+
     private void updateOffsetForGenre(String genre, int value) {
         genreOffset.put(genre, genreOffset.get(genre) + value);
     }
@@ -94,16 +106,4 @@ public class BookCache {
             genreOffset.put(genre, currentOffset + value);
         }
     }
-
-    private void initializeGenreOffset() {
-        genreOffset.put("romance", 7);
-        genreOffset.put("fiction", 7);
-        genreOffset.put("thriller", 7);
-        genreOffset.put("action", 7);
-        genreOffset.put("mystery", 7);
-        genreOffset.put("history", 7);
-        genreOffset.put("horror", 7);
-        genreOffset.put("fantasy", 7);
-    }
-
 }
