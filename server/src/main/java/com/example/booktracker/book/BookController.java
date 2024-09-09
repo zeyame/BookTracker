@@ -72,9 +72,19 @@ public class BookController {
         return ResponseEntity.ok(responseObject);
     }
 
-     // endpoint responsible for setting up an in-memory cache for default books in each genre
-    @GetMapping("/books/cache")
-    public ResponseEntity<Map<String, String>> setUpCache(@RequestParam int limit) {
+    /**
+     * Endpoint is responsible for receiving a request to set up a server-side in-memory cache
+     *
+     * @param limit The number of books that should be initially stored in each genre within the cache
+     * @return  A ResponseEntity with the body of type Map<String, String> that contains a message about the outcome of the request
+     */    @GetMapping("/books/cache")
+    public ResponseEntity<Map<String, String>> setUpCache(@RequestParam(defaultValue = "9") int limit) {
+
+        // validating limit if it was entered by client
+        if (limit <= 0) {
+            throw new CustomBadRequestException("The limit parameter must be a positive integer value");
+        }
+
         bookService.setUpCache(limit);
 
         Map<String, String> response = new HashMap<>();

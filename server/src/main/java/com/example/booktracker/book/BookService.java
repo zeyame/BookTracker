@@ -68,8 +68,8 @@ public class BookService {
 
     // method is responsible for setting up the intial cache in the BookCache repository
     public void setUpCache(int limit) {
-        HashMap<String, List<BookDTO>> cache = new HashMap<>();
-        String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};
+        HashMap<String, List<BookDTO>> cache = new HashMap<>();     // initial cache to be populated
+        String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};          // genres to fetch books for
 
         // Create a map of genre to future, where each future fetches books asynchronously
         Map<String, CompletableFuture<JsonNode>> futureMap = Arrays.stream(genres)
