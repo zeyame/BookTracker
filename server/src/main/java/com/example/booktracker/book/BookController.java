@@ -36,7 +36,7 @@ public class BookController {
 
         // error handling for a request with a missing/invalid search or limit parameters
         if (search.isEmpty() || limit <= 0) {
-            throw new CustomBadRequestException("Invalid search or limit parameters provided.");
+            throw new CustomBadRequestException("Invalid or missing search or limit parameters provided.");
         }
 
         List<BookDTO> books =  bookService.getBooks(search, limit);
@@ -47,11 +47,29 @@ public class BookController {
         return ResponseEntity.ok(responseObject);
     }
 
-    // endpoint responsible for returning books from a requested genre
+    /**
+     * Endpoint is responsible for receiving requests when default books are being fetched for a genre
+     *
+     * @param genre The genre which the client is requesting books for
+     * @param limit The number of books that should be sent back to the client for the requested genre
+     * @return  A ResponseEntity with the body of type Map<String, List<BookDTO>> that contains a 'books' fields with books from the specified genre as its value
+     */
     @GetMapping("/books/{genre}")
-    public List<BookDTO> getBooksByGenre(@PathVariable String genre, @RequestParam int limit) {
-        // call BookApiClient method to fetch books for a given genre
-        return bookService.getBooksByGenre(genre, limit);
+    public ResponseEntity<Map<String, List<BookDTO>>> getBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
+
+        // validating limit if it was entered by client
+        if (limit <= 0) {
+            throw new CustomBadRequestException("The limit parameter must be a positive integer value.");
+        }
+
+        // delegate call to BookService to fetch books for the genre
+        List<BookDTO> books = bookService.getBooksByGenre(genre, limit);
+
+        // if books were found
+        Map<String, List<BookDTO>> responseObject = new HashMap<>();
+        responseObject.put("books", books);
+
+        return ResponseEntity.ok(responseObject);
     }
 
      // endpoint responsible for setting up an in-memory cache for default books in each genre

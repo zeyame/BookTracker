@@ -1,6 +1,10 @@
 package com.example.booktracker.book;
 
 import com.example.booktracker.GenreNotInCacheException;
+import com.example.booktracker.book.exception.BookNotFoundException;
+import com.example.booktracker.book.exception.CustomAuthenticationException;
+import com.example.booktracker.book.exception.CustomBadRequestException;
+import com.example.booktracker.book.exception.ExternalServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -38,12 +42,26 @@ public class BookService {
      * @param search The search term provided by the GET /api/books endpoint
      * @param limit  The limit term provided by the GET /api/books endpoint
      * @return A list of {@link BookDTO} objects representing the books that match the search term.
+     *
+     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomAuthenticationException If there is an error with the API key.
+     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
      */
     public List<BookDTO> getBooks(String search, int limit) {
         return bookApiClient.fetchBooks(search, limit);
     }
 
-    // method is responsible for requesting books for a specific genre from the BookApiClient
+
+    /**
+     * Acts as an intermediary method for the GET /api/books/{genre} endpoint
+     * Delegates the request to fetch a specific number of books from an external API to the BookApiClient
+     * It receives the fetched books and sends them back to the controller
+     *
+     * @param genre The genre term provided by the GET /api/books/{genre} endpoint
+     * @param limit  The limit term provided by the GET /api/books/{genre} endpoint
+     * @return A list of {@link BookDTO} objects representing the books retrieved for the requested genre.
+     */
     public List<BookDTO> getBooksByGenre(String genre, int limit) {
         return bookApiClient.fetchBooksByGenre(genre, limit);
     }

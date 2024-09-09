@@ -76,6 +76,7 @@ public class BookApiClient {
      * @param search The search term used to query for books. This should be a non-empty string.
      * @param limit The maximum number of results to return. This should be a positive integer.
      * @return A list of {@link BookDTO} objects representing the books that match the search term.
+     *
      * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
      * @throws CustomAuthenticationException If there is an error with the API key.
      * @throws BookNotFoundException If no books are found for the search term.
@@ -138,29 +139,80 @@ public class BookApiClient {
         }
     }
 
+
+    /**
+     * Fetches a list of books in a given genre.
+     *
+     * This method queries the Google Books API to retrieve a list of books that are found in the provided the genre term. It limits
+     * the number of results to the specified limit. If no books are found or an error occurs, appropriate exceptions
+     * are thrown.
+     *
+     * @param genre The genre term used to query for books. This should be a non-empty string.
+     * @param limit The maximum number of books to return. This should be a positive integer.
+     * @return A list of {@link BookDTO} objects representing the books that match the search term.
+     *
+     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomAuthenticationException If there is an error with the API key.
+     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
+     */
     public List<BookDTO> fetchBooksByGenre(String genre, int limit) {
+        // fetching a 'limit' number of books for a specific genre from the Google Books API
+        try {
+            JsonNode response = googleBooksClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/volumes")
+                            .queryParam("q", "subject:" + genre)
+                            .queryParam("maxResults", limit)
+                            .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                            .queryParam("key", GOOGLE_KEY)
+                            .build())
+                    .retrieve()
+                    .body(JsonNode.class);
 
-        JsonNode response = googleBooksClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/volumes")
-                        .queryParam("q", "subject:" + genre)
-                        .queryParam("maxResults", limit)
-                        .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
-                        .queryParam("key", GOOGLE_KEY)
-                        .build())
-                .retrieve()
-                .body(JsonNode.class);
+            // validating if response contains books
+            if (response == null || !response.has("items")) {
+                throw new BookNotFoundException("No books found for genre: " + genre + ".");
+            }
 
-        if (response == null || !response.has("items")) {
-            return Collections.emptyList();
+            List<BookDTO> books = new ArrayList<>();
+            // mapping the books to BookDTOs
+            for (JsonNode bookItem: response.get("items")) {
+                books.add(mapToBookDTO(bookItem));
+            }
+
+            return books;
         }
+        catch (RestClientResponseException exception) {
+            HttpStatusCode statusCode = exception.getStatusCode();
 
-        List<BookDTO> books = new ArrayList<>();
-        for (JsonNode bookItem: response.get("items")) {
-            books.add(mapToBookDTO(bookItem));
+            // handling client-side errors
+            if (statusCode.is4xxClientError()) {
+                switch (statusCode.value()) {
+
+                    case 400:
+                        throw new CustomBadRequestException("Bad request when fetching books for the genre: " + genre + ". Check query parameters.");
+
+                    case 401:
+                    case 403:
+                        throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching books for the genre: " + genre + ". Check validity of API key.");
+
+                    case 404:
+                        throw new BookNotFoundException("No books found for genre: " + genre + ".");
+
+                    default:
+                        throw new RuntimeException("Client error occurred when fetching books for genre: " + genre + ".");
+                }
+            }
+
+            // handling server-side errors (external service)
+            else if (statusCode.is5xxServerError()) {
+                throw new ExternalServiceException("External service error occurred when fetching books for genre: " + genre + ".");
+            }
+            else {
+                throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
+            }
         }
-
-        return books;
     }
 
     public List<BookDTO> fetchBooksByGenre(String genre, int limit, int offset) {

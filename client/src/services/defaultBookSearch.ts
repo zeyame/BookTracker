@@ -31,7 +31,8 @@ export const fetchBooksByGenre = async (genre : string, limit: number) => {
         if (!response.ok) {
             throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
         }
-        const books: Array<book> = await response.json();
+        const data = await response.json();
+        const books = data.books;
         return books;
     }
     catch (error) {

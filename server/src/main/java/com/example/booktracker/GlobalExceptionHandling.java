@@ -55,4 +55,13 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException (RuntimeException exception) {
+        String message = "An unexpected error occurred.";
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
 }
