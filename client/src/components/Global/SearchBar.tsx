@@ -20,7 +20,7 @@ export const SearchBar: React.FC = () => {
     const fetchBooks = useCallback(async (query: string, signal?: AbortSignal) => {
         setIsFetching(true);
         try {
-            const currentBooks: Array<book> = await getBooks(query, signal);
+            const currentBooks: Array<book> = await getBooks(query, 5, signal);
             if (!signal?.aborted) {
                 setSearchResults(currentBooks);
             }

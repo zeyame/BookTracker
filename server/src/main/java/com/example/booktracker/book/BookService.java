@@ -30,9 +30,17 @@ public class BookService {
         this.bookCache = bookCache;
     }
 
-    // method responsible for requesting books based on a user search from the BookApiClient
-    public List<BookDTO> getBooks(String search) {
-        return bookApiClient.fetchBooks(search);
+    /**
+     * Acts as an intermediary method for the GET /api/books endpoint
+     * Delegates the request to fetch a specific number of books from an external API to the BookApiClient
+     * It receives the fetched books and sends them back to the controller
+     *
+     * @param search The search term provided by the GET /api/books endpoint
+     * @param limit  The limit term provided by the GET /api/books endpoint
+     * @return A list of {@link BookDTO} objects representing the books that match the search term.
+     */
+    public List<BookDTO> getBooks(String search, int limit) {
+        return bookApiClient.fetchBooks(search, limit);
     }
 
     // method is responsible for requesting books for a specific genre from the BookApiClient

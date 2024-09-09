@@ -1,10 +1,20 @@
 package com.example.booktracker.book;
 
 
+import com.example.booktracker.book.exception.BookNotFoundException;
+import com.example.booktracker.book.exception.CustomAuthenticationException;
+import com.example.booktracker.book.exception.CustomBadRequestException;
+import com.example.booktracker.book.exception.ExternalServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+
+import javax.naming.AuthenticationException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -55,6 +65,78 @@ public class BookApiClient {
         });
     }
 
+
+    /**
+     * Fetches a list of books based on the provided search term.
+     *
+     * This method queries the Google Books API to retrieve a list of books that match the search term. It limits
+     * the number of results to the specified limit. If no books are found or an error occurs, appropriate exceptions
+     * are thrown.
+     *
+     * @param search The search term used to query for books. This should be a non-empty string.
+     * @param limit The maximum number of results to return. This should be a positive integer.
+     * @return A list of {@link BookDTO} objects representing the books that match the search term.
+     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomAuthenticationException If there is an error with the API key.
+     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
+     */
+    public List<BookDTO> fetchBooks(String search, Integer limit) {
+        // requesting books from Google Books API
+        try {
+            JsonNode response = googleBooksClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/volumes")
+                            .queryParam("q", search)
+                            .queryParam("maxResults", limit)
+                            .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                            .queryParam("key", GOOGLE_KEY)
+                            .build())
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            // checking if the response contains books
+            if (response == null || !response.has("items")) {
+                throw new BookNotFoundException("No books found for search: " + search + ".");
+            }
+
+            List<BookDTO> books = new ArrayList<>();
+            // mapping each returned book to a BookDTO
+            for (JsonNode bookItem: response.get("items")) {
+                books.add(mapToBookDTO(bookItem));
+            }
+
+            return books;
+        }
+        catch (RestClientResponseException e) {
+            HttpStatusCode statusCode = e.getStatusCode();
+
+            // handling client side errors
+            if (statusCode.is4xxClientError()) {
+                switch (statusCode.value()) {
+                    case 400:
+                        throw new CustomBadRequestException("Bad request when fetching books for search: " + search + ". Check parameters.");
+
+                    case 401:
+                    case 403:
+                        throw new CustomAuthenticationException("Unauthenticated/unauthorized request when fetching books for search: " + search + ". Check key validity.");
+
+                    case 404:
+                        throw new BookNotFoundException("No books found for search: " + search + ".");
+
+                    default:
+                        throw new RuntimeException("Client error occurred when fetching books for search: " + search + ".");
+                }
+            }
+            // handling server-side errors
+            else if (statusCode.is5xxServerError()) {
+                throw new ExternalServiceException("External service error occurred when fetching books for search: " + search + ".");
+            }
+            else {
+                throw new ExternalServiceException("Unexpected error occurred when fetching books for search: " + search + ".");
+            }
+        }
+    }
 
     public List<BookDTO> fetchBooksByGenre(String genre, int limit) {
 
@@ -122,31 +204,6 @@ public class BookApiClient {
                 );
     }
 
-    
-    public List<BookDTO> fetchBooks(String search) {
-        JsonNode response = googleBooksClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/volumes")
-                        .queryParam("q", search)
-                        .queryParam("maxResults", 5)
-                        .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
-                        .queryParam("key", GOOGLE_KEY)
-                        .build())
-                .retrieve()
-                .body(JsonNode.class);
-
-        if (response == null || !response.has("items")) {
-            return Collections.emptyList();
-        }
-
-        List<BookDTO> books = new ArrayList<>();
-        for (JsonNode bookItem: response.get("items")) {
-            books.add(mapToBookDTO(bookItem));
-        }
-
-        return books;
-
-    }
 
     public List<BookDTO> fetchSimilarBooks(String title, String type, int limit) {
 

@@ -1,6 +1,7 @@
 package com.example.booktracker.book;
 
 import com.example.booktracker.GenreNotInCacheException;
+import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,27 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    // endpoint responsible for returning 5 books based on a user's search
+    /**
+     * Endpoint is responsible for receiving requests when a user searches for a book.
+     *
+     * @param search The search term is what the user inputted in the search bar of the application
+     * @param limit  The limit is the number provided by the client service for specifying the number of books needed to be returned back to the user
+     * @return  A ResponseEntity with the body of type Map<String, List<BookDTO>> that contains a 'books' fields with books as its value
+     */
     @GetMapping("/books")
-    public List<BookDTO> getBooks(@RequestParam String search) {
-        return bookService.getBooks(search);
+    public ResponseEntity<Map<String, List<BookDTO>>> getBooks(@RequestParam(defaultValue = "") String search, @RequestParam(defaultValue = "5") int limit) {
+
+        // error handling for a request with a missing/invalid search or limit parameters
+        if (search.isEmpty() || limit <= 0) {
+            throw new CustomBadRequestException("Invalid search or limit parameters provided.");
+        }
+
+        List<BookDTO> books =  bookService.getBooks(search, limit);
+
+        Map<String, List<BookDTO>> responseObject = new HashMap<>();        // successfull response object
+        responseObject.put("books", books);
+
+        return ResponseEntity.ok(responseObject);
     }
 
     // endpoint responsible for returning books from a requested genre
