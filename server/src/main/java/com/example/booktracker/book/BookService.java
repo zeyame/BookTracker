@@ -134,12 +134,22 @@ public class BookService {
 
     }
 
-    // method responsible for getting cached books in a specific genre from the BookCache repository
-    public List<BookDTO> getCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
+    /**
+     * Retrieves a list of books from the cache based on the specified genre and limit. This method delegates the
+     * request to the {@link BookCache} to fetch books for the given genre. If the genre is not present in the cache
+     * or if an error occurs during retrieval, an appropriate exception will be thrown by the {@link BookCache}.
+     *
+     * @param genre The genre of books to retrieve from the cache. Must be a valid genre that exists in the cache.
+     * @param limit The maximum number of books to return. If the limit exceeds the number of books available for
+     *              the genre, only the available books will be returned.
+     * @return A {@link List} of {@link BookDTO} objects representing the books retrieved from the cache.
+     * @throws GenreNotInCacheException If the specified genre is not present in the cache.
+     */
+    public List<BookDTO> getCachedBooksByGenre(String genre, int limit) {
         return bookCache.getCachedBooksByGenre(genre, limit);     // possible exception thrown if genre not in cache
     }
 
-    public void updateCachedBooksByGenre(String genre, int limit) throws GenreNotInCacheException {
+    public void updateCachedBooksByGenre(String genre, int limit) {
         int currentOffset = bookCache.getOffsetForGenre(genre);
 
         List<BookDTO> newBooksToCache = bookApiClient.fetchBooksByGenre(genre, limit, currentOffset);

@@ -21,7 +21,7 @@ public class BookController {
     }
 
     /**
-     * Endpoint is responsible for receiving requests when a user searches for a book.
+     * Endpoint for receiving requests when a user searches for a book.
      *
      * @param search The search term is what the user inputted in the search bar of the application
      * @param limit  The limit is the number provided by the client service for specifying the number of books needed to be returned back to the user
@@ -44,7 +44,7 @@ public class BookController {
     }
 
     /**
-     * Endpoint is responsible for receiving requests when default books are being fetched for a genre
+     * Endpoint for receiving requests when default books are being fetched for a genre
      *
      * @param genre The genre which the client is requesting books for
      * @param limit The number of books that should be sent back to the client for the requested genre
@@ -68,12 +68,20 @@ public class BookController {
         return ResponseEntity.ok(responseObject);
     }
 
+
     /**
-     * Endpoint is responsible for receiving a request to set up a server-side in-memory cache
+     * Endpoint for setting up the server-side in-memory cache with books. This method validates the provided
+     * limit parameter to ensure it is a positive integer. It then delegates the cache setup task to the
+     * {@link BookService} and returns a {@link CacheResponse} encapsulating the outcome of the cache setup.
      *
-     * @param limit The number of books that should be initially stored in each genre within the cache
-     * @return  A ResponseEntity with the body of type Map<String, String> that contains a message about the outcome of the request
-     */    @GetMapping("/books/cache")
+     * <p>If the limit parameter is less than or equal to 0, a {@link CustomBadRequestException} is thrown.</p>
+     *
+     * @param limit The number of books to be stored in each genre within the cache. Default value is 9 if not specified.
+     * @return A {@link ResponseEntity} containing a {@link CacheResponse} object with details about the cache setup process.
+     * The HTTP status code is set to {@link HttpStatus#OK}.
+     * @throws CustomBadRequestException If the provided limit is not a positive integer.
+     */
+    @GetMapping("/books/cache")
     public ResponseEntity<CacheResponse> setUpCache(@RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
@@ -86,21 +94,34 @@ public class BookController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // endpoint responsible for retrieving books in a specific genre from the in-memory cache
-    @GetMapping("/books/cache/{genre}")
-    public ResponseEntity<?> getCachedBooksByGenre(@PathVariable String genre, @RequestParam int limit) throws GenreNotInCacheException {
-        try {
-            List<BookDTO> cachedBooks = bookService.getCachedBooksByGenre(genre, limit);
-            Map<String, List<BookDTO>> cachedBooksResponseMap = new HashMap<>();
-            cachedBooksResponseMap.put("cachedBooks", cachedBooks);
-            return new ResponseEntity<>(cachedBooksResponseMap, HttpStatus.OK);
-        }
-        catch (GenreNotInCacheException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
 
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    /**
+     * Endpoint for retrieving cached books by genre. This method retrieves a list of books from the server-side
+     * in-memory cache based on the specified genre and limit. If the genre is not found in the cache or the limit
+     * is invalid, an appropriate exception is thrown by the service layer.
+     *
+     * <p>The response body contains a map with a single key "cachedBooks" which maps to the list of books for the
+     * specified genre. If no books are available for the given genre or limit, the list may be empty.</p>
+     *
+     * @param genre The genre of books to retrieve from the cache.
+     * @param limit The maximum number of books to return. Default value is 9 if not specified.
+     * @return A {@link ResponseEntity} containing a {@link Map} with the key "cachedBooks" and a list of {@link BookDTO}
+     *         objects representing the books retrieved from the cache. The HTTP status code is set to {@link HttpStatus#OK}.
+     * @throws GenreNotInCacheException If the specified genre is not present in the cache.
+     * @throws CustomBadRequestException If the limit parameter is less than or equal to 0.
+     */
+    @GetMapping("/books/cache/{genre}")
+    public ResponseEntity<?> getCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
+
+        // validating limit if it was entered by client
+        if (limit <= 0) {
+            throw new CustomBadRequestException("The limit parameter must be a positive integer value.");
         }
+
+        List<BookDTO> cachedBooks = bookService.getCachedBooksByGenre(genre, limit);
+        Map<String, List<BookDTO>> cachedBooksResponseMap = new HashMap<>();
+        cachedBooksResponseMap.put("cachedBooks", cachedBooks);
+        return new ResponseEntity<>(cachedBooksResponseMap, HttpStatus.OK);
     }
 
     @GetMapping("/books/cache/{genre}/update")

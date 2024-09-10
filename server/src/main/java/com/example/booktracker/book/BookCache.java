@@ -67,8 +67,8 @@ public class BookCache {
      */
     public List<BookDTO> getCachedBooksByGenre(String genre, int limit) {
         List<BookDTO> books = cache.get(genre);
-        if (books == null || books.isEmpty()) {
-            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache or is empty");
+        if (books == null) {
+            throw new GenreNotInCacheException(genre + " is not an existing genre in the cache");
         }
 
         int booksToReturn = Math.min(limit, books.size());
