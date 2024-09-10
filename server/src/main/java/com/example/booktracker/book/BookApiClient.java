@@ -41,27 +41,58 @@ public class BookApiClient {
                 .baseUrl(GOOGLE_BOOKS_BASE_URL)
                 .build();
     }
-    public CompletableFuture<BookDTO> fetchBookAsync(String title) {
+
+
+    public CompletableFuture<BookDTO> fetchBookByTitle(String title) {
         return CompletableFuture.supplyAsync(() -> {
-            // Make the async API call
-            JsonNode response = googleBooksClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/volumes")
-                            .queryParam("q", "intitle:" + title)
-                            .queryParam("maxResults", 1)
-                            .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
-                            .queryParam("key", GOOGLE_KEY)
-                            .build())
-                    .retrieve()
-                    .body(JsonNode.class);
+            try {
+                JsonNode response = googleBooksClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/volumes")
+                                .queryParam("q", "intitle:" + title)
+                                .queryParam("maxResults", 1)
+                                .queryParam("fields", "items(id,volumeInfo/title,volumeInfo/authors,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/description,volumeInfo/pageCount,volumeInfo/categories,volumeInfo/imageLinks/thumbnail,volumeInfo/language)")
+                                .queryParam("key", GOOGLE_KEY)
+                                .build())
+                        .retrieve()
+                        .body(JsonNode.class);
 
-            // Process the response
-            if (response == null || !response.has("items")) {
-                return null; // Handle no items found
+                // Process the response
+                if (response == null || !response.has("items")) {
+                    throw new BookNotFoundException("No book found with the title: " + title);
+                }
+
+                JsonNode bookItem = response.get("items").get(0);
+                return mapToBookDTO(bookItem); // Convert to BookDTO
+
+            } catch (RestClientResponseException exception) {
+                HttpStatusCode statusCode = exception.getStatusCode();
+
+                // Handling client-side errors
+                if (statusCode.is4xxClientError()) {
+                    switch (statusCode.value()) {
+                        case 400:
+                            throw new CustomBadRequestException("Bad request when fetching book with title: " + title + ". Check query parameters.");
+                        case 401:
+                        case 403:
+                            throw new CustomAuthenticationException("Unauthorized request when fetching book with title: " + title + ". Check validity of API key.");
+                        case 404:
+                            throw new BookNotFoundException("No book found with the title: " + title + ".");
+                        default:
+                            throw new RuntimeException("Client error occurred when fetching book with title: " + title + ".");
+                    }
+                }
+
+                // Handling server-side errors (external service)
+                else if (statusCode.is5xxServerError()) {
+                    throw new ExternalServiceException("External service error occurred when fetching book with title: " + title + ".");
+                } else {
+                    throw new ExternalServiceException("Unexpected error occurred when fetching book with title: " + title + ".");
+                }
+            } catch (Exception e) {
+                // Handle other exceptions
+                throw new RuntimeException("Unexpected error occurred while fetching book with title: " + title + ". " + e.getMessage());
             }
-
-            JsonNode bookItem = response.get("items").get(0);
-            return mapToBookDTO(bookItem); // Convert to BookDTO
         });
     }
 
@@ -136,6 +167,10 @@ public class BookApiClient {
             else {
                 throw new ExternalServiceException("Unexpected error occurred when fetching books for search: " + search + ".");
             }
+        }
+        catch (Exception e) {
+            // Handle other exceptions
+            throw new RuntimeException("Unexpected error occurred while fetching books for search: " + search + ". " + e.getMessage());
         }
     }
 
@@ -213,6 +248,10 @@ public class BookApiClient {
                 throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
             }
         }
+        catch (Exception e) {
+            // Handle other exceptions
+            throw new RuntimeException("Unexpected error occurred while fetching books for genre: " + genre + ". " + e.getMessage());
+        }
     }
 
     /**
@@ -286,6 +325,10 @@ public class BookApiClient {
                 throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
             }
         }
+        catch (Exception e) {
+            // Handle other exceptions
+            throw new RuntimeException("Unexpected error occurred while fetching books for genre: " + genre + ". " + e.getMessage());
+        }
     }
 
 
@@ -356,36 +399,72 @@ public class BookApiClient {
 
 
     public List<BookDTO> fetchSimilarBooks(String title, String type, int limit) {
-
-        String tasteDiveUrl = "https://tastedive.com/api/similar";
-
-        JsonNode response = tasteDiveClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/similar")
-                        .queryParam("q", "book:" + title)
-                        .queryParam("type", type)
-                        .queryParam("limit", limit)
-                        .queryParam("k", TASTEDIVE_KEY)
-                        .build())
-                .retrieve()
-                .body(JsonNode.class);
-
-        if (response == null || !response.has("similar")) {
-            return null;
-        }
-        JsonNode similarBooksJson = response.get("similar").get("results");
-
         List<String> bookNames = new ArrayList<>();
-        if (similarBooksJson != null && similarBooksJson.isArray()) {
+
+        try {
+            JsonNode response = tasteDiveClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/similar")
+                            .queryParam("q", "book:" + title)
+                            .queryParam("type", type)
+                            .queryParam("limit", limit)
+                            .queryParam("k", TASTEDIVE_KEY)
+                            .build())
+                    .retrieve()
+                    .body(JsonNode.class);
+
+            if (response == null || !response.has("similar")) {
+                throw new BookNotFoundException("No similar books found for the book: " + title + ".");
+            }
+
+            JsonNode similarBooksJson = response.get("similar").get("results");
+
+            if (similarBooksJson == null || !similarBooksJson.isArray()) {
+                throw new BookNotFoundException("No similar books found for the book: " + title + ".");
+            }
+
             for (JsonNode bookItem: similarBooksJson) {
                 bookNames.add(getTextOrEmpty(bookItem, "name"));
             }
         }
+        catch (RestClientResponseException exception) {
+            HttpStatusCode statusCode = exception.getStatusCode();
+            // handling client-side errors
+            if (statusCode.is4xxClientError()) {
+                switch (statusCode.value()) {
+
+                    case 400:
+                        throw new CustomBadRequestException("Bad request when fetching similar books to the book: " + title + ". Check query parameters.");
+
+                    case 401:
+                    case 403:
+                        throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching similar books to the book: " + title + ". Check validity of API key.");
+
+                    case 404:
+                        throw new BookNotFoundException("No similar books found to the book: " + title + ".");
+
+                    default:
+                        throw new RuntimeException("Client error occurred when fetching similar books to book: " + title + ".");
+                }
+            }
+
+            // handling server-side errors (external service)
+            else if (statusCode.is5xxServerError()) {
+                throw new ExternalServiceException("External service error occurred when fetching similar books to the book: " + title + ".");
+            }
+            else {
+                throw new ExternalServiceException("Unexpected error occurred when fetching similar books to the book: " + title + ".");
+            }
+        }
+        catch (Exception e) {
+            // Handle other exceptions
+            throw new RuntimeException("Unexpected error occurred while fetching similar books to book: " + title + ". " + e.getMessage());
+        }
 
         // gathering the async calls for all book names
         List<CompletableFuture<BookDTO>> bookDTOCalls = bookNames.stream()
-                .map(this::fetchBookAsync)
-                .collect(Collectors.toList());
+                .map(this::fetchBookByTitle)
+                .toList();
 
         // executing all the calls asynchronously at once and waiting for them to finish - this is our 'sync' point
         CompletableFuture<Void> allFutureBooks = CompletableFuture.allOf(
@@ -400,8 +479,9 @@ public class BookApiClient {
                 );
 
         return allFutures.join();
-
     }
+
+
 
     public BookDTO mapToBookDTO(JsonNode bookItem) {
         JsonNode volumeInfo = bookItem.get("volumeInfo");
