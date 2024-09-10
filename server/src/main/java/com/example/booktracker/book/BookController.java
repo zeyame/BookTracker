@@ -1,14 +1,10 @@
 package com.example.booktracker.book;
 
-import com.example.booktracker.GenreNotInCacheException;
+import com.example.booktracker.book.exception.GenreNotInCacheException;
 import com.example.booktracker.book.exception.CustomBadRequestException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,17 +74,14 @@ public class BookController {
      * @param limit The number of books that should be initially stored in each genre within the cache
      * @return  A ResponseEntity with the body of type Map<String, String> that contains a message about the outcome of the request
      */    @GetMapping("/books/cache")
-    public ResponseEntity<Map<String, String>> setUpCache(@RequestParam(defaultValue = "9") int limit) {
+    public ResponseEntity<CacheResponse> setUpCache(@RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
         if (limit <= 0) {
             throw new CustomBadRequestException("The limit parameter must be a positive integer value");
         }
 
-        bookService.setUpCache(limit);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "cache successfully set up.");
+        CacheResponse response = bookService.setUpCache(limit);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

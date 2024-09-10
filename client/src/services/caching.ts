@@ -11,7 +11,7 @@ export const initializeCaching = async (limit: number) => {
             throw new Error(`Server failed to set up the cache`);
         }
         const data = await response.json();
-        console.log(data.message);         // logging the cache if response was ok
+        console.log(data);         // logging the response
     }
     catch (error: any) {
         throw error;

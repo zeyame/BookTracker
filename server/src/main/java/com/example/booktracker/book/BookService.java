@@ -1,25 +1,17 @@
 package com.example.booktracker.book;
 
-import com.example.booktracker.GenreNotInCacheException;
+import com.example.booktracker.book.exception.GenreNotInCacheException;
 import com.example.booktracker.book.exception.BookNotFoundException;
 import com.example.booktracker.book.exception.CustomAuthenticationException;
 import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.book.exception.ExternalServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,14 +53,35 @@ public class BookService {
      * @param genre The genre term provided by the GET /api/books/{genre} endpoint
      * @param limit  The limit term provided by the GET /api/books/{genre} endpoint
      * @return A list of {@link BookDTO} objects representing the books retrieved for the requested genre.
+     *
+     * @throws CustomBadRequestException If the genre or limit parameters are invalid or missing.
+     * @throws CustomAuthenticationException If there is an error with the API key.
+     * @throws BookNotFoundException If no books are found for the genre term.
+     * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
      */
     public List<BookDTO> getBooksByGenre(String genre, int limit) {
         return bookApiClient.fetchBooksByGenre(genre, limit);
     }
 
-    // method is responsible for setting up the intial cache in the BookCache repository
-    public void setUpCache(int limit) {
-        HashMap<String, List<BookDTO>> cache = new HashMap<>();     // initial cache to be populated
+
+    /**
+     * Acts as an intermediary method for the GET /api/books/cache endpoint
+     * Delegates the request to fetch a specific number of books from an external API to the BookApiClient
+     * It receives the fetched books and sends them back to the controller
+     *
+     * @param limit  The limit term provided by the GET /api/books/{genre} endpoint
+     *
+     * @throws CustomBadRequestException If the genre or limit parameters are invalid or missing.
+     * @throws CustomAuthenticationException If there is an error with the API key.
+     * @throws BookNotFoundException If no books are found for a genre term.
+     * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
+     */
+    public CacheResponse setUpCache(int limit) {
+        Map<String, List<BookDTO>> cache = new HashMap<>();     // initial cache to be populated
+
+        Map<String, List<String>> errors = new HashMap<>();     // potential errors when fetching books for different genres
+        errors.put("errors", new ArrayList<>());
+
         String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};          // genres to fetch books for
 
         // Create a map of genre to future, where each future fetches books asynchronously
@@ -76,6 +89,10 @@ public class BookService {
                 .collect(Collectors.toMap(
                         genre -> genre,
                         genre -> bookApiClient.fetchBooksByGenreAsync(genre, limit,  limit)
+                                .exceptionally(ex -> {
+                                    errors.get("errors").add(ex.getMessage());
+                                    return null;
+                                })
                 ));
 
         // Wait for all the futures to complete
@@ -89,6 +106,12 @@ public class BookService {
                 try {
                     // Get the completed result from each future
                     JsonNode jsonResponse = future.get();
+
+                    if (jsonResponse == null) {
+                        System.out.println("Skipping cache populate for genre: " + genre + ".");
+                        return;
+                    }
+
                     JsonNode bookItems = jsonResponse.get("items");
 
                     // Check if there are book items and process them
@@ -100,12 +123,14 @@ public class BookService {
                         cache.put(genre, books);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    errors.get("errors").add("Unexpected error occurred when setting up cache. " + e.getMessage());
                 }
             });
         }).join();
 
         bookCache.setUpCache(cache);
+
+        return new CacheResponse(cache, errors);
 
     }
 
