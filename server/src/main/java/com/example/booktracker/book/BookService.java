@@ -149,11 +149,26 @@ public class BookService {
         return bookCache.getCachedBooksByGenre(genre, limit);     // possible exception thrown if genre not in cache
     }
 
-    public void updateCachedBooksByGenre(String genre, int limit) {
+
+    /**
+     * Updates the cache with new books for the specified genre.
+     * This method fetches books from the external API based on the given genre and limit, then updates the cache.
+     * It returns the updated list of books for the genre.
+     *
+     * @param genre The genre for which the cache should be updated.
+     * @param limit The number of books to be fetched and added to the cache.
+     *
+     * @return A list of `BookDTO` objects representing the new books added to the cache for the specified genre.
+     *
+     * @throws GenreNotInCacheException If the specified genre is not present in the cache.
+     * @throws BookNotFoundException If no books are found for the specified genre.
+     * @throws ExternalServiceException If there is an error with the external service.
+     */
+    public List<BookDTO> updateCachedBooksByGenre(String genre, int limit) {
         int currentOffset = bookCache.getOffsetForGenre(genre);
 
         List<BookDTO> newBooksToCache = bookApiClient.fetchBooksByGenre(genre, limit, currentOffset);
-        bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
+        return bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
     }
 
     public List<BookDTO> getSimilarBooks(String title, String type, int limit) {

@@ -151,9 +151,9 @@ public class BookApiClient {
      * @param limit The maximum number of books to return. This should be a positive integer.
      * @return A list of {@link BookDTO} objects representing the books that match the search term.
      *
-     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomBadRequestException If the query parameters provided to the API were invalid.
      * @throws CustomAuthenticationException If there is an error with the API key.
-     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws BookNotFoundException If no books are found for the genre.
      * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
      */
     public List<BookDTO> fetchBooksByGenre(String genre, int limit) {
@@ -226,9 +226,9 @@ public class BookApiClient {
      * @param offset The start index of where to start fetching books from.
      * @return A list of {@link BookDTO} objects representing the books that match the search term.
      *
-     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomBadRequestException If the query parameters provided to the API were invalid.
      * @throws CustomAuthenticationException If there is an error with the API key.
-     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws BookNotFoundException If no books are found for the genre.
      * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
      */
     public List<BookDTO> fetchBooksByGenre(String genre, int limit, int offset) {
@@ -300,9 +300,9 @@ public class BookApiClient {
      * @param offset The start index of where to start fetching books from.
      * @return A list of {@link BookDTO} objects representing the books that match the search term.
      *
-     * @throws CustomBadRequestException If the search term is empty or the limit is non-positive.
+     * @throws CustomBadRequestException If the query parameters provided to the API were invalid.
      * @throws CustomAuthenticationException If there is an error with the API key.
-     * @throws BookNotFoundException If no books are found for the search term.
+     * @throws BookNotFoundException If no books are found for the genre.
      * @throws ExternalServiceException If there is an error with the external service or something unexpected happened.
      */
     public CompletableFuture<JsonNode> fetchBooksByGenreAsync(String genre, int limit, int offset) {

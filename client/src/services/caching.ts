@@ -42,7 +42,7 @@ export const updateCache = async (genreName: string, limit: number) => {
             throw new Error(`Failed response from the backend when requested to update the cache for ${genreName} genre.`);
         }
         const data = await response.json();
-        console.log(data.message);
+        console.log(data);
     }
     catch (error: any) {
         throw error;

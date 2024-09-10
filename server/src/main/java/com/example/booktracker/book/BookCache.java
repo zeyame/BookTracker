@@ -91,7 +91,7 @@ public class BookCache {
      * @param newBooks A list of {@link BookDTO} objects representing the new books to be added to the cache.
      * @throws GenreNotInCacheException If the genre does not exist in the cache.
      */
-    public void updateCachedBooksByGenre(String genre, List<BookDTO> newBooks) {
+    public List<BookDTO> updateCachedBooksByGenre(String genre, List<BookDTO> newBooks) {
         List<BookDTO> existingBooks = cache.get(genre);
         if (existingBooks == null) {
             throw new GenreNotInCacheException(genre + " is not an existing genre in the cache.");
@@ -99,6 +99,8 @@ public class BookCache {
         existingBooks.addAll(newBooks);
         cache.put(genre, existingBooks);
         updateOffsetForGenre(genre, newBooks.size());
+
+        return existingBooks;
     }
 
     public int getOffsetForGenre(String genre) throws GenreNotInCacheException {

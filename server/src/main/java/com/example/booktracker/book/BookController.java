@@ -1,5 +1,7 @@
 package com.example.booktracker.book;
 
+import com.example.booktracker.book.exception.BookNotFoundException;
+import com.example.booktracker.book.exception.ExternalServiceException;
 import com.example.booktracker.book.exception.GenreNotInCacheException;
 import com.example.booktracker.book.exception.CustomBadRequestException;
 import org.springframework.http.HttpStatus;
@@ -111,7 +113,7 @@ public class BookController {
      * @throws CustomBadRequestException If the limit parameter is less than or equal to 0.
      */
     @GetMapping("/books/cache/{genre}")
-    public ResponseEntity<?> getCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
+    public ResponseEntity<Map<String, List<BookDTO>>> getCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
         if (limit <= 0) {
@@ -124,19 +126,37 @@ public class BookController {
         return new ResponseEntity<>(cachedBooksResponseMap, HttpStatus.OK);
     }
 
-    @GetMapping("/books/cache/{genre}/update")
-    public ResponseEntity<?> updateCachedBooksByGenre(@PathVariable String genre, @RequestParam int limit) throws GenreNotInCacheException {
-        Map<String, String> responseMap = new HashMap<>();
-        try {
-            bookService.updateCachedBooksByGenre(genre, limit);
-            responseMap.put("message", genre + " genre has been successfully updated in the cache");
 
-            return new ResponseEntity<>(responseMap, HttpStatus.OK);
+    /**
+     * Handles the request to update the cache for books of a specific genre.
+     * This endpoint updates the cache with new books for the specified genre based on the provided limit.
+     * It returns the updated cache for the genre if the update is successful.
+     *
+     * @param genre The genre for which the cache should be updated. This is a path variable.
+     * @param limit The number of books to be fetched and added to the cache for the specified genre. This is a query parameter.
+     *
+     * @return A `ResponseEntity` containing a map with the key "updatedCache" and a list of `BookDTO` objects representing the updated books for the specified genre.
+     *
+     * @throws CustomBadRequestException If the limit parameter is invalid (non-positive).
+     * @throws GenreNotInCacheException If the specified genre is not present in the cache (handled in the service method).
+     * @throws BookNotFoundException If no books are found for the specified genre (handled in the service method).
+     * @throws ExternalServiceException If there is an error with the external service (handled in the service method).
+     */
+    @GetMapping("/books/cache/{genre}/update")
+    public ResponseEntity<Map<String, List<BookDTO>>> updateCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
+
+        // validating limit if it was entered by client
+        if (limit <= 0) {
+            throw new CustomBadRequestException("The limit parameter must be a positive integer value.");
         }
-        catch (GenreNotInCacheException e) {
-            responseMap.put("error", genre + " is not an existing genre in the cache.");
-            return new ResponseEntity<>(responseMap, HttpStatus.NOT_FOUND);
-        }
+
+        Map<String, List<BookDTO>> responseMap = new HashMap<>();
+
+        List<BookDTO> updatedGenreCache = bookService.updateCachedBooksByGenre(genre, limit);
+        responseMap.put("updatedCache", updatedGenreCache);
+
+        return new ResponseEntity<>(responseMap, HttpStatus.OK);
+
     }
 
     @GetMapping("/books/similar")
