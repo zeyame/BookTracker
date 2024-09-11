@@ -1,4 +1,6 @@
-package com.example.booktracker.book;
+package com.example.booktracker.book.customResponses;
+
+import com.example.booktracker.book.BookDTO;
 
 import java.util.HashMap;
 import java.util.List;

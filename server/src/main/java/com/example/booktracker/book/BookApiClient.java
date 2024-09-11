@@ -1,22 +1,21 @@
 package com.example.booktracker.book;
 
 
+import com.example.booktracker.book.customResponses.SimilarBooksResponse;
 import com.example.booktracker.book.exception.BookNotFoundException;
 import com.example.booktracker.book.exception.CustomAuthenticationException;
 import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.book.exception.ExternalServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
-import javax.naming.AuthenticationException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -398,6 +397,20 @@ public class BookApiClient {
     }
 
 
+    /**
+     * Fetches similar books from the TasteDive API for a given book title.
+     * It handles both client and server errors gracefully and asynchronously fetches the details of each similar book.
+     * If a book fetch fails, the error is recorded in the returned response.
+     *
+     * @param title the title of the book to find similar books for
+     * @param type  the type of media (default is "book")
+     * @param limit the maximum number of similar books to retrieve
+     * @return a {@link SimilarBooksResponse} containing similar book data and a list of errors
+     * @throws BookNotFoundException if no similar books are found
+     * @throws CustomBadRequestException if the request contains invalid parameters
+     * @throws CustomAuthenticationException if there is an issue with authentication (e.g., invalid API key)
+     * @throws ExternalServiceException if the external service returns a 5xx error or any other unexpected error occurs
+     */
     public SimilarBooksResponse fetchSimilarBooks(String title, String type, int limit) {
         List<String> bookNames = new ArrayList<>();
 
@@ -461,15 +474,16 @@ public class BookApiClient {
             throw new RuntimeException("Unexpected error occurred while fetching similar books to book: " + title + ". " + e.getMessage());
         }
 
-        Map<String, List<String>> errorsMap = new HashMap<>();
-        errorsMap.put("errors", new ArrayList<String>());
+        // map will contain all possible errors which may be thrown when fetching data of all 20 similar books
+        Map<String, String> errorsMap = new HashMap<>();
+        AtomicInteger errorCounter = new AtomicInteger(1);
 
         // gathering the async calls for all book names
         List<CompletableFuture<BookDTO>> bookDTOCalls = bookNames.stream()
                 .map(name -> fetchBookByTitle(name)
                         .handle((result, exception) -> {
                             if (exception != null) {
-                                errorsMap.get("errors").add("Error while fetching data for the similar book with title: " + title);
+                                errorsMap.put("error " + errorCounter.getAndIncrement(), "Error while fetching data for the similar book with title: " + title);
                                 return null;
                             }
                             return result;
@@ -494,7 +508,15 @@ public class BookApiClient {
     }
 
 
-
+    /**
+     * Maps a given {@link JsonNode} representing a book's details to a {@link BookDTO} object.
+     * It extracts relevant fields such as title, authors, publisher, description, page count, categories,
+     * image URL, and language from the provided JSON data. If the "volumeInfo" node is missing or null,
+     * the method returns {@code null}.
+     *
+     * @param bookItem the {@link JsonNode} representing a book's details
+     * @return a {@link BookDTO} containing the mapped data, or {@code null} if no "volumeInfo" is present
+     */
     public BookDTO mapToBookDTO(JsonNode bookItem) {
         JsonNode volumeInfo = bookItem.get("volumeInfo");
 
@@ -514,8 +536,16 @@ public class BookApiClient {
 
         return null;
     }
-    
 
+
+    /**
+     * Retrieves the list of authors from the given {@link JsonNode}.
+     * Extracts and returns the "authors" field from the "volumeInfo" node.
+     * If no authors are found or the field is not an array, an empty list is returned.
+     *
+     * @param volumeInfo the {@link JsonNode} representing the book's volume information
+     * @return a {@link List} of authors, or an empty list if no authors are found
+     */
     private List<String> getAuthors(JsonNode volumeInfo) {
         JsonNode authorsNode = volumeInfo.get("authors");
         if (authorsNode != null && authorsNode.isArray()) {
@@ -529,6 +559,15 @@ public class BookApiClient {
         return Collections.emptyList();
     }
 
+
+    /**
+     * Retrieves the list of categories from the given {@link JsonNode}.
+     * Extracts and returns the "categories" field from the "volumeInfo" node.
+     * If no categories are found or the field is not an array, an empty list is returned.
+     *
+     * @param volumeInfo the {@link JsonNode} representing the book's volume information
+     * @return a {@link List} of categories, or an empty list if no categories are found
+     */
     private List<String> getCategories(JsonNode volumeInfo) {
         JsonNode categoriesNode = volumeInfo.get("categories");
         if (categoriesNode != null && categoriesNode.isArray()) {
@@ -543,16 +582,43 @@ public class BookApiClient {
         return Collections.emptyList();
     }
 
+
+    /**
+     * Retrieves the thumbnail image URL for the book from the given {@link JsonNode}.
+     * Extracts and returns the "thumbnail" field from the "imageLinks" node.
+     * If no image link is found, an empty string is returned.
+     *
+     * @param volumeInfo the {@link JsonNode} representing the book's volume information
+     * @return the thumbnail URL as a {@link String}, or an empty string if no image link is found
+     */
     private String getImageUrl(JsonNode volumeInfo) {
         JsonNode imageLinks = volumeInfo.get("imageLinks");
         return (imageLinks != null) ? getTextOrEmpty(imageLinks, "thumbnail") : "";
     }
 
+
+    /**
+     * Retrieves the text value of a specified field from the given {@link JsonNode}.
+     * Returns the field's text value if it exists, otherwise returns an empty string.
+     *
+     * @param item      the {@link JsonNode} from which to extract the field
+     * @param fieldName the name of the field to retrieve
+     * @return the field's text value as a {@link String}, or an empty string if the field is not found
+     */
     private String getTextOrEmpty(JsonNode item, String fieldName) {
         JsonNode fieldValue = item.get(fieldName);
         return (fieldValue != null) ? fieldValue.asText() : "";
     }
 
+
+    /**
+     * Retrieves the page count from the given {@link JsonNode}.
+     * Extracts and returns the "pageCount" field as an integer. If the field is not found
+     * or is not a number, returns 0 as the default value.
+     *
+     * @param volumeInfo the {@link JsonNode} representing the book's volume information
+     * @return the page count as an {@code int}, or 0 if the field is not found or is not a number
+     */
     private int getPageCount(JsonNode volumeInfo) {
         JsonNode pageCountNode = volumeInfo.get("pageCount");
         return (pageCountNode != null && pageCountNode.isNumber()) ? pageCountNode.asInt(0) : 0;

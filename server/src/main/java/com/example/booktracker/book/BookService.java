@@ -1,5 +1,7 @@
 package com.example.booktracker.book;
 
+import com.example.booktracker.book.customResponses.CacheResponse;
+import com.example.booktracker.book.customResponses.SimilarBooksResponse;
 import com.example.booktracker.book.exception.GenreNotInCacheException;
 import com.example.booktracker.book.exception.BookNotFoundException;
 import com.example.booktracker.book.exception.CustomAuthenticationException;
@@ -171,17 +173,18 @@ public class BookService {
         return bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
     }
 
+
+    /**
+     * Fetches similar books for the provided title by calling an external API.
+     * This method uses the type and limit parameters to filter the results.
+     *
+     * @param title the title of the book to find similar books for
+     * @param type  the type of media (default is "book")
+     * @param limit the maximum number of similar books to retrieve
+     * @return a {@link SimilarBooksResponse} containing similar book data and errors
+     */
     public SimilarBooksResponse getSimilarBooks(String title, String type, int limit) {
         return bookApiClient.fetchSimilarBooks(title, type, limit);
-    }
-
-    // helper method to test cache availability
-    public Map<String, List<BookDTO>> getEntireCache() {
-        return bookCache.getCache();
-    }
-
-    public List<BookDTO> viewBooksInAGenre(String genre) {
-        return bookCache.viewBooksInAGenre(genre);
     }
 
 }

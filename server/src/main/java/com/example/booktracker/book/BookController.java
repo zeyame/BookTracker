@@ -1,5 +1,7 @@
 package com.example.booktracker.book;
 
+import com.example.booktracker.book.customResponses.CacheResponse;
+import com.example.booktracker.book.customResponses.SimilarBooksResponse;
 import com.example.booktracker.book.exception.BookNotFoundException;
 import com.example.booktracker.book.exception.ExternalServiceException;
 import com.example.booktracker.book.exception.GenreNotInCacheException;
@@ -171,20 +173,5 @@ public class BookController {
 
         return ResponseEntity.ok(similarBooksResult);
     }
-
-    // testing endpoint to check out the state of the server cache
-    @GetMapping("/books/cache/full")
-    public ResponseEntity<Map<String, List<BookDTO>>> getAllCache() {
-        Map<String, List<BookDTO>> cache =  bookService.getEntireCache();
-        return new ResponseEntity<>(cache, HttpStatus.OK);
-    }
-
-    // testing endpoint to check out the state of a genre in the server cache
-    @GetMapping("/books/cache/{genre}/viewing")
-    public ResponseEntity<List<BookDTO>> viewBooksInAGenre(@PathVariable String genre) {
-        List<BookDTO> books = bookService.viewBooksInAGenre(genre);
-        return new ResponseEntity<>(books, HttpStatus.OK);
-    }
-
 
 }
