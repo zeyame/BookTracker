@@ -160,11 +160,16 @@ public class BookController {
     }
 
     @GetMapping("/books/similar")
-    public ResponseEntity<?> getSimilarBooks(@RequestParam String title, @RequestParam String type, @RequestParam int limit) {
-        List<BookDTO> similarBooks = bookService.getSimilarBooks(title, type, limit);
-        Map<String, List<BookDTO>> response = new HashMap<>();
-        response.put("similarBooks", similarBooks);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<SimilarBooksResponse> getSimilarBooks(@RequestParam String title, @RequestParam(defaultValue = "book") String type, @RequestParam(defaultValue = "20") int limit) {
+
+        // validating limit if it was entered by client
+        if (limit <= 0) {
+            throw new CustomBadRequestException("The limit parameter must be a positive integer value.");
+        }
+
+        SimilarBooksResponse similarBooksResult = bookService.getSimilarBooks(title, type, limit);
+
+        return ResponseEntity.ok(similarBooksResult);
     }
 
     // testing endpoint to check out the state of the server cache

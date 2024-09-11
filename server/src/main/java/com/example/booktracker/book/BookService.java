@@ -171,7 +171,7 @@ public class BookService {
         return bookCache.updateCachedBooksByGenre(genre, newBooksToCache);
     }
 
-    public List<BookDTO> getSimilarBooks(String title, String type, int limit) {
+    public SimilarBooksResponse getSimilarBooks(String title, String type, int limit) {
         return bookApiClient.fetchSimilarBooks(title, type, limit);
     }
 

@@ -16,6 +16,8 @@ export const fetchSimilarBooks = async (title: string, limit: number): Promise<A
         if (!response.ok) {
             throw new Error("Unexpected error occurred when requesting similar books from the server.");
         }
+
+        // returned structure = {similarBooks: [], errors: { errors: [] }}
         const data = await response.json();
         const similarBooks: Array<book> = data.similarBooks;
         return similarBooks;

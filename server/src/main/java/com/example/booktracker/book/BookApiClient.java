@@ -398,7 +398,7 @@ public class BookApiClient {
     }
 
 
-    public List<BookDTO> fetchSimilarBooks(String title, String type, int limit) {
+    public SimilarBooksResponse fetchSimilarBooks(String title, String type, int limit) {
         List<String> bookNames = new ArrayList<>();
 
         try {
@@ -461,9 +461,20 @@ public class BookApiClient {
             throw new RuntimeException("Unexpected error occurred while fetching similar books to book: " + title + ". " + e.getMessage());
         }
 
+        Map<String, List<String>> errorsMap = new HashMap<>();
+        errorsMap.put("errors", new ArrayList<String>());
+
         // gathering the async calls for all book names
         List<CompletableFuture<BookDTO>> bookDTOCalls = bookNames.stream()
-                .map(this::fetchBookByTitle)
+                .map(name -> fetchBookByTitle(name)
+                        .handle((result, exception) -> {
+                            if (exception != null) {
+                                errorsMap.get("errors").add("Error while fetching data for the similar book with title: " + title);
+                                return null;
+                            }
+                            return result;
+                        })
+                )
                 .toList();
 
         // executing all the calls asynchronously at once and waiting for them to finish - this is our 'sync' point
@@ -472,13 +483,14 @@ public class BookApiClient {
         );
 
         // extracting the actual BookDTOs from the bookDTOCalls once allFutureBooks signals 'complete'
-        CompletableFuture<List<BookDTO>> allFutures = allFutureBooks.thenApply(v ->
+        List<BookDTO> similarBooks = allFutureBooks.thenApply(v ->
                 bookDTOCalls.stream()
+                        .filter(Objects::nonNull)
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList())
-                );
+                ).join();
 
-        return allFutures.join();
+        return new SimilarBooksResponse(errorsMap, similarBooks);
     }
 
 
