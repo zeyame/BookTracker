@@ -13,7 +13,7 @@ public class BookCache {
     private Map<String, Integer> genreOffset = new HashMap<>();         // keeps track of the offset for each genre in the cache
     public BookCache() {
         // Initialize offsets to 0 for all genres
-        Arrays.asList("romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy")
+        Arrays.asList("nonfiction", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy")
                 .forEach(genre -> genreOffset.put(genre, 9));
     }
 
@@ -109,10 +109,6 @@ public class BookCache {
             throw new GenreNotInCacheException(genre + " is not an existing genre in the cache.");
         }
         return offset;
-    }
-
-    public List<BookDTO> viewBooksInAGenre(String genre) {
-        return cache.get(genre);
     }
 
     private void updateOffsetForGenre(String genre, int value) {

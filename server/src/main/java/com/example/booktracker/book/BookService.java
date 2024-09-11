@@ -84,7 +84,7 @@ public class BookService {
         Map<String, List<String>> errors = new HashMap<>();     // potential errors when fetching books for different genres
         errors.put("errors", new ArrayList<>());
 
-        String[] genres = {"romance", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};          // genres to fetch books for
+        String[] genres = {"nonfiction", "fiction", "thriller", "action", "mystery", "history", "horror", "fantasy"};          // genres to fetch books for
 
         // Create a map of genre to future, where each future fetches books asynchronously
         Map<String, CompletableFuture<JsonNode>> futureMap = Arrays.stream(genres)

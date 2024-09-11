@@ -8,7 +8,7 @@ import { LoadingIcon } from "../../components/Global/LoadingIcon";
 import { SearchBar } from "../../components/Global/SearchBar";
 
 export const SearchPage: React.FC = () => {
-    const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
+    const genres: Array<string> = ['nonfiction', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
     // states
     const [books, setBooks] = useState<Map<string, Array<book>>>(new Map());
@@ -32,7 +32,7 @@ export const SearchPage: React.FC = () => {
         } else {
             const getDefaultBooks = async () => {
                 try {
-                    const newBooks: Map<string, Array<book>> = await fetchDefaultBooks(9);
+                    const newBooks: Map<string, Array<book>> = await fetchDefaultBooks(9, genres);
                     setBooks(newBooks);
                     setInitialBooksFetched(true);
                 } catch (error: any) {

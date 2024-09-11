@@ -3,9 +3,8 @@ import { book } from "../interfaces/BookInterface";
 
 const BASE_URL: string = "http://127.0.0.1:8080";       // Spring server
 
-const genres: Array<string> = ['romance', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
-export const fetchDefaultBooks = async (limit: number) => {
+export const fetchDefaultBooks = async (limit: number, genres: Array<string>) => {
     try {
         const fetchPromises = genres.map(genre => {
             const encodedGenre = encodeURIComponent(genre);
