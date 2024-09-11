@@ -9,9 +9,11 @@ export const fetchAuthorDetails = async (authorName: string): Promise<Author | n
             throw new Error(`Response from server failed when fetching details about the author '${authorName}'.`);
         }
         const data = await response.json();
+        const authorData = data.authorDetails;
+        
         const authorDetails: Author = {
-            'description': data.description || '',
-            'imageUrl': data.imageUrl || ''
+            'description': authorData.description || '',
+            'imageUrl': authorData.imageUrl || ''
         }
     
         return authorDetails;
