@@ -1,0 +1,24 @@
+version: "2.29.3"
+services:
+  frontend:
+    build: ./client
+    container_name: client_container
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/client-app
+      - /client-app/node_modules
+    stdin_open: true
+    tty: true
+
+  backend:
+    build: ./server
+    container_name: server_container
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server:/server-app
+      - /server-app/target
+      - /server-app/.mvn
+
+      
