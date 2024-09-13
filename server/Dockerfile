@@ -8,12 +8,16 @@ RUN apt-get update && \
 
 WORKDIR /server-app
 
-# Copy only the pom.xml and install dependencies
+# Copy the pom.xml
 COPY ./pom.xml .
+
+# install dependencies
 RUN mvn dependency:go-offline
 
 # Copy the rest of the source code and package the application
 COPY . .
+
+# build the project
 RUN mvn clean package
 
 EXPOSE 8080
