@@ -53,11 +53,11 @@ export const SearchPage: React.FC = () => {
         }
     }, [initialBooksFetched]);
 
-    useEffect(() => {
-        if (initialBooksFetched && !cacheInitialized) {
-            initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
-        }
-    }, [initialBooksFetched, cacheInitialized]);
+    // useEffect(() => {
+    //     if (initialBooksFetched && !cacheInitialized) {
+    //         initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
+    //     }
+    // }, [initialBooksFetched, cacheInitialized]);
 
     // functions
     const handlePagination = async (genreName: string) => {
