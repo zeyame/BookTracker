@@ -14,10 +14,10 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String hashedPassword) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
-        this.hashedPassword = hashedPassword;
+        this.password = password;
     }
 
     @Id
@@ -28,7 +28,7 @@ public class User {
     private String email;
 
     @Column(name = "hashed_password")
-    private String hashedPassword;
+    private String password;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -37,6 +37,9 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_verified")
+    private Boolean isVerified;
 
     public String getUsername() {
         return username;
@@ -54,12 +57,12 @@ public class User {
         this.email = email;
     }
 
-    public String getHashedPassword() {
-        return hashedPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setHashedPassword(String hashedPassword) {
-        this.hashedPassword = hashedPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -76,5 +79,13 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setIsVerified(Boolean updatedStatus) {
+        this.isVerified = updatedStatus;
     }
 }
