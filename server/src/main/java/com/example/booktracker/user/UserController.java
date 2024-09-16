@@ -1,6 +1,11 @@
 package com.example.booktracker.user;
 
 import com.example.booktracker.EmailService;
+import com.example.booktracker.JwtService;
+import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
+import com.example.booktracker.user.exception.InvalidTokenException;
+import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
+import com.example.booktracker.user.exception.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,50 +13,91 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
     private final EmailService emailService;
+    private final JwtService jwtService;
+
     @Autowired
-    public UserController(UserService userService, EmailService emailService) {
+    public UserController(UserService userService, EmailService emailService, JwtService jwtService) {
         this.userService = userService;
         this.emailService = emailService;
+        this.jwtService = jwtService;
     }
 
-    @PostMapping("/user/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO userDTO) {
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
 
-        String username = userDTO.getUsername();
-        String email = userDTO.getEmail();
-        String password = userDTO.getPassword();
+        String username = userRegistrationDTO.getUsername();
+        String email = userRegistrationDTO.getEmail();
+        String password = userRegistrationDTO.getPassword();
 
-        Map<String, String> responseMap = new HashMap<>();
 
         // handle the case where an account already exists for this email
-        if (userService.findByEmail(email) != null) {
-            responseMap.put("message", "An account with this email is already registered.");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMap);
+        if (userService.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyRegisteredException("An account with this email is already registered.");
         }
 
         // handle the case where username already taken
-        if (userService.findByUsername(username) != null) {
-            responseMap.put("message", "This username already exists.");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMap);
+        if (userService.findByUsername(username).isPresent()) {
+            throw new UsernameAlreadyRegisteredException("This username already exists.");
         }
+
+        Map<String, String> responseMap = new HashMap<>();
 
         // save user to database
         User user = new User(username, email, password);
         userService.save(user);
 
-        // verify user email
-        emailService.sendVerificationEmail(email, "Verify your email to use BookTracker.", "This is the verification link.");
+        // generating a verification token
+        String token = jwtService.generateToken(user);
 
-        responseMap.put("message", "verification email sent.");
+        // verification link
+        String link = "http://localhost:8080/api/user/verify?token="+token+"&username="+username;
 
-        return ResponseEntity.ok(responseMap);
+        // sending verification email to registered user
+        emailService.sendVerificationEmail(
+                email,
+                "This is your verification link to complete your registration with Book Tracker",
+                "This is your verification link to complete your registration with Book Tracker: " + link
+                );
+
+        responseMap.put("message", "User registered successfully. Verification email sent.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<Map<String, String>> verifyUser(@RequestParam String token, @RequestParam String username) {
+        if (!jwtService.isTokenValid(token, username)) {
+            throw new InvalidTokenException("Verification failed. Invalid token.");
+        }
+
+        // updating user's verification status
+        Optional<User> possibleUser = userService.findByUsername(username);
+        if (possibleUser.isPresent()) {
+            User user = possibleUser.get();
+            user.setIsVerified(true);
+            userService.save(user);
+        }
+        else {
+            throw new UsernameNotFoundException("Verification failed. User could not be found");
+        }
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("message", "Verification successful. User can now login.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody UserLoginDTO userLoginDTO) {
+        // to do
+        return null;
     }
 
 

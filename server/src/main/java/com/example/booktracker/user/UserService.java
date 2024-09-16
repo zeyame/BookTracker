@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -17,11 +19,11 @@ public class UserService {
         this.encoder = encoder;
     }
 
-    public User findByUsername(String userName) {
+    public Optional<User> findByUsername(String userName) {
         return userRepository.findByUsername(userName);
     }
 
-    public User findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
