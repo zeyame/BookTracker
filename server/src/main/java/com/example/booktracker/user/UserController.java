@@ -1,7 +1,7 @@
 package com.example.booktracker.user;
 
-import com.example.booktracker.EmailService;
-import com.example.booktracker.JwtService;
+import com.example.booktracker.extra_services.EmailService;
+import com.example.booktracker.extra_services.JwtService;
 import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
 import com.example.booktracker.user.exception.InvalidTokenException;
 import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;

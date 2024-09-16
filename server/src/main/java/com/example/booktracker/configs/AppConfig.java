@@ -1,4 +1,4 @@
-package com.example.booktracker;
+package com.example.booktracker.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,11 +12,6 @@ public class AppConfig {
     @Bean
     public RestClient.Builder restClientBuilder() {
         return RestClient.builder();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

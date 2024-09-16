@@ -1,15 +1,13 @@
-package com.example.booktracker;
+package com.example.booktracker.exception_handling;
 
 import com.example.booktracker.book.exception.*;
 import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
 import com.example.booktracker.user.exception.InvalidTokenException;
 import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
 import com.example.booktracker.user.exception.UsernameNotFoundException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailSendException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

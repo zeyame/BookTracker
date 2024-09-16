@@ -1,4 +1,4 @@
-package com.example.booktracker;
+package com.example.booktracker.extra_services;
 
 import com.example.booktracker.user.User;
 import io.jsonwebtoken.Claims;

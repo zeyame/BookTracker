@@ -1,4 +1,4 @@
-package com.example.booktracker;
+package com.example.booktracker.extra_services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
