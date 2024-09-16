@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -84,7 +84,7 @@ public class UserController {
         String token = jwtService.generateToken(user);
 
         // verification link
-        String link = "http://localhost:8080/api/user/verify?token="+token+"&username="+username;
+        String link = "http://localhost:8080/api/users/verify-email?token="+token+"&username="+username;
 
         // sending verification email to registered user
         int maxTries = 2;
@@ -136,7 +136,7 @@ public class UserController {
      * @throws InvalidTokenException If the token is invalid, the user is removed from the database, and this exception is thrown.
      * @throws UsernameNotFoundException If the user with the provided username is not found in the database.
      */
-    @GetMapping("/verify")
+    @GetMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyUser(@RequestParam String token, @RequestParam String username) {
         // validating token sent from verification link
         if (!jwtService.isTokenValid(token, username)) {
@@ -168,5 +168,10 @@ public class UserController {
         return null;
     }
 
+    @GetMapping("/verify-token")
+    public ResponseEntity<Map<String, String>> verifyToken(String token) {
+        // to do
+        return null;
+    }
 
 }

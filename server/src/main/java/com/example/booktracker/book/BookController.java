@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/books")
 public class BookController {
 
     private final BookService bookService;
@@ -31,7 +31,7 @@ public class BookController {
      * @param limit  The limit is the number provided by the client service for specifying the number of books needed to be returned back to the user
      * @return  A ResponseEntity with the body of type Map<String, List<BookDTO>> that contains a 'books' fields with books as its value
      */
-    @GetMapping("/books")
+    @GetMapping
     public ResponseEntity<Map<String, List<BookDTO>>> getBooks(@RequestParam(defaultValue = "") String search, @RequestParam(defaultValue = "5") int limit) {
 
         // error handling for a request with a missing/invalid search or limit parameters
@@ -54,7 +54,7 @@ public class BookController {
      * @param limit The number of books that should be sent back to the client for the requested genre
      * @return  A ResponseEntity with the body of type Map<String, List<BookDTO>> that contains a 'books' fields with books from the specified genre as its value
      */
-    @GetMapping("/books/{genre}")
+    @GetMapping("/{genre}")
     public ResponseEntity<Map<String, List<BookDTO>>> getBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
@@ -85,7 +85,7 @@ public class BookController {
      * The HTTP status code is set to {@link HttpStatus#OK}.
      * @throws CustomBadRequestException If the provided limit is not a positive integer.
      */
-    @GetMapping("/books/cache")
+    @GetMapping("/cache")
     public ResponseEntity<CacheResponse> setUpCache(@RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
@@ -114,7 +114,7 @@ public class BookController {
      * @throws GenreNotInCacheException If the specified genre is not present in the cache.
      * @throws CustomBadRequestException If the limit parameter is less than or equal to 0.
      */
-    @GetMapping("/books/cache/{genre}")
+    @GetMapping("/cache/{genre}")
     public ResponseEntity<Map<String, List<BookDTO>>> getCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
@@ -144,7 +144,7 @@ public class BookController {
      * @throws BookNotFoundException If no books are found for the specified genre (handled in the service method).
      * @throws ExternalServiceException If there is an error with the external service (handled in the service method).
      */
-    @GetMapping("/books/cache/{genre}/update")
+    @GetMapping("/cache/{genre}/update")
     public ResponseEntity<Map<String, List<BookDTO>>> updateCachedBooksByGenre(@PathVariable String genre, @RequestParam(defaultValue = "9") int limit) {
 
         // validating limit if it was entered by client
@@ -161,7 +161,7 @@ public class BookController {
 
     }
 
-    @GetMapping("/books/similar")
+    @GetMapping("/similar")
     public ResponseEntity<SimilarBooksResponse> getSimilarBooks(@RequestParam String title, @RequestParam(defaultValue = "book") String type, @RequestParam(defaultValue = "20") int limit) {
 
         // validating limit if it was entered by client
