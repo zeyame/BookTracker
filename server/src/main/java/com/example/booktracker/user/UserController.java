@@ -30,14 +30,14 @@ public class UserController {
 
         Map<String, String> responseMap = new HashMap<>();
 
+        // handle the case where an account already exists for this email
         if (userService.findByEmail(email) != null) {
-            // handle the case where an account already exists for this email
             responseMap.put("message", "An account with this email is already registered.");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMap);
         }
 
+        // handle the case where username already taken
         if (userService.findByUsername(username) != null) {
-            // handle the case where username already taken
             responseMap.put("message", "This username already exists.");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMap);
         }
@@ -46,11 +46,13 @@ public class UserController {
         User user = new User(username, email, password);
         userService.save(user);
 
-        // verifying user email
+        // verify user email
         emailService.sendVerificationEmail(email, "Verify your email to use BookTracker.", "This is the verification link.");
 
         responseMap.put("message", "verification email sent.");
 
         return ResponseEntity.ok(responseMap);
     }
+
+
 }
