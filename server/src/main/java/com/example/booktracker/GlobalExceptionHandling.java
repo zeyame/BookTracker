@@ -5,6 +5,7 @@ import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
 import com.example.booktracker.user.exception.InvalidTokenException;
 import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
 import com.example.booktracker.user.exception.UsernameNotFoundException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -16,6 +17,15 @@ import javax.naming.AuthenticationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandling {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException (RuntimeException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
 
     @ExceptionHandler(BookNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleBookNotFoundException (BookNotFoundException exception) {
@@ -62,15 +72,6 @@ public class GlobalExceptionHandling {
     public ResponseEntity<ErrorResponse> handleGenreNotInCacheException (GenreNotInCacheException exception) {
         String message = exception.getMessage();
         HttpStatus status = HttpStatus.NOT_FOUND;
-
-        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
-
-        return new ResponseEntity<>(errorResponse, status);
-    }
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntimeException (RuntimeException exception) {
-        String message = "An unexpected error occurred.";
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
         ErrorResponse errorResponse = new ErrorResponse(message, status.value());
 
@@ -128,4 +129,5 @@ public class GlobalExceptionHandling {
 
         return new ResponseEntity<>(errorResponse, status);
     }
+
 }
