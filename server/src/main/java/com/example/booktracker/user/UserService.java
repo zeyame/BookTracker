@@ -81,6 +81,27 @@ public class UserService {
 
 
     /**
+     * Deletes a user by their username.
+     *
+     * This method attempts to delete a user from the database by their username. If an error occurs during the database access,
+     * a {@link RuntimeException} is thrown with a descriptive error message.
+     *
+     * @param username The username of the user to be deleted.
+     * @throws RuntimeException If an error occurs when accessing the database.
+     */
+    @Transactional
+    public void deleteByUsername(String username) {
+        try {
+            userRepository.deleteById(username);
+        }
+        catch (DataAccessException e) {
+            String errorMessage = "Error occurred when deleting user from the database. " + e.getMessage();
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+
+    /**
      * Registers a new user by saving their details to the database.
      *
      * This method performs user registration by encoding the user's password using a {@link BCryptPasswordEncoder}
@@ -120,6 +141,21 @@ public class UserService {
         save(user);
     }
 
+
+    /**
+     * Verifies a user's registration by validating the provided token and updating the user's verification status.
+     *
+     * This method performs the following steps:
+     * 1. Validates the provided token using the {@link JwtService}. If the token is invalid, the user is deleted
+     *    from the database, and an {@link InvalidTokenException} is thrown.
+     * 2. If the token is valid, the user's verification status is updated to 'verified' in the database.
+     *
+     * @param token The verification token received from the verification link.
+     * @param username The username of the user whose verification status is to be updated.
+     *
+     * @throws InvalidTokenException If the provided token is invalid or has expired, resulting in user deletion.
+     * @throws InvalidCredentialsException If the user with the specified username could not be found.
+     */
     @Transactional
     public void verify(String token, String username) {
         // validating token sent back from verification link
@@ -137,46 +173,34 @@ public class UserService {
             save(user);
         }
         else {
-            throw new InvalidCredentialsException("Verification failed. User could not be found");
+            throw new InvalidCredentialsException("Verification failed. User could not be found.");
         }
     }
 
 
     /**
-     * Deletes a user by their username.
+     * Authenticates a user based on the provided login credentials.
      *
-     * This method attempts to delete a user from the database by their username. If an error occurs during the database access,
-     * a {@link RuntimeException} is thrown with a descriptive error message.
+     * This method validates the provided username and password, retrieves the user from the database,
+     * and checks if the user is verified and if the provided password matches the stored hashed password.
+     * If any of the validation steps fail or if the user is not verified, appropriate exceptions are thrown.
      *
-     * @param username The username of the user to be deleted.
-     * @throws RuntimeException If an error occurs when accessing the database.
+     * @param userLoginDTO The DTO containing the username and password for authentication.
+     * @throws CustomBadRequestException if the username or password is null or empty.
+     * @throws UserNotVerifiedException if the user has not been verified yet.
+     * @throws InvalidCredentialsException if the username does not exist or the password is incorrect.
      */
-    @Transactional
-    public void deleteByUsername(String username) {
-        try {
-            userRepository.deleteById(username);
-        }
-        catch (DataAccessException e) {
-            String errorMessage = "Error occurred when deleting user from the database. " + e.getMessage();
-            throw new RuntimeException(errorMessage);
-        }
-    }
+    public void authenticate(UserLoginDTO userLoginDTO) {
 
-    /**
-     * Authenticates a user by validating their username and password.
-     *
-     * This method checks if a user with the specified username exists and is verified. It then compares the provided
-     * password with the stored hashed password. If the user is not verified, an exception is thrown. If the username is not
-     * found or the password does not match, an exception is also thrown.
-     *
-     * @param username The username of the user attempting to authenticate.
-     * @param enteredPassword The plain text password provided by the user for authentication.
-     * @return {@code true} if the username exists, the user is verified, and the password matches the stored hashed password;
-     *         {@code false} otherwise.
-     * @throws UserNotVerifiedException If the user is not verified.
-     * @throws InvalidCredentialsException If the username does not exist or the password is incorrect.
-     */
-    public void authenticate(String username, String enteredPassword) {
+        // validate the request's parameters
+        String username = userLoginDTO.getUsername();
+        String enteredPassword = userLoginDTO.getPassword();
+
+        if (Stream.of(username, enteredPassword).anyMatch(val -> val == null || val.trim().isEmpty())) {
+            throw new CustomBadRequestException("Authentication failed. Username and password are required values for authentication and cannot be empty.");
+        }
+
+        // get user from database and authenticate them
         Optional<User> possibleUser = findByUsername(username);
         if (possibleUser.isPresent()) {
             User user = possibleUser.get();

@@ -32,24 +32,26 @@ public class UserController {
 
 
     /**
-     * Registers a new user with the provided registration details.
+     * Registers a new user and sends a verification email to the provided email address.
      *
-     * This method performs the following actions:
-     *  Validates that the email, username, and password are provided and non-empty.
-     *  Checks if an account with the given email already exists and throws an {@link EmailAlreadyRegisteredException} if so.
-     *  Checks if a user with the given username already exists and throws a {@link UsernameAlreadyRegisteredException} if so.
-     *  Encodes the provided password and creates a new {@link User} object.
-     *  Saves the new user to the database.
+     * This endpoint handles the registration process by saving the user's details to the database.
+     * After registration, it generates a verification token and constructs a verification link,
+     * which is then sent to the user's email address. The user is expected to click the link to
+     * verify their email address and complete the registration process.
      *
+     * @param userRegistrationDTO The data transfer object containing user registration details.
+     *                             It includes the username, email, and password of the user.
      *
-     * @param userRegistrationDTO The data transfer object containing user registration details. This includes:
-     *                               {@code username} - The desired username for the new user.
-     *                               {@code email} - The email address for the new user.
-     *                               {@code password} - The plain text password for the new user.
+     * @return A {@link ResponseEntity} containing a response map with a message indicating
+     *         that the user has been successfully registered and that a verification email
+     *         has been sent. The HTTP status code is set to {@code 201 Created} to indicate
+     *         successful processing of the request.
      *
-     * @throws CustomBadRequestException if any of the registration fields (username, email, or password) are missing or empty.
-     * @throws EmailAlreadyRegisteredException if an account with the provided email already exists.
-     * @throws UsernameAlreadyRegisteredException if a user with the provided username already exists.
+     * @throws EmailAlreadyRegisteredException if an account with the provided email address
+     *                                         already exists.
+     * @throws UsernameAlreadyRegisteredException if the provided username is already taken.
+     * @throws CustomBadRequestException if any of the required registration fields (email,
+     *                                    username, password) are missing or empty.
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
@@ -59,13 +61,14 @@ public class UserController {
         // register new user to database
         userService.register(userRegistrationDTO);
 
+        // extracting user data
         String username = userRegistrationDTO.getUsername();
         String email = userRegistrationDTO.getEmail();
 
         // generating a verification token
         String token = jwtService.generateToken(username);
 
-        // verification link
+        // generating a verification link
         String link = generateVerificationLink(token, username);
 
         // sending verification email to registered user
@@ -100,7 +103,7 @@ public class UserController {
      */
     @GetMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyUser(@RequestParam String token, @RequestParam String username) {
-        // updating user's verification status
+        // verify user
         userService.verify(token, username);
 
         Map<String, String> responseMap = new HashMap<>();
@@ -125,16 +128,14 @@ public class UserController {
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody UserLoginDTO userLoginDTO) {
-        Map<String, String> responseMap = new HashMap<>();
-
-        String username = userLoginDTO.getUsername();
-        String plainPassword = userLoginDTO.getPassword();
-
         // authenticate user
-        userService.authenticate(username, plainPassword);
+        userService.authenticate(userLoginDTO);
 
         // generate token for authenticated user
-        String token = jwtService.generateToken(username);
+        String token = jwtService.generateToken(userLoginDTO.getUsername());
+
+        Map<String, String> responseMap = new HashMap<>();
+
         responseMap.put("message", "User has been authenticated.");
         responseMap.put("token", token);
 

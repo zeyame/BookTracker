@@ -17,6 +17,20 @@ public class EmailService {
     }
 
 
+    /**
+     * Sends a verification email to the specified recipient with retry logic.
+     *
+     * This method attempts to send a verification email to the given recipient address.
+     * It retries sending the email up to a maximum number of attempts if a {@link MailException}
+     * occurs. If the email fails to send after the specified number of attempts, the exception
+     * is propagated to notify the caller of the failure.
+     *
+     * @param recipientEmail The email address of the recipient to whom the verification email will be sent.
+     * @param subject The subject of the verification email.
+     * @param body The body content of the verification email, which typically includes the verification link.
+     *
+     * @throws MailException If an error occurs while sending the email and the maximum number of retry attempts is reached.
+     */
     public void sendVerificationEmail(String recipientEmail, String subject, String body) {
         int maxTries = 2;
         int attempt = 0;
