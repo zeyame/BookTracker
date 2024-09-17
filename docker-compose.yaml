@@ -1,5 +1,21 @@
-version: "2.29.3"
+version: '3'
 services:
+  db:
+    ports:
+        - 5432:5432
+    container_name: postgresql_container
+    image: postgres:16.4
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./schema:/docker-entrypoint-initdb.d
+    networks:
+      - booktracker_default
+    restart: always
+
   frontend:
     build: ./client
     container_name: client_container
@@ -10,15 +26,30 @@ services:
       - /client-app/node_modules
     stdin_open: true
     tty: true
+    networks:
+      - booktracker_default
 
   backend:
     build: ./server
     container_name: server_container
     ports:
-      - "8080:8080"
+      - 8080:8080
     volumes:
       - ./server:/server-app
       - /server-app/target
       - /server-app/.mvn
+    environment:
+      - spring_db_url=jdbc:postgresql://db:5432/${DATABASE_NAME}
+      - spring_db_username=${DATABASE_USERNAME}
+      - spring_db_password=${DATABASE_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - booktracker_default
+    restart: always    
 
-      
+volumes:
+  db-data:
+
+networks:
+  booktracker_default:

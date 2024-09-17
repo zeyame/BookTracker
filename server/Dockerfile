@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21
 
 # Install Maven
 RUN apt-get update && \
@@ -11,13 +11,13 @@ WORKDIR /server-app
 # Copy the pom.xml
 COPY ./pom.xml .
 
-# install dependencies
+# Install dependencies
 RUN mvn dependency:go-offline
 
 # Copy the rest of the source code and package the application
 COPY . .
 
-# build the project
+# Build the project
 RUN mvn clean package
 
 EXPOSE 8080
