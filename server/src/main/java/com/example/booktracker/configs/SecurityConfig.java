@@ -19,8 +19,19 @@ public class SecurityConfig {
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        // The default strength is 10 if not specified
+        int strength = 10;
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(strength);
+        System.out.println("Configuring BCryptPasswordEncoder");
+        System.out.println("Encoding strength: " + strength);
 
+        // Let's test the encoder to make sure it's working
+        String testPassword = "testPassword123";
+        String encoded = encoder.encode(testPassword);
+        System.out.println("Test encode result: " + encoded);
+        System.out.println("Test password matches: " + encoder.matches(testPassword, encoded));
+
+        return encoder;
+    }
 
 }

@@ -44,7 +44,7 @@ public class JwtService {
      * is signed using the specified signing key.
      *
      *
-     * @param user The {@link User} object for which the JWT is to be generated.
+     * @param username The {@link User} object for which the JWT is to be generated.
      *             The user's username is used as the subject of the token.
      * @return A {@link String} representing the generated JWT.
      * @throws IllegalArgumentException if any argument provided to the JWT builder
@@ -52,8 +52,8 @@ public class JwtService {
      * @throws SecurityException if an error occurs while signing the JWT.
      * @throws JwtException if any unexpected errors occur during token creation.
      */
-    public String generateToken(User user) {
-        return buildToken(user, expirationTime);
+    public String generateToken(String username) {
+        return buildToken(username, expirationTime);
     }
 
     /**
@@ -63,17 +63,17 @@ public class JwtService {
      * issuer, subject, expiration date, and issued date. It then signs the token with a secret key using the HS256
      * algorithm and returns the compacted token as a string.
      *
-     * @param user The user for whom the JWT token is being generated. The token's subject is set to the user's username.
+     * @param username The user for whom the JWT token is being generated. The token's subject is set to the user's username.
      * @param expirationTime The duration in milliseconds for which the token will be valid from the time of issuance.
      * @return The generated JWT token as a string.
      * @throws RuntimeException if there is an issue with token arguments, signing the JWT, or any unexpected error during
      *      token construction.
      */
-    private String buildToken (User user, long expirationTime) {
+    private String buildToken (String username, long expirationTime) {
         try {
             return Jwts.builder()
-                    .issuer("booktracker")
-                    .subject(user.getUsername())
+                    .issuer("ShelfQuest")
+                    .subject(username)
                     .expiration(new Date((System.currentTimeMillis() + expirationTime)))
                     .issuedAt(new Date())
                     .signWith(getSignInKey(secretKey), SignatureAlgorithm.HS256)

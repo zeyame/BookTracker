@@ -1,10 +1,7 @@
 package com.example.booktracker.exception_handling;
 
 import com.example.booktracker.book.exception.*;
-import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
-import com.example.booktracker.user.exception.InvalidTokenException;
-import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
-import com.example.booktracker.user.exception.UsernameNotFoundException;
+import com.example.booktracker.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -98,8 +95,18 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException exception) {
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(InvalidCredentialsException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(UserNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotVerifiedException(UserNotVerifiedException exception) {
         String message = exception.getMessage();
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 

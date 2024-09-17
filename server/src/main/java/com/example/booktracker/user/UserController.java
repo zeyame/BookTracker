@@ -1,11 +1,9 @@
 package com.example.booktracker.user;
 
+import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.extra_services.EmailService;
 import com.example.booktracker.extra_services.JwtService;
-import com.example.booktracker.user.exception.EmailAlreadyRegisteredException;
-import com.example.booktracker.user.exception.InvalidTokenException;
-import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
-import com.example.booktracker.user.exception.UsernameNotFoundException;
+import com.example.booktracker.user.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,82 +32,44 @@ public class UserController {
 
 
     /**
-     * Registers a new user in the system and sends a verification email.
+     * Registers a new user with the provided registration details.
      *
-     * <p>This endpoint handles user registration by creating a new user record in the database and sending a verification email
-     * with a verification link. The user must confirm their email address by clicking the link in the email to complete the registration.</p>
+     * This method performs the following actions:
+     *  Validates that the email, username, and password are provided and non-empty.
+     *  Checks if an account with the given email already exists and throws an {@link EmailAlreadyRegisteredException} if so.
+     *  Checks if a user with the given username already exists and throws a {@link UsernameAlreadyRegisteredException} if so.
+     *  Encodes the provided password and creates a new {@link User} object.
+     *  Saves the new user to the database.
      *
-     * The registration process involves the following steps:
-     *   Check if the email provided in the request is already registered. If so, an {@link EmailAlreadyRegisteredException}
-     *   is thrown.
-     *   Check if the username provided in the request is already taken. If so, a {@link UsernameAlreadyRegisteredException}
-     *   is thrown.
-     *   Create a new {@link User} object and save it to the database.
-     *   Generate a verification token using the {@link JwtService}.
-     *   Construct a verification link and send it to the user via email using the {@link EmailService}.
-     *   Retry sending the email up to a maximum number of attempts in case of failure.
      *
-     * @param userRegistrationDTO The DTO containing user registration details including username, email, and password.
-     * @return A {@link ResponseEntity} containing a map with a success message if registration is successful.
-     *         The HTTP status code is set to {@link HttpStatus#CREATED}.
-     * @throws EmailAlreadyRegisteredException If the email provided is already associated with an existing account.
-     * @throws UsernameAlreadyRegisteredException If the username provided is already taken.
-     * @throws MailException If an error occurs while sending the verification email. This could occur multiple times
-     *         if email sending fails, but will be thrown after a maximum number of retries.
+     * @param userRegistrationDTO The data transfer object containing user registration details. This includes:
+     *                               {@code username} - The desired username for the new user.
+     *                               {@code email} - The email address for the new user.
+     *                               {@code password} - The plain text password for the new user.
+     *
+     * @throws CustomBadRequestException if any of the registration fields (username, email, or password) are missing or empty.
+     * @throws EmailAlreadyRegisteredException if an account with the provided email already exists.
+     * @throws UsernameAlreadyRegisteredException if a user with the provided username already exists.
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
 
-        String username = userRegistrationDTO.getUsername();
-        String email = userRegistrationDTO.getEmail();
-        String password = userRegistrationDTO.getPassword();
-
-
-        // handle the case where an account already exists for this email
-        if (userService.findByEmail(email).isPresent()) {
-            throw new EmailAlreadyRegisteredException("An account with this email is already registered.");
-        }
-
-        // handle the case where username already taken
-        if (userService.findByUsername(username).isPresent()) {
-            throw new UsernameAlreadyRegisteredException("This username already exists.");
-        }
-
         Map<String, String> responseMap = new HashMap<>();
 
-        // save user to database
-        User user = new User(username, email, password);
-        userService.save(user);
+        // register new user to database
+        userService.register(userRegistrationDTO);
+
+        String username = userRegistrationDTO.getUsername();
+        String email = userRegistrationDTO.getEmail();
 
         // generating a verification token
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(username);
 
         // verification link
-        String link = "http://localhost:8080/api/users/verify-email?token="+token+"&username="+username;
+        String link = generateVerificationLink(token, username);
 
         // sending verification email to registered user
-        int maxTries = 2;
-        int attempt = 0;
-        boolean emailSent = false;
-
-        // attempting to send email three times in case of unexpected failure
-        while (attempt <= maxTries && !emailSent) {
-            try {
-                emailService.sendVerificationEmail(
-                    email,
-                    "Verify Your BookTracker Account",
-                    "This is your verification link to complete your registration with Book Tracker: " + link
-                );
-                emailSent = true;
-            }
-            catch (MailException e) {
-                attempt++;
-                // throw exception - handled globally
-                if (attempt > maxTries) {
-                    throw e;
-                }
-            }
-        }
+        emailService.sendVerificationEmail(email, "Verify your Shelf Quest account.", "This is your link to verify the account: " + link);
 
         responseMap.put("message", "User registered successfully. Verification email sent.");
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
@@ -116,45 +77,31 @@ public class UserController {
 
 
     /**
-     * Verifies a user's registration using a token and username.
+     * Handles the email verification process for a user.
      *
-     * This endpoint handles the verification process for a user by validating the token received from the verification link.
-     * If the token is valid, it updates the user's verification status in the database. If the token is invalid or the user
-     * is not found, appropriate exceptions are thrown and the user is removed from the database if the token is invalid.
+     * This endpoint verifies the user's email address by checking the provided
+     * verification token and username. If the token is valid and matches the username,
+     * the user's verification status is updated to true, allowing them to log in.
      *
-     * The verification process involves the following steps:
-     *   Validate the provided token using {@link JwtService}. If the token is invalid, remove the user from the database
-     *   and throw an {@link InvalidTokenException}.
-     *   Check if the user with the provided username exists in the database. If so, update the user's verification status
-     *   to true and save the updated user record.
-     *   If the user is not found, throw a {@link UsernameNotFoundException}.
+     * @param token The verification token sent to the user. It is used to validate
+     *              the verification request.
+     * @param username The username of the user whose email is being verified.
+     *                 This is used to locate the user in the database.
      *
-     * @param token The verification token sent in the verification link.
-     * @param username The username of the user being verified.
-     * @return A {@link ResponseEntity} containing a map with a success message if the verification is successful.
-     *         The HTTP status code is set to {@link HttpStatus#CREATED}.
-     * @throws InvalidTokenException If the token is invalid, the user is removed from the database, and this exception is thrown.
-     * @throws UsernameNotFoundException If the user with the provided username is not found in the database.
+     * @return A {@link ResponseEntity} containing a response map with a message indicating
+     *         whether the verification was successful or not. The HTTP status code is set to
+     *         {@code 201 Created} to indicate successful processing of the request.
+     *
+     * @throws InvalidTokenException if the provided token is invalid or does not match
+     *                                the expected criteria.
+     * @throws InvalidCredentialsException if the user with the provided username
+     *                                      cannot be found or any other authentication
+     *                                      issues occur.
      */
     @GetMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyUser(@RequestParam String token, @RequestParam String username) {
-        // validating token sent from verification link
-        if (!jwtService.isTokenValid(token, username)) {
-            // remove user from db
-            userService.deleteByUsername(username);
-            throw new InvalidTokenException("Verification failed due to invalid token. Try registering again.");
-        }
-
         // updating user's verification status
-        Optional<User> possibleUser = userService.findByUsername(username);
-        if (possibleUser.isPresent()) {
-            User user = possibleUser.get();
-            user.setIsVerified(true);
-            userService.save(user);
-        }
-        else {
-            throw new UsernameNotFoundException("Verification failed. User could not be found");
-        }
+        userService.verify(token, username);
 
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("message", "Verification successful. User can now login.");
@@ -162,16 +109,46 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
+    /**
+     * Authenticates a user and generates a JWT token upon successful login.
+     *
+     * This method handles the login functionality by receiving the user's credentials in the form of
+     * a {@link UserLoginDTO}. It validates the credentials by calling the {@code authenticate} method of
+     * the {@link UserService}. If authentication is successful, a JWT token is generated using the
+     * {@link JwtService} and returned in the response.
+     *
+     * In case of invalid credentials, an {@link InvalidCredentialsException} is thrown.
+     *
+     * @param userLoginDTO A {@link UserLoginDTO} object containing the username and password provided by the user.
+     * @return A {@link ResponseEntity} containing a success message and a JWT token if authentication succeeds.
+     * @throws InvalidCredentialsException If authentication fails due to incorrect username or password.
+     */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody UserLoginDTO userLoginDTO) {
-        // to do
-        return null;
+        Map<String, String> responseMap = new HashMap<>();
+
+        String username = userLoginDTO.getUsername();
+        String plainPassword = userLoginDTO.getPassword();
+
+        // authenticate user
+        userService.authenticate(username, plainPassword);
+
+        // generate token for authenticated user
+        String token = jwtService.generateToken(username);
+        responseMap.put("message", "User has been authenticated.");
+        responseMap.put("token", token);
+
+        return ResponseEntity.ok(responseMap);
     }
 
     @GetMapping("/verify-token")
     public ResponseEntity<Map<String, String>> verifyToken(String token) {
         // to do
         return null;
+    }
+
+    private String generateVerificationLink(String token, String username) {
+        return "http://localhost:8080/api/users/verify-email?token="+token+"&username="+username;
     }
 
 }

@@ -39,7 +39,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Column(name = "is_verified")
-    private Boolean isVerified;
+    private Boolean isVerified = false;
 
     public String getUsername() {
         return username;

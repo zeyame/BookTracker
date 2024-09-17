@@ -17,8 +17,28 @@ public class EmailService {
     }
 
 
+    public void sendVerificationEmail(String recipientEmail, String subject, String body) {
+        int maxTries = 2;
+        int attempt = 0;
+        boolean emailSent = false;
+
+        while (attempt <= maxTries && !emailSent) {
+            try {
+                send(recipientEmail, subject, body);
+                emailSent = true;
+            }
+            catch (MailException e) {
+                attempt++;
+                if (attempt > maxTries) {
+                    throw e;  // Propagate exception after all attempts fail
+                }
+            }
+        }
+    }
+
+
     /**
-     * Sends a verification email to the specified recipient.
+     * Sends an email to the specified recipient.
      *
      * This method creates a simple email message with the specified recipient, subject, and body content, and sends it
      * using the configured {@link JavaMailSender}. The sender's email address is set to "rayhuntr1@gmail.com".
@@ -29,7 +49,7 @@ public class EmailService {
      * @throws {@link MailException} If an error occurs while sending the email. This exception can include issues such as
      * network problems, invalid email addresses, or issues with the mail server configuration.
      */
-    public void sendVerificationEmail(String recipientEmail, String subject, String body) {
+    private void send(String recipientEmail, String subject, String body) {
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
@@ -40,4 +60,5 @@ public class EmailService {
 
         javaMailSender.send(simpleMailMessage);
     }
+
 }
