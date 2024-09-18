@@ -39,10 +39,6 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SECURITY_JWT_EXPIRATION_TIME=${SECURITY_JWT_EXPIRATION_TIME}
 
-    volumes:
-      - ./server:/server-app
-      - ~/.m2:/root/.m2
-
 
 volumes:
   db-data:

@@ -17,6 +17,8 @@ import { BookPage } from './pages/BookPage';
 import { AllSimilarBooksPage } from './pages/AllSimilarBooksPage';
 import { AboutAuthor } from './components/Book-Page/AboutAuthor';
 import { AuthorPage } from './pages/AuthorPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegistrationPage } from './pages/RegistrationPage';
 
 const router = createBrowserRouter([
   {
@@ -70,6 +72,14 @@ const router = createBrowserRouter([
       {
         path: '/author/:authorName',
         element: <AuthorPage />
+      },
+      {
+        path: '/user/login',
+        element: <LoginPage />
+      },
+      {
+        path: '/user/registration',
+        element: <RegistrationPage />
       }
     ],
     errorElement: <ErrorPage />
