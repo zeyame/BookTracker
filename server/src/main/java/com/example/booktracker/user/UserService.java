@@ -9,6 +9,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -217,5 +218,9 @@ public class UserService {
         else {
             throw new InvalidCredentialsException("Authentication failed. Username or password incorrect.");
         }
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

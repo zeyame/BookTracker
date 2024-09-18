@@ -15,7 +15,7 @@ COPY ./pom.xml .
 RUN mvn dependency:go-offline
 
 # Copy the rest of the source code and package the application
-COPY . .
+COPY ./src .
 
 # Build the project
 RUN mvn clean package

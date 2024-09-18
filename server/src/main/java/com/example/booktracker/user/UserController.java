@@ -11,6 +11,7 @@ import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -146,6 +147,26 @@ public class UserController {
     public ResponseEntity<Map<String, String>> verifyToken(String token) {
         // to do
         return null;
+    }
+
+    //testing endpoint
+    @PostMapping("/{username}/delete")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
+        userService.deleteByUsername(username);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("message", "User with username " + username + " deleted.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
+    }
+
+    // testing endpoint
+    @GetMapping
+    public ResponseEntity<Map<String, List<User>>> getUsers() {
+        List<User> users = userService.findAll();
+
+        Map<String, List<User>> responseMap = new HashMap<>();
+        responseMap.put("Users", users);
+
+        return ResponseEntity.ok(responseMap);
     }
 
     private String generateVerificationLink(String token, String username) {
