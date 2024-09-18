@@ -1,25 +1,14 @@
+# Use Eclipse Temurin JDK 21 as the base image
 FROM eclipse-temurin:21
 
-# Install Maven
-RUN apt-get update && \
-    apt-get install -y maven && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Set the working directory in the container
+WORKDIR /app
 
-WORKDIR /server-app
+# Copy the built JAR file from the local machine to the container
+COPY target/booktracker-0.0.1-SNAPSHOT.jar /app/booktracker.jar
 
-# Copy the pom.xml
-COPY ./pom.xml .
-
-# Install dependencies
-RUN mvn dependency:go-offline
-
-# Copy the rest of the source code and package the application
-COPY ./src .
-
-# Build the project
-RUN mvn clean package
-
+# Expose port 8080
 EXPOSE 8080
 
-CMD ["java", "-jar", "target/booktracker-0.0.1-SNAPSHOT.jar"]
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "/app/booktracker.jar"]

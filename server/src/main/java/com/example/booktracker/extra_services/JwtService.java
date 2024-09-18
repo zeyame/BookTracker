@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +26,14 @@ public class JwtService {
     private String secretKey;
 
     @Value("${security.jwt.expiration-time}")
-    private long expirationTime;
+    private String expirationTimeStr;
 
+    private static long expirationTime;
+
+    @PostConstruct
+    public void init() {
+        this.expirationTime = Long.parseLong(expirationTimeStr);
+    }
     private String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
