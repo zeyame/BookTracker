@@ -9,7 +9,7 @@ interface UserRegistration {
     email: string
     username: string
     password: string
-    confirmPassword: string
+    confirmpassword: string
 }
 
 export const RegistrationPage: React.FC = () => {
@@ -20,7 +20,7 @@ export const RegistrationPage: React.FC = () => {
         email: '',
         username: '',
         password: '',
-        confirmPassword: ''
+        confirmpassword: ''
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [registrationError, setRegistrationError] = useState<RegistrationError>({
@@ -29,6 +29,7 @@ export const RegistrationPage: React.FC = () => {
         passwordError: '',
         otherError: ''
     });
+
 
     const handleUserRegistration = (inputFieldName: string, inputValue: string) => {
         const adjustedInputFieldName: string = inputFieldName.replace(/\s+/g, '').toLowerCase();
@@ -41,93 +42,122 @@ export const RegistrationPage: React.FC = () => {
         }
     }
 
+
     const handleCreateAccount = async () => {
-        checkFormValidity();
+        // reset previous errors
+        setRegistrationError({
+            emailError: '',
+            usernameError: '',
+            passwordError: '',
+            otherError: ''
+        });
 
-        try {
-            setLoading(true)
-            await registerUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
-            navigate('/users/verification');
-        }
-        catch (error: any) {
-            const errorMessage: string = error.message;
 
-            if (errorMessage.includes("email")) {
-                setRegistrationError(prev => ({
-                    ...prev,
-                    emailError: errorMessage
-                }));
+        // validate the form
+        const formHasErrors: boolean = checkFormValidity();
+
+        // send data to server for user registration if data is valid
+        if (!formHasErrors) {
+            try {
+                setLoading(true)
+                await registerUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
+                navigate('/user/verification');
             }
-
-            else if (errorMessage.includes("username")) {
-                setRegistrationError(prev => ({
-                    ...prev,
-                    usernameError: errorMessage
-                }));
+            catch (error: any) {
+                const errorMessage: string = error.message;
+    
+                if (errorMessage.includes("email")) {
+                    setRegistrationError(prev => ({
+                        ...prev,
+                        emailError: errorMessage
+                    }));
+                }
+    
+                else if (errorMessage.includes("username")) {
+                    setRegistrationError(prev => ({
+                        ...prev,
+                        usernameError: errorMessage
+                    }));
+                }
+    
+                else { 
+                    setRegistrationError(prev => ({
+                        ...prev,
+                        otherError: errorMessage
+                    }));
+                }
             }
-
-            else {
-                setRegistrationError(prev => ({
-                    ...prev,
-                    otherError: errorMessage
-                }));
+            finally {
+                setLoading(false);
             }
-        }
-        finally {
-            setLoading(false);
         }
     }
 
-    const checkFormValidity = () => {
-        const enteredEmail: string = useUserRegistration.email;
-        const enteredUsername: string = useUserRegistration.username;        
 
-        if (enteredEmail.length < 1) {
+    const checkFormValidity = (): boolean => {
+        let hasErrors = false;
+
+        const { email, username } = useUserRegistration;       
+
+        if (email.length < 1) {
             setRegistrationError(prev => ({
                 ...prev,
                 emailError: "Email is required."
             }));
+            hasErrors = true;
         }
 
-        if (enteredUsername.length < 1) {
+        if (username.length < 1) {
             setRegistrationError(prev => ({
                 ...prev,
                 usernameError: "Username is requied."
             }));
+            hasErrors = true;
         }
 
-        checkPasswordValidity();
+        const passwordHasErrors: boolean = checkPasswordValidity();
+
+        if (passwordHasErrors) hasErrors = true;
+
+        return hasErrors;
     }
 
-    const checkPasswordValidity = () => {
+    const checkPasswordValidity = ():boolean => {
 
-        const enteredPassword: string = useUserRegistration.password;
-        const reEnteredPassword: string = useUserRegistration.confirmPassword;
+        let hasErrors = false;
 
-        if (enteredPassword.length < 1) {
+        const { password, confirmpassword } = useUserRegistration;
+        
+
+        console.log(password);
+        console.log(confirmpassword);
+
+        if (password.length < 1) {
             setRegistrationError(prev => ({
                 ...prev,
                 passwordError: "Password is required."
             }));
+            hasErrors = true;
         }
 
-        else if (enteredPassword.length < 6) {
+        else if (password.length < 6) {
             setRegistrationError(prev => ({
                 ...prev,
                 passwordError: "Password must be atleast 6 characters."
             }));
+            hasErrors = true;
         }
-        else {
-            if (enteredPassword !== reEnteredPassword) {
-                setRegistrationError(prev => ({
-                    ...prev,
-                    passwordError: "Passwords must match."
-                }));
-            }
+        else if (password !== confirmpassword) {
+            setRegistrationError(prev => ({
+                ...prev,
+                passwordError: "Passwords must match."
+            }));
+            hasErrors = true;
         }
 
+        return hasErrors;
     }
-
+    
     return (
         <div className="registration-page-container">
             <h1 className="registration-page-app-name">Shelf Quest</h1>

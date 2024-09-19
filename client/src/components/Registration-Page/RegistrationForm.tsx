@@ -19,13 +19,16 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserReg
                 <h1 className="registration-form-title">Create Account</h1>
             </div>
 
-            <RegistrationFormField placeholder="Email" handleInputField={handleUserRegistration} error={registrationError.emailError} />
-
-            <RegistrationFormField placeholder="Username" handleInputField={handleUserRegistration} error={registrationError.usernameError} />
-
-            <RegistrationFormField placeholder="Password" handleInputField={handleUserRegistration} error={registrationError.passwordError} />
-
-            <RegistrationFormField placeholder="Confirm Password" handleInputField={handleUserRegistration} error={registrationError.otherError} />
+            {['Email', 'Username', 'Password', 'Confirm Password'].map(field =>
+                <RegistrationFormField 
+                    key={field}
+                    placeholder={field} 
+                    handleInputField={handleUserRegistration} 
+                    error={
+                        field === 'Confirm Password' ? registrationError.otherError 
+                            : 
+                        registrationError[`${field.toLowerCase()}Error` as keyof RegistrationError]} />
+            )}
 
             <div className="registration-button-container">
                 {
@@ -39,7 +42,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserReg
                         </button>
                 }
             </div>
-            
+
             <div className="already-have-account-message-div">
                 <p className="already-have-account-message">
                     Already have an account? <Link className="already-have-account-sign-in-link" to={"/user/login"}>Sign in</Link>

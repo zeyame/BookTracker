@@ -8,7 +8,7 @@ export const registerUser = async (email: string, username: string, password: st
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'applciation/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 email: email,
