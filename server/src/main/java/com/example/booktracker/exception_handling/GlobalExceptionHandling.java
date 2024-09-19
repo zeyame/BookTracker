@@ -5,6 +5,7 @@ import com.example.booktracker.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -99,6 +100,17 @@ public class GlobalExceptionHandling {
     public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(InvalidCredentialsException exception) {
         String message = exception.getMessage();
         HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernammeNotFoundException(UsernameNotFoundException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.NOT_FOUND;
 
         ErrorResponse errorResponse = new ErrorResponse(message, status.value());
 

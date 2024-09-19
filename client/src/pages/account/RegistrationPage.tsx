@@ -61,7 +61,7 @@ export const RegistrationPage: React.FC = () => {
             try {
                 setLoading(true)
                 await registerUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
-                navigate('/user/verification', {state: {email: useUserRegistration.email}});
+                navigate('/user/verification', {state: {email: useUserRegistration.email, username: useUserRegistration.username}});
             }
             catch (error: any) {
                 const errorMessage: string = error.message;

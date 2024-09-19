@@ -96,9 +96,7 @@ const element = document.getElementById('root') as HTMLElement;
 if (element) {
   const root = ReactDOM.createRoot(element);
   root.render(
-    <React.StrictMode>
       <RouterProvider router={router} />
-    </React.StrictMode>
   );  
 }
 else {

@@ -1,3 +1,5 @@
+import { json } from "react-router-dom";
+
 const BASE_URL: string = "http://localhost:8080";       // Spring server
 
 
@@ -37,4 +39,28 @@ export const registerUser = async (email: string, username: string, password: st
     }
 }
 
+
+export const requestOTP = async (email: string, username: string): Promise<void> => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/otp/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                username: username
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("An error occurred while sending the OTP.");
+        }
+
+    }
+    catch (error) {
+        throw error;
+    }
+}
 

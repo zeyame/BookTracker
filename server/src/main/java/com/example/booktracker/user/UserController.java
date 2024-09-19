@@ -10,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @RestController
@@ -21,13 +18,11 @@ import java.util.stream.Stream;
 public class UserController {
 
     private final UserService userService;
-    private final EmailService emailService;
     private final JwtService jwtService;
 
     @Autowired
-    public UserController(UserService userService, EmailService emailService, JwtService jwtService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
-        this.emailService = emailService;
         this.jwtService = jwtService;
     }
 
@@ -62,20 +57,7 @@ public class UserController {
         // register new user to database
         userService.register(userRegistrationDTO);
 
-        // extracting user data
-        String username = userRegistrationDTO.getUsername();
-        String email = userRegistrationDTO.getEmail();
-
-        // generating a verification token
-        String token = jwtService.generateToken(username);
-
-        // generating a verification link
-        String link = generateVerificationLink(token, username);
-
-        // sending verification email to registered user
-        emailService.sendVerificationEmail(email, "Verify your Shelf Quest account.", "This is your link to verify the account: " + link);
-
-        responseMap.put("message", "User registered successfully. Verification email sent.");
+        responseMap.put("message", "User registered successfully.");
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
@@ -168,9 +150,4 @@ public class UserController {
 
         return ResponseEntity.ok(responseMap);
     }
-
-    private String generateVerificationLink(String token, String username) {
-        return "http://localhost:8080/api/users/verify-email?token="+token+"&username="+username;
-    }
-
 }

@@ -142,6 +142,10 @@ public class UserService {
         save(user);
     }
 
+    public void storeOTP(int otp, String username) {
+
+    }
+
 
     /**
      * Verifies a user's registration by validating the provided token and updating the user's verification status.
