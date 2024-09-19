@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { book } from "../interfaces/BookInterface";
-import '../styles/all-similar-books-page.css';
-import { SearchBar } from "../components/Global/SearchBar";
-import { ExpandedSimilarBook } from "../components/All-Similar-Books-Page/ExpandedSimilarBook";
+import { book } from "../../interfaces/BookInterface";
+import '../../styles/all-similar-books-page.css';
+import { SearchBar } from "../../components/Global/SearchBar";
+import { ExpandedSimilarBook } from "../../components/All-Similar-Books-Page/ExpandedSimilarBook";
 
 export const AllSimilarBooksPage: React.FC = () => {
     const navigate = useNavigate();

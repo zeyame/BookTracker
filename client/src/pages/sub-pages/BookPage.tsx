@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { book } from "../interfaces/BookInterface";
-import { SearchBar } from "../components/Global/SearchBar";
-import '../styles/book-page.css';
-import { LoadingIcon } from "../components/Global/LoadingIcon";
-import { fetchSimilarBooks } from "../services/similarBookSearch";
-import { SimilarBook } from "../components/Book-Page/SimilarBook";
-import { Author } from "../interfaces/AuthorInterface";
-import { fetchAuthorDetails } from "../services/authorSearch";
-import { RightArrowIcon } from "../components/Global/RightArrowIcon";
-import { sliceDescription } from "../utils/sliceDescription";
+import { book } from "../../interfaces/BookInterface";
+import { SearchBar } from "../../components/Global/SearchBar";
+import '../../styles/book-page.css';
+import { LoadingIcon } from "../../components/Global/LoadingIcon";
+import { fetchSimilarBooks } from "../../services/similarBookSearch";
+import { SimilarBook } from "../../components/Book-Page/SimilarBook";
+import { Author } from "../../interfaces/AuthorInterface";
+import { fetchAuthorDetails } from "../../services/authorSearch";
+import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
+import { sliceDescription } from "../../utils/sliceDescription";
 
 type Loading = {
     aboutAuthor: boolean

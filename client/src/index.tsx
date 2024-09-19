@@ -13,12 +13,13 @@ import { StatsPage } from './pages/activity/StatsPage';
 import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
-import { BookPage } from './pages/BookPage';
-import { AllSimilarBooksPage } from './pages/AllSimilarBooksPage';
+import { BookPage } from './pages/sub-pages/BookPage';
+import { AllSimilarBooksPage } from './pages/sub-pages/AllSimilarBooksPage';
 import { AboutAuthor } from './components/Book-Page/AboutAuthor';
-import { AuthorPage } from './pages/AuthorPage';
-import { LoginPage } from './pages/LoginPage';
-import { RegistrationPage } from './pages/RegistrationPage';
+import { AuthorPage } from './pages/sub-pages/AuthorPage';
+import { LoginPage } from './pages/account/LoginPage';
+import { RegistrationPage } from './pages/account/RegistrationPage';
+import { VerificationPage } from './pages/account/VerificationPage';
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: '/user/registration',
         element: <RegistrationPage />
+      },
+      {
+        path: '/user/verification',
+        element: <VerificationPage />
       }
     ],
     errorElement: <ErrorPage />
