@@ -43,7 +43,7 @@
     height: 38px;
     width: 100%;
     margin-top: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     margin-left: -15px;
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 20px;
@@ -103,4 +103,19 @@
 .return-home-from-verification {
     text-decoration: underline;
     cursor: pointer;
+}
+
+.empty-otp-error {
+    color: red;
+    margin-top: -10px;
+    margin-left: 4px;
+    margin-bottom: 20px;
+}
+
+.otp-verification-error {
+    color: red;
+    margin-top: -10px;
+    margin-left: 4px;
+    margin-bottom: 20px;
+    line-height: 25px;
 }

@@ -5,6 +5,7 @@ import com.example.booktracker.extra_services.EmailService;
 import com.example.booktracker.otp.exception.IncorrectOtpException;
 import com.example.booktracker.otp.exception.InvalidOtpException;
 import com.example.booktracker.user.UserService;
+import com.example.booktracker.user.exception.UserAlreadyVerifiedException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/otp")
@@ -56,6 +56,11 @@ public class OtpController {
             throw new UsernameNotFoundException("An OTP could not be sent as user is not yet registered.");
         }
 
+        // has the user already been verified (avoids accidental extra requests for OTPs)
+        if (userService.findByUsername(username).get().isVerified()) {
+            throw new UserAlreadyVerifiedException("User is already verified.");
+        }
+
         // Generate the OTP
         String otp = otpService.generateOtp();
 
@@ -64,7 +69,7 @@ public class OtpController {
 
         // send email with otp
         emailService.sendVerificationEmail(email, "Verify your ShelfQuest email.",
-                "To verify your email address, please use the following One Time Password (OTP):\n\n" + otp);
+                "To verify your email address, please use the following One Time Password (OTP):\n\n" + otp + "\n\nPlease be aware that this OTP expires in 30 minutes.");
 
 
         Map<String, String> responseMap = new HashMap<>();

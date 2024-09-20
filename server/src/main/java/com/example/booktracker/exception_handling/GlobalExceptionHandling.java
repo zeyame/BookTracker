@@ -131,6 +131,16 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    @ExceptionHandler(UserAlreadyVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyVerifiedException(UserAlreadyVerifiedException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.OK;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException exception) {
         String message = exception.getMessage();

@@ -127,10 +127,6 @@ export const RegistrationPage: React.FC = () => {
         let hasErrors = false;
 
         const { password, confirmpassword } = useUserRegistration;
-        
-
-        console.log(password);
-        console.log(confirmpassword);
 
         if (password.length < 1) {
             setRegistrationError(prev => ({

@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +66,12 @@ public class OtpService {
      * @throws CustomBadRequestException if the username is null or empty
      */
     public Optional<OtpVerification> findActiveOtpByUsername(String username) {
-        return otpRepository.findActiveOtpByUsername(username);
+        try {
+            return otpRepository.findActiveOtpByUsername(username);
+        }
+        catch (DataAccessException exception) {
+            throw new RuntimeException("An unexpected database error occurred when fetching active otp for user.");
+        }
     }
 
     /**
@@ -145,11 +151,11 @@ public class OtpService {
             String storedOtp = otpVerification.getOtp();
 
             if (!storedOtp.equals(otp)) {
-                throw new IncorrectOtpException("Incorrect otp entered by user.");
+                throw new IncorrectOtpException("The otp you entered is incorrect.");
             }
         }
         else {
-            throw new InvalidOtpException("User has no active otp. Try requesting a new one.");
+            throw new InvalidOtpException("OTP has expired or invalid. Try requesting a new OTP.");
         }
     }
 }

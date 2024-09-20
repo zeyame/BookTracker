@@ -1,29 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import '../../styles/verification-page.css';
 import { LoadingIcon } from "../../components/Global/LoadingIcon";
-import { requestOTP } from "../../services/userAccount";
+import { requestOTP, verifyOtp } from "../../services/userAccount";
 
 
 interface customError {
-    navigationError: boolean
-    otpRequestError: boolean
+    navigationError: string
+    otpRequestError: string
+    otpInputError: string
+    otpVerificationError: string
+}
+
+interface customLoading {
+    page: boolean
+    otpSubmit: boolean
 }
 
 export const VerificationPage: React.FC = () => {
+    const navigate = useNavigate();
 
     const location = useLocation();
     const email: string | null = location.state?.email;
     const username: string | null = location.state?.username;
-
-    console.log("Email: ", email);
-    console.log("Username: ", username);
     
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<customError>({
-        navigationError: false,
-        otpRequestError: false
+    // states
+    const [loading, setLoading] = useState<customLoading>({
+        page: false,
+        otpSubmit: false
     });
+    const [error, setError] = useState<customError>({
+        navigationError: '',
+        otpRequestError: '',
+        otpInputError: '',
+        otpVerificationError: ''
+    });
+    const [otp, setOtp] = useState<string>('');
 
     // request otp
     useEffect(() => {
@@ -31,7 +43,7 @@ export const VerificationPage: React.FC = () => {
         if (!email || !username) {
             setError(prev => ({
                 ...prev,
-                navigationError: true
+                navigationError: "Invalid navigation."
             }));
             return;
         }
@@ -41,24 +53,70 @@ export const VerificationPage: React.FC = () => {
 
     const requestForOtp = async (email: string, username: string) => {
         try {
-            setLoading(true);
+            setLoading(prev => ({
+                ...prev,
+                page: true
+            }));
             await requestOTP(email, username);
         }
         catch (error: any) {
             setError(prev => ({
                 ...prev,
-                otpRequestError: true
+                otpRequestError: error.message
             }));
         }
         finally {
-            setLoading(false);
+            setLoading(prev => ({
+                ...prev,
+                page: false
+            }));
+        }
+    }
+
+    const handleOtpInput = (otpValue: string) => {
+        setOtp(otpValue);
+    }
+
+    const handleSubmitOtp = async () => {
+        setError(prev => ({
+            ...prev,
+            otpInputError: ''
+        }));
+
+        if (otp.length < 1) {
+            setError(prev => ({
+                ...prev,
+                otpInputError: "OTP is required."
+            }));
+            return;
+        }
+
+        try {
+            setLoading(prev => ({
+                ...prev,
+                otpSubmit: true
+            }))
+            username && await verifyOtp(username, otp);
+            navigate("/user/login");
+        }
+        catch (error: any) {
+            setError(prev => ({
+                ...prev,
+                otpVerificationError: error.message
+            }));
+        }
+        finally {
+            setLoading(prev => ({
+                ...prev, 
+                otpSubmit: false
+            }));
         }
     }
 
     return (
         <>
             {
-                loading ? 
+                loading.page ? 
                 <div className="verification-page-container">
                     <div className="verification-page-loading">
                         <p className="verification-loading-message">Loading</p>
@@ -66,14 +124,14 @@ export const VerificationPage: React.FC = () => {
                     </div> 
                 </div>
                     :
-                error.navigationError ?
+                error.navigationError.length > 0 ? 
                 <div className="verification-page-error">
-                    Invalid navigation. Please return to the registration page or <Link className="return-home-from-verification" to={'/'}>click here</Link> to return to the home page.
+                    {error.navigationError} Please return to the registration page or <Link className="return-home-from-verification" to={'/'}>click here</Link> to return to the home page.
                 </div>
                     :
-                error.otpRequestError ?
+                error.otpRequestError.length > 0 ?
                 <div className="verification-page-error">
-                    An error occurred while sending the OTP for verification. Please refresh to try again or return to the registration page. 
+                    {error.otpRequestError}
                 </div>
                     :
                 <div className="verification-page-container">
@@ -82,11 +140,28 @@ export const VerificationPage: React.FC = () => {
                         <h2 className="verification-page-title">Verify email address</h2> 
                         <p className="verification-message">To verify your email , we've sent a One Time Password (OTP) to {email}</p>
                         <div className="otp-input-container">
-                            <input className="otp-input" placeholder="Enter OTP"  />
+                            <input className="otp-input" placeholder="Enter OTP" onChange={(inputValue) => handleOtpInput(inputValue.target.value)}  />
+                            {
+                                error.otpInputError.length > 0
+                                    ?
+                                <p className="empty-otp-error">{error.otpInputError}</p>
+                                    :
+                                error.otpVerificationError.length > 0 ?
+                                <p className="otp-verification-error">{error.otpVerificationError}</p>
+                                    :
+                                <p></p>
+                            }
                         </div>
-                        <button className="submit-otp-button">
-                            Create account
-                        </button>
+                        {
+                            loading.otpSubmit ? 
+                            <div className="otp-submit-button-loading">
+                                <LoadingIcon />
+                            </div>
+                            :
+                            <button className="submit-otp-button" onClick={() => handleSubmitOtp()}>
+                                Create account
+                            </button>
+                        }
                         <button className="resend-otp">Resend OTP</button>
                     </div>
                 </div>

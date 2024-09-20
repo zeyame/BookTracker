@@ -49,8 +49,8 @@ export const requestOTP = async (email: string, username: string): Promise<void>
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                email: email,
-                username: username
+                email,
+                username
             })
         });
 
@@ -64,3 +64,34 @@ export const requestOTP = async (email: string, username: string): Promise<void>
     }
 }
 
+
+export const verifyOtp = async (username: string, otp: string) => {
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/otp/verify`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                username,
+                otp
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            switch (response.status) {
+                case 500:
+                    throw new Error("Unexpected error occurred when verifying OTP.");
+                default:
+                    throw new Error(errorData.message);
+            }
+        }
+        
+    }
+    catch (error: any) {
+        throw error;
+    }
+}
