@@ -6,6 +6,7 @@ import com.example.booktracker.user.exception.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -142,44 +143,19 @@ public class UserService {
         save(user);
     }
 
-    public void storeOTP(int otp, String username) {
-
-    }
-
-
-    /**
-     * Verifies a user's registration by validating the provided token and updating the user's verification status.
-     *
-     * This method performs the following steps:
-     * 1. Validates the provided token using the {@link JwtService}. If the token is invalid, the user is deleted
-     *    from the database, and an {@link InvalidTokenException} is thrown.
-     * 2. If the token is valid, the user's verification status is updated to 'verified' in the database.
-     *
-     * @param token The verification token received from the verification link.
-     * @param username The username of the user whose verification status is to be updated.
-     *
-     * @throws InvalidTokenException If the provided token is invalid or has expired, resulting in user deletion.
-     * @throws InvalidCredentialsException If the user with the specified username could not be found.
-     */
     @Transactional
-    public void verify(String token, String username) {
-        // validating token sent back from verification link
-        if (!jwtService.isTokenValid(token, username)) {
-            // remove user from db
-            deleteByUsername(username);
-            throw new InvalidTokenException("Verification failed due to invalid token. Try registering again.");
-        }
+    public void verify(String username) {
 
-        // updating verification status to verified
-        Optional<User> possibleUser = findByUsername(username);
-        if (possibleUser.isPresent()) {
-            User user = possibleUser.get();
+        Optional<User> optionalUser = findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
             user.setIsVerified(true);
             save(user);
         }
         else {
-            throw new InvalidCredentialsException("Verification failed. User could not be found.");
+            throw new UsernameNotFoundException("User is not registered in order to verify their account.");
         }
+
     }
 
 

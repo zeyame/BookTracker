@@ -61,40 +61,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
-
-    /**
-     * Handles the email verification process for a user.
-     *
-     * This endpoint verifies the user's email address by checking the provided
-     * verification token and username. If the token is valid and matches the username,
-     * the user's verification status is updated to true, allowing them to log in.
-     *
-     * @param token The verification token sent to the user. It is used to validate
-     *              the verification request.
-     * @param username The username of the user whose email is being verified.
-     *                 This is used to locate the user in the database.
-     *
-     * @return A {@link ResponseEntity} containing a response map with a message indicating
-     *         whether the verification was successful or not. The HTTP status code is set to
-     *         {@code 201 Created} to indicate successful processing of the request.
-     *
-     * @throws InvalidTokenException if the provided token is invalid or does not match
-     *                                the expected criteria.
-     * @throws InvalidCredentialsException if the user with the provided username
-     *                                      cannot be found or any other authentication
-     *                                      issues occur.
-     */
-    @GetMapping("/verify-email")
-    public ResponseEntity<Map<String, String>> verifyUser(@RequestParam String token, @RequestParam String username) {
-        // verify user
-        userService.verify(token, username);
-
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("message", "Verification successful. User can now login.");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
-    }
-
     /**
      * Authenticates a user and generates a JWT token upon successful login.
      *

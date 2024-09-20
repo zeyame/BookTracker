@@ -1,10 +1,10 @@
 package com.example.booktracker.otp;
 
-public class OtpRequest {
+public class OtpRequestDTO {
     private String email;
     private String username;
 
-    public OtpRequest(String email, String username) {
+    public OtpRequestDTO(String email, String username) {
         this.email = email;
         this.username = username;
     }

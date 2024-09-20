@@ -1,6 +1,8 @@
 package com.example.booktracker.exception_handling;
 
 import com.example.booktracker.book.exception.*;
+import com.example.booktracker.otp.exception.IncorrectOtpException;
+import com.example.booktracker.otp.exception.InvalidOtpException;
 import com.example.booktracker.otp.exception.OtpAlreadySentException;
 import com.example.booktracker.user.exception.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -161,6 +163,27 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    @ExceptionHandler(IncorrectOtpException.class)
+    public ResponseEntity<ErrorResponse> handleIncorrectOtpException(IncorrectOtpException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOtpException(InvalidOtpException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
         String message = exception.getMessage();
@@ -170,7 +193,5 @@ public class GlobalExceptionHandling {
 
         return new ResponseEntity<>(errorResponse, status);
     }
-
-
 
 }
