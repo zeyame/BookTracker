@@ -1,13 +1,15 @@
 package com.example.booktracker.otp;
 
+import com.example.booktracker.otp.exception.OtpAlreadySentException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class OtpService {
@@ -41,11 +43,22 @@ public class OtpService {
 
     @Transactional
     public void save(String otpValue, String username) {
+
+        if (findActiveOtpByUsername(username).isPresent()) {
+            throw new OtpAlreadySentException("An OTP has already been sent to the user. Please use the existing OTP or wait before requesting a new one.");
+        }
+
         OtpVerification otp = new OtpVerification();
         otp.setUsername(username);
         otp.setOtp(otpValue);
         otp.setExpirationTime(new Date(System.currentTimeMillis() + EXPIRATION_TIME));
 
-        otpRepository.save(otp);
+        try {
+            otpRepository.save(otp);
+        }
+        catch (DataIntegrityViolationException exception) {
+            throw new OtpAlreadySentException("An OTP has already been sent to the user. Please use the existing OTP or wait before requesting a new one.");
+        }
+
     }
 }

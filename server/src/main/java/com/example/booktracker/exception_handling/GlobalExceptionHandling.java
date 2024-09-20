@@ -1,7 +1,9 @@
 package com.example.booktracker.exception_handling;
 
 import com.example.booktracker.book.exception.*;
+import com.example.booktracker.otp.exception.OtpAlreadySentException;
 import com.example.booktracker.user.exception.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -146,5 +148,29 @@ public class GlobalExceptionHandling {
 
         return new ResponseEntity<>(errorResponse, status);
     }
+
+
+    // otp exceptions
+    @ExceptionHandler(OtpAlreadySentException.class)
+    public ResponseEntity<ErrorResponse> handleOtpAlreadySentException(OtpAlreadySentException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.OK;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+        String message = exception.getMessage();
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+
 
 }

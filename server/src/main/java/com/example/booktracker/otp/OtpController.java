@@ -46,34 +46,23 @@ public class OtpController {
         }
 
         if (userService.findByUsername(username).isEmpty()) {
-            throw new UsernameNotFoundException("An OTP could not be sent as user does not exist.");
-        }
-
-        Map<String, String> responseMap = new HashMap<>();
-
-        // Check if an active OTP already exists
-        Optional<OtpVerification> existingOtp = otpService.findActiveOtpByUsername(username);
-        if (existingOtp.isPresent()) {
-            responseMap.put("message", "An OTP has already been sent to the user. Please use the existing OTP or wait before requesting a new one.");
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+            throw new UsernameNotFoundException("An OTP could not be sent as user is not yet registered.");
         }
 
         // Generate and send the OTP
         String otp = otpService.generateOtp();
 
-        try {
-            // Save OTP to database
-            otpService.save(otp, username);
+        // save otp with username
+        otpService.save(otp, username);
 
-            emailService.sendVerificationEmail(email, "Verify your ShelfQuest email.",
-                    "To verify your email address, please use the following One Time Password (OTP):\n\n" + otp);
+        // send email with otp
+        emailService.sendVerificationEmail(email, "Verify your ShelfQuest email.",
+                "To verify your email address, please use the following One Time Password (OTP):\n\n" + otp);
 
-            responseMap.put("message", "OTP has successfully been sent to the user.");
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
-        }
-        catch (DataIntegrityViolationException exception) {
-            responseMap.put("message", "An OTP has already been sent to the user. Please use the existing OTP or wait before requesting a new one.");
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
-        }
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("message", "OTP has successfully been sent to the user.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 }
