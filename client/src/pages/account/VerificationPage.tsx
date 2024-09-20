@@ -97,7 +97,7 @@ export const VerificationPage: React.FC = () => {
                 otpSubmit: true
             }))
             username && await verifyOtp(username, otp);
-            navigate("/user/login");
+            navigate("/user/login", {state: {"registeredMessage": "You have successfully verified your account. You can now login."}});
         }
         catch (error: any) {
             setError(prev => ({
