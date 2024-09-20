@@ -1,5 +1,6 @@
 package com.example.booktracker.extra_services;
 
+import com.example.booktracker.book.exception.CustomBadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -32,6 +33,12 @@ public class EmailService {
      * @throws MailException If an error occurs while sending the email and the maximum number of retry attempts is reached.
      */
     public void sendVerificationEmail(String recipientEmail, String subject, String body) {
+
+        // validating the email parameter
+        if (recipientEmail == null || recipientEmail.trim().isEmpty()) {
+            throw new CustomBadRequestException("Email is required to send the verification OTP.");
+        }
+
         int maxTries = 2;
         int attempt = 0;
         boolean emailSent = false;

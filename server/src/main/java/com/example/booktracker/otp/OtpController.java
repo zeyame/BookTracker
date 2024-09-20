@@ -2,6 +2,8 @@ package com.example.booktracker.otp;
 
 import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.extra_services.EmailService;
+import com.example.booktracker.otp.exception.IncorrectOtpException;
+import com.example.booktracker.otp.exception.InvalidOtpException;
 import com.example.booktracker.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,21 +34,29 @@ public class OtpController {
         this.userService = userService;
     }
 
+    /**
+     * Sends a One Time Password (OTP) to the user's registered email address for verification.
+     *
+     * This method checks if the user is registered before generating and sending the OTP.
+     * If the user is not found, a {@link UsernameNotFoundException} is thrown. The OTP is generated,
+     * saved in the database, and then sent to the specified email address.
+     *
+     * @param otpRequest an object containing the username and email address of the user
+     * @return a {@link ResponseEntity} containing a message indicating the success of the operation
+     * @throws UsernameNotFoundException if the user with the specified username is not registered
+     */
     @Transactional
     @PostMapping("/send")
     public ResponseEntity<Map<String, String>> sendOtp(@RequestBody OtpRequestDTO otpRequest) {
         String username = otpRequest.getUsername();
         String email = otpRequest.getEmail();
 
-        if (Stream.of(username, email).anyMatch(val -> val == null || val.trim().isEmpty())) {
-            throw new CustomBadRequestException("Both email and username are required to provide an OTP.");
-        }
-
+        // user must be registered first to get an OTP for verification
         if (userService.findByUsername(username).isEmpty()) {
             throw new UsernameNotFoundException("An OTP could not be sent as user is not yet registered.");
         }
 
-        // Generate and send the OTP
+        // Generate the OTP
         String otp = otpService.generateOtp();
 
         // save otp with username
@@ -63,6 +73,18 @@ public class OtpController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
+    /**
+     * Verifies the One Time Password (OTP) for a user and updates their verification status.
+     *
+     * This method checks if the provided OTP is active and correct for the specified user.
+     * If the verification is successful, the OTP is deleted, and the user's verification status is updated.
+     *
+     * @param verifyOtpRequestDTO an object containing the username and OTP to be verified
+     * @return a {@link ResponseEntity} containing a message indicating the success of the verification
+     * @throws IncorrectOtpException if the provided OTP is incorrect
+     * @throws InvalidOtpException if the user has no active OTP
+     * @throws CustomBadRequestException if the username or OTP is missing
+     */
     @Transactional
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody VerifyOtpRequestDTO verifyOtpRequestDTO) {
@@ -70,7 +92,7 @@ public class OtpController {
         otpService.verify(verifyOtpRequestDTO);
 
         // delete the otp once validated
-        otpService.deleteActiveOtpByUsername(verifyOtpRequestDTO.getUsername());
+        otpService.deleteOtpByUsername(verifyOtpRequestDTO.getUsername());
 
         // update user's verification status in the users table
         userService.verify(verifyOtpRequestDTO.getUsername());
