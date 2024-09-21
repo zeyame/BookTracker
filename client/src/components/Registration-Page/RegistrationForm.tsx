@@ -7,12 +7,13 @@ import { RegistrationError } from "../../interfaces/RegistrationError";
 interface RegistrationFormProps {
     handleUserRegistration: (inputFieldName: string, inputValue: string) => void
     handleCreateAccount: () => void
+    handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>, functionToCall: () => void) => void,
     loading: boolean
     registrationError: RegistrationError
 }
 
 
-export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserRegistration, handleCreateAccount, loading, registrationError}) => {
+export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserRegistration, handleCreateAccount, handleKeyDown, loading, registrationError}) => {
     return (
         <div className="registration-form-container">
             <div>
@@ -27,7 +28,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserReg
                     error={
                         field === 'Confirm Password' ? registrationError.otherError 
                             : 
-                        registrationError[`${field.toLowerCase()}Error` as keyof RegistrationError]} />
+                        registrationError[`${field.toLowerCase()}Error` as keyof RegistrationError]}
+                    handleCreateAccount={handleCreateAccount}
+                    handleKeyDown={handleKeyDown}
+                        />
             )}
 
             <div className="registration-button-container">

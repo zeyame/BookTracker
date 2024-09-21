@@ -9,7 +9,7 @@
 
 .registration-page-app-name {
     margin-right: 35px;
-    margin-top: 70px;
+    margin-top: 110px;
     margin-bottom: 5px;
     color: rgb(49, 38, 76);
 }
@@ -124,4 +124,30 @@
 .registering-loading {
     display: flex;
     justify-content: center;
+}
+
+.error-registering-after-verification {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(231, 87, 87); 
+    color: white; /* Dark green text for success */
+    padding: 20px 40px; /* Padding for spacing */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1000;
+    animation: fadeOut 3s ease-in-out forwards;
+    top: 5%;
+    left: 54%;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
 }

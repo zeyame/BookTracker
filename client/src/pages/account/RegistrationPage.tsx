@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import isEmail from 'validator/lib/isEmail';
 import '../../styles/registration-page.css'
 import { RegistrationForm } from "../../components/Registration-Page/RegistrationForm";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RegistrationError } from "../../interfaces/RegistrationError";
-import { registerUser } from "../../services/userAccount";
+import { registerUser, validateUser } from "../../services/userAccount";
+import { handleKeyDown } from "../../utils/handleKeyDown";
+import { validate } from "uuid";
 
 interface UserRegistration {
     email: string
@@ -15,6 +18,9 @@ interface UserRegistration {
 export const RegistrationPage: React.FC = () => {
 
     const navigate = useNavigate();
+    
+    const location = useLocation();
+    const errorRegisteringAfterVerification: string | null = location.state?.errorRegisteringAfterVerification;
 
     const [useUserRegistration, setUseUserRegistration] = useState<UserRegistration>({
         email: '',
@@ -30,7 +36,6 @@ export const RegistrationPage: React.FC = () => {
         otherError: ''
     });
 
-
     const handleUserRegistration = (inputFieldName: string, inputValue: string) => {
         const adjustedInputFieldName: string = inputFieldName.replace(/\s+/g, '').toLowerCase();
 
@@ -41,7 +46,6 @@ export const RegistrationPage: React.FC = () => {
             }));
         }
     }
-
 
     const handleCreateAccount = async () => {
         // reset previous errors
@@ -60,8 +64,8 @@ export const RegistrationPage: React.FC = () => {
         if (!formHasErrors) {
             try {
                 setLoading(true)
-                await registerUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
-                navigate('/user/verification', {state: {email: useUserRegistration.email, username: useUserRegistration.username}});
+                await validateUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
+                navigate('/user/verification', {state: {email: useUserRegistration.email, username: useUserRegistration.username, password: useUserRegistration.password}});
             }
             catch (error: any) {
                 const errorMessage: string = error.message;
@@ -103,6 +107,14 @@ export const RegistrationPage: React.FC = () => {
             setRegistrationError(prev => ({
                 ...prev,
                 emailError: "Email is required."
+            }));
+            hasErrors = true;
+        }
+
+        else if (!isEmail(email, {allow_utf8_local_part: true})) {
+            setRegistrationError(prev => ({
+                ...prev,
+                emailError: "Invalid email address."
             }));
             hasErrors = true;
         }
@@ -153,11 +165,17 @@ export const RegistrationPage: React.FC = () => {
 
         return hasErrors;
     }
-    
+
     return (
         <div className="registration-page-container">
+            {
+                errorRegisteringAfterVerification &&
+                <div className="error-registering-after-verification">
+                    {errorRegisteringAfterVerification}
+                </div>
+            }
             <h1 className="registration-page-app-name">Shelf Quest</h1>
-            <RegistrationForm handleUserRegistration={handleUserRegistration} handleCreateAccount={handleCreateAccount} loading={loading} registrationError={registrationError} />
+            <RegistrationForm handleUserRegistration={handleUserRegistration} handleCreateAccount={handleCreateAccount} handleKeyDown={handleKeyDown} loading={loading} registrationError={registrationError} />
         </div>
     );
 }

@@ -3,6 +3,44 @@ import { json } from "react-router-dom";
 const BASE_URL: string = "http://localhost:8080";       // Spring server
 
 
+export const validateUser = async (email: string, username: string, password: string): Promise<void> => {
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/users/validate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email,
+                username,
+                password
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            
+            switch (response.status) {
+                case 400:
+                    throw new Error("Missing data from the user.");
+                case 409:
+                    throw new Error(errorData.message);
+                default:
+                    throw new Error("An unexpected error occurred with validating user data.");
+            }
+        }
+    }
+    catch (error: any) {
+        if (error instanceof TypeError) {
+            throw new Error("An unexpected error occurring when contacting server.");
+        }
+        throw error;
+    }
+
+}
+
 export const registerUser = async (email: string, username: string, password: string): Promise<void> => {
 
     try {
@@ -35,12 +73,16 @@ export const registerUser = async (email: string, username: string, password: st
         }
     }
     catch (error: any) {
+        if (error instanceof TypeError) {
+            // handling network related errors
+            throw new Error("An unexpected error occurred when contacting server for registration.");
+        }
         throw error;
     }
 }
 
 
-export const requestOTP = async (email: string, username: string): Promise<void> => {
+export const requestOTP = async (email: string, username: string, resend: boolean): Promise<void> => {
     try {
         const response = await fetch(`${BASE_URL}/api/otp/send`, {
             method: 'POST',
@@ -50,7 +92,8 @@ export const requestOTP = async (email: string, username: string): Promise<void>
             },
             body: JSON.stringify({
                 email,
-                username
+                username,
+                resend
             })
         });
 

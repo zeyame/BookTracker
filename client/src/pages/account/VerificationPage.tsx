@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import '../../styles/verification-page.css';
 import { LoadingIcon } from "../../components/Global/LoadingIcon";
-import { requestOTP, verifyOtp } from "../../services/userAccount";
+import { registerUser, requestOTP, verifyOtp } from "../../services/userAccount";
+import { handleKeyDown } from "../../utils/handleKeyDown";
 
 
 interface customError {
@@ -15,6 +16,7 @@ interface customError {
 interface customLoading {
     page: boolean
     otpSubmit: boolean
+    resend: boolean
 }
 
 export const VerificationPage: React.FC = () => {
@@ -23,11 +25,13 @@ export const VerificationPage: React.FC = () => {
     const location = useLocation();
     const email: string | null = location.state?.email;
     const username: string | null = location.state?.username;
-    
+    const password: string | null = location.state?.password;
+
     // states
     const [loading, setLoading] = useState<customLoading>({
         page: false,
-        otpSubmit: false
+        otpSubmit: false,
+        resend: true
     });
     const [error, setError] = useState<customError>({
         navigationError: '',
@@ -36,6 +40,8 @@ export const VerificationPage: React.FC = () => {
         otpVerificationError: ''
     });
     const [otp, setOtp] = useState<string>('');
+    const [otpReSent, setOtpReSent] = useState<boolean>(false);
+    const [userVerified, setUserVerified] = useState<boolean>(false);
 
     // request otp
     useEffect(() => {
@@ -48,16 +54,41 @@ export const VerificationPage: React.FC = () => {
             return;
         }
 
-        requestForOtp(email, username);
+        requestForOtp(email, username, false);
     }, [email, username]); 
 
-    const requestForOtp = async (email: string, username: string) => {
+    useEffect(() => {
+        if (email && username && password && userVerified) {
+            requestUserRegistration(email, username, password);
+        }
+        return () => {
+            setUserVerified(false);
+        }
+    }, [userVerified])
+
+    const requestUserRegistration = async (email: string, username: string, password: string) => {
         try {
+            await registerUser(email, username, password);
+            navigate("/user/login", {state: {"registeredMessage": "You have successfully been registered. You can now login.", userLoginDetails: {username, password}}});
+        }
+        catch (error: any) {
+            navigate('/user/registration', {state: {errorRegisteringAfterVerification: error.message}});
+        }
+    }
+
+    const requestForOtp = async (email: string, username: string, resend: boolean) => {
+        try {
+            resend ? 
+            setLoading(prev => ({
+                ...prev,
+                resend: true
+            })) :
             setLoading(prev => ({
                 ...prev,
                 page: true
             }));
-            await requestOTP(email, username);
+
+            await requestOTP(email, username, resend);
         }
         catch (error: any) {
             setError(prev => ({
@@ -68,7 +99,8 @@ export const VerificationPage: React.FC = () => {
         finally {
             setLoading(prev => ({
                 ...prev,
-                page: false
+                page: false,
+                resend: false
             }));
         }
     }
@@ -97,7 +129,7 @@ export const VerificationPage: React.FC = () => {
                 otpSubmit: true
             }))
             username && await verifyOtp(username, otp);
-            navigate("/user/login", {state: {"registeredMessage": "You have successfully verified your account. You can now login."}});
+            setUserVerified(true);
         }
         catch (error: any) {
             setError(prev => ({
@@ -111,6 +143,11 @@ export const VerificationPage: React.FC = () => {
                 otpSubmit: false
             }));
         }
+    }
+
+    const handleResendButton = async () => {
+        email && username && await requestForOtp(email, username, true);
+        setOtpReSent(true);
     }
 
     return (
@@ -140,7 +177,7 @@ export const VerificationPage: React.FC = () => {
                         <h2 className="verification-page-title">Verify email address</h2> 
                         <p className="verification-message">To verify your email , we've sent a One Time Password (OTP) to {email}</p>
                         <div className="otp-input-container">
-                            <input className="otp-input" placeholder="Enter OTP" onChange={(inputValue) => handleOtpInput(inputValue.target.value)}  />
+                            <input className="otp-input" placeholder="Enter OTP" onChange={(inputValue) => handleOtpInput(inputValue.target.value)} onKeyDown={(event) => handleKeyDown(event, handleSubmitOtp)}  />
                             {
                                 error.otpInputError.length > 0
                                     ?
@@ -162,7 +199,17 @@ export const VerificationPage: React.FC = () => {
                                 Create account
                             </button>
                         }
-                        <button className="resend-otp">Resend OTP</button>
+                        {
+                            loading.resend ? 
+                            <div className="otp-resending-loading">
+                                <LoadingIcon />
+                            </div>
+                            :
+                            otpReSent ?
+                            <p>Otp Resent.</p>
+                            :
+                            <button className="resend-otp" onClick={handleResendButton}>Resend OTP</button>
+                        }
                     </div>
                 </div>
             }

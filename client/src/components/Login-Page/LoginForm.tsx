@@ -7,11 +7,12 @@ interface LoginFormProps {
     handleLoginField: (inputValue: string, inputFieldName: string) => void
     handleLoginButton: () => void
     handleSignUpButton: () => void
+    handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>, functionToCall: () => void) => void,
     loading: boolean
     loginError: LoginError
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLoginButton, handleSignUpButton, loading, loginError}) => {
+export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLoginButton, handleSignUpButton, handleKeyDown, loading, loginError}) => {
 
     return (
         <div className="login-form-container">
@@ -23,7 +24,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLog
                     key={field}
                     placeholder={field} 
                     handleLoginField={handleLoginField} 
-                    error={ loginError[`${field.toLowerCase()}Error` as keyof LoginError] } />
+                    error={ loginError[`${field.toLowerCase()}Error` as keyof LoginError] } 
+                    handleLoginButton={handleLoginButton}
+                    handleKeyDown={handleKeyDown}
+                    />
             )}
             
             <div className="login-button-container">
