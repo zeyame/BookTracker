@@ -186,17 +186,17 @@ public class UserService {
         if (possibleUser.isPresent()) {
             User user = possibleUser.get();
             if (!user.isVerified()) {
-                throw new UserNotVerifiedException("Authenticated failed. User not yet verified.");
+                throw new UserNotVerifiedException("Authentication failed. User not yet verified.");        // 401
             }
 
             String storedHashedPassword = user.getPassword();
 
             if (!encoder.matches(enteredPassword, storedHashedPassword)) {
-                throw new InvalidCredentialsException("Authentication failed. Username or password incorrect.");
+                throw new InvalidCredentialsException("Username or password incorrect.");    // 401
             }
         }
         else {
-            throw new InvalidCredentialsException("Authentication failed. Username or password incorrect.");
+            throw new InvalidCredentialsException("Username or password incorrect.");        // 401
         }
     }
 

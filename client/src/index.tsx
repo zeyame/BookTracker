@@ -43,7 +43,7 @@ const router = createBrowserRouter([
         element: <AddBookPage />
       },
       {
-        path: '/read',
+        path: '/user/:username/read',
         element: <ReadPage />
       },
       {

@@ -6,12 +6,13 @@ import { LoadingIcon } from "../Global/LoadingIcon"
 interface LoginFormProps {
     handleLoginField: (inputValue: string, inputFieldName: string) => void
     handleLoginButton: () => void
+    handleSignUpButton: () => void
     loading: boolean
     loginError: LoginError
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLoginButton, loading, loginError}) => {
-    
+export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLoginButton, handleSignUpButton, loading, loginError}) => {
+
     return (
         <div className="login-form-container">
             <h2 className="login-form-title">
@@ -25,7 +26,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLog
                     error={ loginError[`${field.toLowerCase()}Error` as keyof LoginError] } />
             )}
             
-            <div className="registration-button-container">
+            <div className="login-button-container">
                 {
                     loading ? 
                         <div className="logging-in-loading">
@@ -37,6 +38,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLog
                         </button>
                 }
             </div>
+
+            <div className="new-to-shelf-quest-container">
+                <hr className="divider" />
+                <span className="divider-text">New to Shelf Quest?</span>
+                <hr className="divider" />
+            </div>
+            
+            <button className="login-page-sign-up-button" onClick={handleSignUpButton}>
+                Sign Up
+            </button>
 
         </div>
     )

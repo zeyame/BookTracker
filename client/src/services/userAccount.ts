@@ -60,12 +60,16 @@ export const requestOTP = async (email: string, username: string): Promise<void>
 
     }
     catch (error) {
+        if (error instanceof TypeError) {
+            // handling network related errors
+            throw new Error("An unexpected error occurred.");
+        }
         throw error;
     }
 }
 
 
-export const verifyOtp = async (username: string, otp: string) => {
+export const verifyOtp = async (username: string, otp: string): Promise<void> => {
 
     try {
         const response = await fetch(`${BASE_URL}/api/otp/verify`,{
@@ -92,6 +96,57 @@ export const verifyOtp = async (username: string, otp: string) => {
         
     }
     catch (error: any) {
+        if (error instanceof TypeError) {
+            // handling network related errors
+            throw new Error("An unexpected error occurred.");
+        }
+        throw error;
+    }
+}
+
+export const loginUser = async (username: string, password: string): Promise<void> => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            switch(response.status) {
+                case 401:
+                    if (errorData.message.includes("verified")) {
+                        throw new Error("You have not yet verified your account.");
+                    }
+                    else {
+                        throw new Error(errorData.message);
+                    }
+                default:
+                    throw new Error("An unexpected error occurred. Please try again.");
+            }
+        }
+
+        const data = await response.json();
+
+        // generated JWT once user is logged in
+        const token = data.token;
+
+        // store token in session storage
+        sessionStorage.setItem('token', token);
+    }
+    catch (error: any) {
+        if (error instanceof TypeError) {
+            // handling network related errors
+            throw new Error("An unexpected error occurred.");
+        }
         throw error;
     }
 }

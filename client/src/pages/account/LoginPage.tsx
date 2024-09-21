@@ -1,8 +1,9 @@
 import React, { useState } from "react"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import '../../styles/login-page.css';
 import { LoginForm } from "../../components/Login-Page/LoginForm";
 import { LoginError } from "../../interfaces/LoginError";
+import { loginUser } from "../../services/userAccount";
 
 interface UserLogin {
     username: string
@@ -10,6 +11,8 @@ interface UserLogin {
 }
 
 export const LoginPage: React.FC = () => {
+    const navigate = useNavigate();
+
     const location = useLocation();
     const registeredMessage: string | null = location.state?.registeredMessage;
 
@@ -37,27 +40,70 @@ export const LoginPage: React.FC = () => {
         }
     }
 
-    const handleLoginButton = () => {
-        setLoginError(prev => ({
+    const handleLoginButton = async () => {
+        setLoginError({
             usernameError: '',
             passwordError: ''
-        }));
+        });
+
+        const formHasErrors: boolean = checkFormValidity();
+
+        if (!formHasErrors) {
+            try {
+                setLoading(true);
+                await loginUser(userLogin.username, userLogin.password);
+                navigate(`/user/${userLogin.username}/read`);
+            }
+            catch (error: any) {
+                // error set to password always to be displayed right below the password field
+                setLoginError(prev => ({
+                    ...prev,
+                    passwordError: error.message
+                }));
+            }
+            finally {
+                setLoading(false);
+            }
+        }
     }
+
+    const checkFormValidity = (): boolean => {
+        let hasErrors = false;
+
+        if (userLogin.username.length < 1) {
+            setLoginError(prev => ({
+                ...prev,
+                usernameError: 'Username is required.'
+            }));
+            hasErrors = true;
+        }
+
+        if (userLogin.password.length < 1) {
+            setLoginError(prev => ({
+                ...prev,
+                passwordError: 'Password is required.'
+            }));
+            hasErrors = true;
+        }
+
+        return hasErrors;
+    }
+
+    const handleSignUpButton = () => {
+        navigate("/user/registration")
+    }
+
 
     return (
         <div className="login-page-container">
             {
-                registeredMessage ?
+                registeredMessage &&
                 <div className="successful-verification-message">
                     {registeredMessage}
                 </div>
-                :
-                <div className="modal-will-be-here">
-                    Account verification successful. You can now login. 
-                </div>
             }
             <h1 className="login-page-app-name">Shelf Quest</h1>
-            <LoginForm handleLoginField={handleLoginField} handleLoginButton={handleLoginButton} loading={loading} loginError={loginError} />
+            <LoginForm handleLoginField={handleLoginField} handleLoginButton={handleLoginButton} handleSignUpButton={handleSignUpButton} loading={loading} loginError={loginError} />
         </div>
     );
 }

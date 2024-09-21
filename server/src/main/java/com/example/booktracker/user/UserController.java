@@ -88,7 +88,7 @@ public class UserController {
         responseMap.put("message", "User has been authenticated.");
         responseMap.put("token", token);
 
-        return ResponseEntity.ok(responseMap);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
     @GetMapping("/verify-token")

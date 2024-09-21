@@ -12,12 +12,19 @@ export const LoginFormField: React.FC<LoginFormFieldProps> = ({placeholder, hand
         <div className="login-form-field-container">
             <input className="login-field-input" placeholder={placeholder} onChange={(inputValue) => handleLoginField(placeholder,inputValue.target.value)} />
             {
-                    error.length > 0 
-                &&
-                    <div className="login-error">
-                        <p>{error}</p>
+                placeholder.toLowerCase() === 'password' ?
+                    <div className="forgot-password-and-error-container">
+                        {
+                            error.length > 0 && <p className="password-required-error">{error}</p>
+                        }                    
+                        <p className="forgot-password">Forgot password?</p>    
                     </div>
-            }
+                :
+                error.length > 0 &&
+                <div className="login-error">
+                    <p>{error}</p>
+                </div>
+        }
         </div>
     )
 }
