@@ -57,7 +57,7 @@ export const BookPage: React.FC = () => {
         const [bookStatus, setBookStatus] = useState<string>("");
         const [showPopUp, setShowPopUp] = useState<boolean>(false);
         const [showModal, setShowModal] = useState<boolean>(false);
-        const [selectedShelf, setselectedShelf] = useState<string>("");
+        const [selectedShelf, setselectedShelf] = useState<string>(bookStatus);
         const [showRemoveFromShelfModal, setShowRemoveFromShelfModal] = useState<boolean>(false);
 
 
