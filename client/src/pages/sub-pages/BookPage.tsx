@@ -54,6 +54,7 @@ export const BookPage: React.FC = () => {
         const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
         const [bookStatus, setBookStatus] = useState<string>("");
+        const[showPopUp, setShowPopUp] = useState<boolean>(false);
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
@@ -289,6 +290,12 @@ export const BookPage: React.FC = () => {
 
     const handleWantToRead = () => {
         setBookStatus("Want to read");
+        setShowPopUp(true);
+
+        // Hide the popup after 3 seconds
+        setTimeout(() => {
+            setShowPopUp(false);
+        }, 3000);
     }
     
     if (!book) {
@@ -300,6 +307,11 @@ export const BookPage: React.FC = () => {
     return (
         <div className="book-page-container">
             <SearchBar />
+            {showPopUp && (
+                <div className="shelf-added-popup">
+                    <span>Shelved as "want to read"</span>
+                </div>
+            )}
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />

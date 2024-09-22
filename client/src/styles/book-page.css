@@ -145,6 +145,28 @@
     background-color: rgb(239, 237, 237);
 }
 
+.shelf-added-popup {
+    position: absolute;
+    top: 80%;
+    left: 9%;
+    font-size: 13px;
+    width: 180px;
+    margin-top: 30px;
+    background-color: rgb(22, 18, 32);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: fadeInOut 3s ease;
+    z-index: 1000;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    10%, 90% { opacity: 1; }
+}
+
 .book-page-main-content {
     display: flex;
     flex-direction: column;
