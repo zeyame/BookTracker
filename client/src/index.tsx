@@ -74,21 +74,22 @@ const router = createBrowserRouter([
         path: '/author/:authorName',
         element: <AuthorPage />
       },
-      {
-        path: '/user/login',
-        element: <LoginPage />
-      },
-      {
-        path: '/user/registration',
-        element: <RegistrationPage />
-      },
-      {
-        path: '/user/verification',
-        element: <VerificationPage />
-      }
     ],
     errorElement: <ErrorPage />
   },  
+  { 
+    path: '/user/registration',
+    element: <RegistrationPage />,  
+  },
+  {
+    path: '/user/verification',
+    element: <VerificationPage />
+  },
+  {
+    path: '/user/login',
+    element: <LoginPage />
+  },
+
 ]);
 
 const element = document.getElementById('root') as HTMLElement;

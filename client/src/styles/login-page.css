@@ -24,7 +24,7 @@
     z-index: 1000;
     animation: fadeOut 3s ease-in-out forwards;
     top: 7%;
-    left: 54%;
+    left: 50%;
 }
 
 @keyframes fadeOut {

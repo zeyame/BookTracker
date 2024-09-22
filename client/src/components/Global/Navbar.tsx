@@ -20,8 +20,15 @@ export const Navbar: React.FC = () => {
                 <NavButton id='goals-nav' name='Goals' link='/goals' />
                 <NavButton id='stats-nav' name='Stats' link='/stats' />
                 <MenuHeader title="Account" />
-                <NavButton id="login-nav" name="Login" link="/user/login" />
-                <NavButton id="register-nav" name="Register" link="/user/registration" />
+                {
+                    sessionStorage.getItem("token") ? 
+                    <NavButton id="logout-nav" name="Logout" link="/user/login" />
+                    :
+                    <>
+                        <NavButton id="login-nav" name="Login" link="/user/login" />
+                        <NavButton id="register-nav" name="Register" link="/user/registration" />
+                    </>
+                }
             </ul>
         </nav>
     )
