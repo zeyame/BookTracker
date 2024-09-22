@@ -124,3 +124,10 @@
     display: flex;
     justify-content: center;
 }
+
+.otp-request-failure {
+    font-size: 20px;
+    position: absolute;
+    left: 45%;
+    top: 40%;
+}

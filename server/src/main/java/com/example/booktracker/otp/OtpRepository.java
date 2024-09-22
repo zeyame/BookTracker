@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<OtpVerification, Integer> {
@@ -17,4 +18,7 @@ public interface OtpRepository extends JpaRepository<OtpVerification, Integer> {
     @Transactional
     @Query("DELETE FROM OtpVerification o WHERE o.email = :email")
     void deleteOtpByEmail(@Param("email") String email);
+
+    @Query("SELECT o FROM OtpVerification o WHERE o.expirationTime < CURRENT_TIMESTAMP ")
+    List<OtpVerification> findExpiredOtps();
 }

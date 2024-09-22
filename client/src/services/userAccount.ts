@@ -82,7 +82,7 @@ export const registerUser = async (email: string, username: string, password: st
 }
 
 
-export const requestOTP = async (email: string, resend: boolean): Promise<void> => {
+export const requestOTP = async (email: string): Promise<void> => {
     try {
         const response = await fetch(`${BASE_URL}/api/otp/send`, {
             method: 'POST',
@@ -91,8 +91,7 @@ export const requestOTP = async (email: string, resend: boolean): Promise<void> 
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                email,
-                resend
+                email
             })
         });
 

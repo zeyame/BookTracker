@@ -51,7 +51,6 @@ public class OtpController {
     @PostMapping("/send")
     public ResponseEntity<Map<String, String>> sendOtp(@RequestBody OtpRequestDTO otpRequest) {
         String email = otpRequest.getEmail();
-        boolean isResendRequest = otpRequest.isResend();
 
         // has the user already been registered
         if (userService.findByEmail(email).isPresent()) {

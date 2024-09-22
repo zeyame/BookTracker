@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -53,6 +54,32 @@ public class OtpService {
     public String generateOtp() {
         int otp = 100000 + RANDOM.nextInt(900000);
         return String.valueOf(otp);
+    }
+
+
+    /**
+     * Removes expired OTP (One-Time Password) verifications from the database.
+     *
+     * This method is scheduled to run at a fixed rate of 30 minutes (1800000 milliseconds).
+     * It retrieves all expired OTP records from the repository and deletes them.
+     *
+     *
+     * If an error occurs during the database access while trying to remove the expired OTPs,
+     * a {@link RuntimeException} is thrown with an appropriate message.
+     *
+     *
+     * @throws RuntimeException if there is a failure in removing expired OTPs due to data access issues.
+     */
+    @Transactional
+    @Scheduled(fixedRate = 1800000)
+    public void removeExpiredOtps() {
+        try {
+            List<OtpVerification> expiredOtps = otpRepository.findExpiredOtps();
+            otpRepository.deleteAll(expiredOtps);
+        }
+        catch (DataAccessException exception) {
+            throw new RuntimeException("Failed to remove expired otps.");
+        }
     }
 
 

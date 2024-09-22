@@ -92,7 +92,7 @@ export const VerificationPage: React.FC = () => {
                 page: true
             }));
 
-            await requestOTP(email, resend);
+            await requestOTP(email);
         }
         catch (error: any) {
             setError(prev => ({
@@ -171,7 +171,7 @@ export const VerificationPage: React.FC = () => {
                 </div>
                     :
                 error.otpRequestError.length > 0 ?
-                <div className="verification-page-error">
+                <div className="otp-request-failure">
                     {error.otpRequestError}
                 </div>
                     :
