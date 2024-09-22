@@ -593,7 +593,7 @@ public class BookApiClient {
      */
     private String getImageUrl(JsonNode volumeInfo) {
         JsonNode imageLinks = volumeInfo.get("imageLinks");
-        return (imageLinks != null) ? getTextOrEmpty(imageLinks, "thumbnail") : "";
+        return (imageLinks != null) ? getTextOrEmpty(imageLinks, "thumbnail") : "https://via.placeholder.com/150x220?text=No+Cover+Available";
     }
 
 
