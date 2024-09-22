@@ -29,7 +29,7 @@ type showMoreButton = {
 export const BookPage: React.FC = () => {
 
     const location = useLocation();
-    const book: book | undefined = location.state.bookData;
+    const book: book | null = location.state?.bookData;
 
         // states
         const [aboutAuthor, setAboutAuthor] = useState<Author>({
@@ -306,8 +306,8 @@ export const BookPage: React.FC = () => {
                     <div className="book-page-metadata-section">
                         <div className="book-page-authors">
                             {book.authors.map((author, index) => 
-                                <Link to={`/author/${author}`} state={ {authorData: author} }>
-                                    <h3 className="book-page-author" key={author}>{index > 0 && ', '}{author}</h3>
+                                <Link key={author} to={`/author/${author}`} state={ {authorData: author} }>
+                                    <h3 key={author} className="book-page-author" >{index > 0 && ', '}{author}</h3>
                                 </Link>
                             )}
                         </div>
@@ -346,7 +346,7 @@ export const BookPage: React.FC = () => {
                             <div className="book-page-genres">
                                 <p>Genres:</p> 
                                 {book.categories.map(category =>
-                                    <p className="book-page-genre" key={category}>{category}</p>
+                                    <p key={category} className="book-page-genre" >{category}</p>
                                 )}
                             </div>
                         }

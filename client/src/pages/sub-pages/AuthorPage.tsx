@@ -6,7 +6,7 @@ export const AuthorPage: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const authorData: string | null = location.state.authorData ?? null;
+    const authorData: string | null = location.state?.authorData ?? null;
 
     if (!authorData) {
         navigate('/');
