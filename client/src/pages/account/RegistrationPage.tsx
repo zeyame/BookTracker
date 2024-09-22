@@ -15,16 +15,23 @@ export const RegistrationPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const alreadyTypedEmail: string | null = location.state?.registrationDetails.email;
+    const alreadyTypedUsername: string | null = location.state?.registrationDetails.username;
+    const alreadyTypedPassword: string | null = location.state?.registrationDetails.password;
+
+
     const errorRegisteringAfterVerification: string | null = location.state?.errorRegisteringAfterVerification;
 
     // states
     const [useUserRegistration, setUseUserRegistration] = useState<UserRegistration>({
-        email: '',
-        username: '',
-        password: '',
-        confirmpassword: ''
+        email: alreadyTypedEmail || '',
+        username: alreadyTypedUsername || '',
+        password: alreadyTypedPassword || '',
+        confirmpassword: alreadyTypedPassword || ''
     });
+
     const [loading, setLoading] = useState<boolean>(false);
+
     const [registrationError, setRegistrationError] = useState<RegistrationError>({
         emailError: '',
         usernameError: '',
@@ -32,19 +39,8 @@ export const RegistrationPage: React.FC = () => {
         otherError: ''
     });
 
-    useEffect(() => {
-        const possibleUserRegistration: string | null = sessionStorage.getItem("userRegistration"); 
-
-        if (possibleUserRegistration) {
-            const existingUserRegistrationDetails: UserRegistration = JSON.parse(possibleUserRegistration);
-            setUseUserRegistration(existingUserRegistrationDetails);
-        }
-        
-    }, []);
-
 
     // functions 
-
     const handleUserRegistration = (inputFieldName: string, inputValue: string) => {
         const adjustedInputFieldName: string = inputFieldName.replace(/\s+/g, '').toLowerCase();
 
@@ -74,10 +70,6 @@ export const RegistrationPage: React.FC = () => {
             try {
                 setLoading(true)
                 await validateUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
-
-                // once data validated on both the client and server we save it to session storage for automatic re-filling of form
-                sessionStorage.setItem("userRegistration", JSON.stringify(useUserRegistration));
-
                 navigate('/user/verification', {state: {email: useUserRegistration.email, username: useUserRegistration.username, password: useUserRegistration.password}});
             }
             catch (error: any) {
