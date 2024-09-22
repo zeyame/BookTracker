@@ -11,6 +11,7 @@ import { fetchAuthorDetails } from "../../services/authorSearch";
 import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
+import { PencilIcon } from "../../components/Book-Page/PencilIcon";
 
 type Loading = {
     aboutAuthor: boolean
@@ -52,6 +53,7 @@ export const BookPage: React.FC = () => {
         const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
         const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
+        const [bookStatus, setBookStatus] = useState<string>("");
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
@@ -284,6 +286,10 @@ export const BookPage: React.FC = () => {
             similarBooksCacheRef.current.splice(0, 5);
         }
     }
+
+    const handleWantToRead = () => {
+        setBookStatus("Want to read");
+    }
     
     if (!book) {
         return (
@@ -298,10 +304,25 @@ export const BookPage: React.FC = () => {
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
                     <div className="reading-status-btn-container">
-                        <button className="reading-status-btn">Want to read</button>
-                        <button className="choose-shelf-btn">
-                            <DownArrowIcon className="choose-shelf-icon" width="15" height="15" />
+                        <button className={`reading-status-btn ${bookStatus.length > 0 ? 'added-to-shelf' : ''}`} onClick={handleWantToRead}>
+                            {
+                                bookStatus.length > 0 ? 
+                                <>
+                                    <PencilIcon className="pencil-icon" />
+                                    {bookStatus}
+                                </>
+                                :
+                                <>
+                                    Want to read
+                                </>
+                            }
                         </button>
+                        {
+                            bookStatus.length < 1 && 
+                            <button className="choose-shelf-btn">
+                                <DownArrowIcon className="choose-shelf-icon" width="15" height="15" />
+                            </button>
+                        }
                     </div>
                     <button className="buy-amazon-btn">Buy on Amazon</button>
                 </div>

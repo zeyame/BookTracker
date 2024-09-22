@@ -1,6 +1,10 @@
 import React from "react";
 
-export const PencilIcon: React.FC = () => {
+interface PencilIconProps {
+    className? : string
+}
+
+export const PencilIcon: React.FC<PencilIconProps> = () => {
     return (
         <svg width={20} height={13} viewBox="0 0 306.637 306.637" fill="#000000"xmlns="http://www.w3.org/2000/svg">
             <g>
