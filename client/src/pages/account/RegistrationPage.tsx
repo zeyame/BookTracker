@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import isEmail from 'validator/lib/isEmail';
 import '../../styles/registration-page.css'
 import { RegistrationForm } from "../../components/Registration-Page/RegistrationForm";
@@ -15,18 +15,14 @@ export const RegistrationPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const alreadyTypedUsername: string | null = location.state?.alreadyTypedDetails.username;
-    const alreadyTypedEmail: string | null = location.state?.alreadyTypedDetails.email;
-    const alreadyTypedPassword: string | null = location.state?.alreadyTypedDetails.password;
-    
     const errorRegisteringAfterVerification: string | null = location.state?.errorRegisteringAfterVerification;
 
     // states
     const [useUserRegistration, setUseUserRegistration] = useState<UserRegistration>({
-        email: alreadyTypedEmail || '',
-        username: alreadyTypedUsername || '',
-        password: alreadyTypedPassword || '',
-        confirmpassword: alreadyTypedPassword || ''
+        email: '',
+        username: '',
+        password: '',
+        confirmpassword: ''
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [registrationError, setRegistrationError] = useState<RegistrationError>({
@@ -35,6 +31,16 @@ export const RegistrationPage: React.FC = () => {
         passwordError: '',
         otherError: ''
     });
+
+    useEffect(() => {
+        const possibleUserRegistration: string | null = sessionStorage.getItem("userRegistration"); 
+
+        if (possibleUserRegistration) {
+            const existingUserRegistrationDetails: UserRegistration = JSON.parse(possibleUserRegistration);
+            setUseUserRegistration(existingUserRegistrationDetails);
+        }
+        
+    }, []);
 
 
     // functions 
@@ -68,6 +74,10 @@ export const RegistrationPage: React.FC = () => {
             try {
                 setLoading(true)
                 await validateUser(useUserRegistration.email, useUserRegistration.username, useUserRegistration.password);
+
+                // once data validated on both the client and server we save it to session storage for automatic re-filling of form
+                sessionStorage.setItem("userRegistration", JSON.stringify(useUserRegistration));
+
                 navigate('/user/verification', {state: {email: useUserRegistration.email, username: useUserRegistration.username, password: useUserRegistration.password}});
             }
             catch (error: any) {

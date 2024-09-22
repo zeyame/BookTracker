@@ -69,10 +69,14 @@ export const VerificationPage: React.FC = () => {
     const requestUserRegistration = async (email: string, username: string, password: string) => {
         try {
             await registerUser(email, username, password);
-            navigate("/user/login", {state: {userLoginDetails: {username, password}, "registeredMessage": "You have successfully been registered. You can now login."}});
+
+            // saving user login data to session storage so that their data is automatically filled in for them
+            sessionStorage.setItem("userLogin", JSON.stringify({username, password}));
+            
+            navigate("/user/login", {state: {"registeredMessage": "You have successfully been registered. You can now login."}});
         }
         catch (error: any) {
-            navigate('/user/registration', {state: {alreadyTypedDetails: {email, username, password}, errorRegisteringAfterVerification: error.message}});
+            navigate('/user/registration', {state: {errorRegisteringAfterVerification: error.message}});
         }
     }
 

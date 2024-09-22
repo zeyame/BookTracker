@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import '../../styles/login-page.css';
 import { LoginForm } from "../../components/Login-Page/LoginForm";
@@ -13,14 +13,11 @@ export const LoginPage: React.FC = () => {
 
     // successfull registration message 
     const registeredMessage: string | null = location.state?.registeredMessage;
-
-    // user details from the registration process 
-    const registeredUsername: string | null = location.state?.userLoginDetails.username;
-    const registeredPassword: string | null = location.state?.userLoginDetails.password;
     
+    // states
     const [userLogin, setUserLogin] = useState<UserLogin>({
-        username: registeredUsername || '',
-        password: registeredPassword || '',
+        username: '',
+        password: '',
     });
     
     const [loginError, setLoginError] = useState<LoginError>({
@@ -29,6 +26,17 @@ export const LoginPage: React.FC = () => {
     });
 
     const [loading, setLoading] = useState<boolean>(false);
+
+    // effects
+    useEffect(() => {
+        const possibleUserLogin: string | null = sessionStorage.getItem("userLogin"); 
+
+        if (possibleUserLogin) {
+            const existingUserLoginDetails: UserLogin = JSON.parse(possibleUserLogin);
+            setUserLogin(existingUserLoginDetails);
+        }
+    
+    }, []);
 
     
     const handleLoginField = (inputFieldName: string, inputValue: string) => {
@@ -54,6 +62,10 @@ export const LoginPage: React.FC = () => {
             try {
                 setLoading(true);
                 await loginUser(userLogin.username, userLogin.password);
+
+                // once user logs in once for the session they are remembered if they log out within the same session
+                sessionStorage.setItem("userLogin", JSON.stringify(userLogin));
+                
                 navigate(`/user/${userLogin.username}/read`);
             }
             catch (error: any) {
