@@ -2,15 +2,19 @@ package com.example.booktracker.otp;
 
 public class VerifyOtpRequestDTO {
 
-    private String username;
+    private String email;
     private String otp;
 
-    public String getUsername() {
-        return username;
+    public VerifyOtpRequestDTO(String email, String otp) {
+        this.email = email;
+        this.otp = otp;
+    }
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getOtp() {
@@ -21,8 +25,4 @@ public class VerifyOtpRequestDTO {
         this.otp = otp;
     }
 
-    public VerifyOtpRequestDTO(String username, String otp) {
-        this.username = username;
-        this.otp = otp;
-    }
 }

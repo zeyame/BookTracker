@@ -10,11 +10,11 @@ import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<OtpVerification, Integer> {
 
-    @Query("SELECT o FROM OtpVerification o WHERE o.username = :username and o.used = false and o.expirationTime > CURRENT_TIMESTAMP")
-    Optional<OtpVerification> findActiveOtpByUsername(@Param("username") String username);
+    @Query("SELECT o FROM OtpVerification o WHERE o.email = :email and o.used = false and o.expirationTime > CURRENT_TIMESTAMP")
+    Optional<OtpVerification> findActiveOtpByEmail(@Param("email") String email);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM OtpVerification o WHERE o.username = :username")
-    void deleteOtpByUsername(@Param("username") String username);
+    @Query("DELETE FROM OtpVerification o WHERE o.email = :email")
+    void deleteOtpByEmail(@Param("email") String email);
 }

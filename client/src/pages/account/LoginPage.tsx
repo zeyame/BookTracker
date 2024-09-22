@@ -6,10 +6,6 @@ import { LoginError } from "../../interfaces/LoginError";
 import { loginUser } from "../../services/userAccount";
 import { handleKeyDown } from "../../utils/handleKeyDown";
 
-interface UserLogin {
-    username: string
-    password: string
-}
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -19,12 +15,12 @@ export const LoginPage: React.FC = () => {
     const registeredMessage: string | null = location.state?.registeredMessage;
 
     // user details from the registration process 
-    const username: string | null = location.state?.userLoginDetails.username;
-    const password: string | null = location.state?.userLoginDetails.password;
+    const registeredUsername: string | null = location.state?.userLoginDetails.username;
+    const registeredPassword: string | null = location.state?.userLoginDetails.password;
     
     const [userLogin, setUserLogin] = useState<UserLogin>({
-        username: username || '',
-        password: password || '',
+        username: registeredUsername || '',
+        password: registeredPassword || '',
     });
     
     const [loginError, setLoginError] = useState<LoginError>({
@@ -108,7 +104,7 @@ export const LoginPage: React.FC = () => {
                 </div>
             }
             <h1 className="login-page-app-name">Shelf Quest</h1>
-            <LoginForm handleLoginField={handleLoginField} handleLoginButton={handleLoginButton} handleKeyDown={handleKeyDown} handleSignUpButton={handleSignUpButton} loading={loading} loginError={loginError} />
+            <LoginForm userLogin={userLogin} handleLoginField={handleLoginField} handleLoginButton={handleLoginButton} handleKeyDown={handleKeyDown} handleSignUpButton={handleSignUpButton} loading={loading} loginError={loginError} />
         </div>
     );
 }

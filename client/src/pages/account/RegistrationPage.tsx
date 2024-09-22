@@ -7,26 +7,26 @@ import { RegistrationError } from "../../interfaces/RegistrationError";
 import { registerUser, validateUser } from "../../services/userAccount";
 import { handleKeyDown } from "../../utils/handleKeyDown";
 import { validate } from "uuid";
+import { UserRegistration } from "../../interfaces/UserRegistration";
 
-interface UserRegistration {
-    email: string
-    username: string
-    password: string
-    confirmpassword: string
-}
 
 export const RegistrationPage: React.FC = () => {
 
     const navigate = useNavigate();
-    
     const location = useLocation();
+
+    const alreadyTypedUsername: string | null = location.state?.alreadyTypedDetails.username;
+    const alreadyTypedEmail: string | null = location.state?.alreadyTypedDetails.email;
+    const alreadyTypedPassword: string | null = location.state?.alreadyTypedDetails.password;
+    
     const errorRegisteringAfterVerification: string | null = location.state?.errorRegisteringAfterVerification;
 
+    // states
     const [useUserRegistration, setUseUserRegistration] = useState<UserRegistration>({
-        email: '',
-        username: '',
-        password: '',
-        confirmpassword: ''
+        email: alreadyTypedEmail || '',
+        username: alreadyTypedUsername || '',
+        password: alreadyTypedPassword || '',
+        confirmpassword: alreadyTypedPassword || ''
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [registrationError, setRegistrationError] = useState<RegistrationError>({
@@ -35,6 +35,9 @@ export const RegistrationPage: React.FC = () => {
         passwordError: '',
         otherError: ''
     });
+
+
+    // functions 
 
     const handleUserRegistration = (inputFieldName: string, inputValue: string) => {
         const adjustedInputFieldName: string = inputFieldName.replace(/\s+/g, '').toLowerCase();
@@ -175,7 +178,7 @@ export const RegistrationPage: React.FC = () => {
                 </div>
             }
             <h1 className="registration-page-app-name">Shelf Quest</h1>
-            <RegistrationForm handleUserRegistration={handleUserRegistration} handleCreateAccount={handleCreateAccount} handleKeyDown={handleKeyDown} loading={loading} registrationError={registrationError} />
+            <RegistrationForm userRegistration={useUserRegistration} handleUserRegistration={handleUserRegistration} handleCreateAccount={handleCreateAccount} handleKeyDown={handleKeyDown} loading={loading} registrationError={registrationError} />
         </div>
     );
 }

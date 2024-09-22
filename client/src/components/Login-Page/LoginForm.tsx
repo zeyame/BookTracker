@@ -4,6 +4,7 @@ import { LoginError } from "../../interfaces/LoginError"
 import { LoadingIcon } from "../Global/LoadingIcon"
 
 interface LoginFormProps {
+    userLogin: UserLogin
     handleLoginField: (inputValue: string, inputFieldName: string) => void
     handleLoginButton: () => void
     handleSignUpButton: () => void
@@ -12,7 +13,7 @@ interface LoginFormProps {
     loginError: LoginError
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLoginButton, handleSignUpButton, handleKeyDown, loading, loginError}) => {
+export const LoginForm: React.FC<LoginFormProps> = ({userLogin, handleLoginField, handleLoginButton, handleSignUpButton, handleKeyDown, loading, loginError}) => {
 
     return (
         <div className="login-form-container">
@@ -22,6 +23,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({handleLoginField, handleLog
             {['Username', 'Password'].map(field =>
                 <LoginFormField 
                     key={field}
+                    value={userLogin[field.toLowerCase() as keyof UserLogin] || ''}
                     placeholder={field} 
                     handleLoginField={handleLoginField} 
                     error={ loginError[`${field.toLowerCase()}Error` as keyof LoginError] } 

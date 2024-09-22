@@ -54,7 +54,7 @@ export const VerificationPage: React.FC = () => {
             return;
         }
 
-        requestForOtp(email, username, false);
+        requestForOtp(email, false);
     }, [email, username]); 
 
     useEffect(() => {
@@ -69,14 +69,14 @@ export const VerificationPage: React.FC = () => {
     const requestUserRegistration = async (email: string, username: string, password: string) => {
         try {
             await registerUser(email, username, password);
-            navigate("/user/login", {state: {"registeredMessage": "You have successfully been registered. You can now login.", userLoginDetails: {username, password}}});
+            navigate("/user/login", {state: {userLoginDetails: {username, password}, "registeredMessage": "You have successfully been registered. You can now login."}});
         }
         catch (error: any) {
-            navigate('/user/registration', {state: {errorRegisteringAfterVerification: error.message}});
+            navigate('/user/registration', {state: {alreadyTypedDetails: {email, username, password}, errorRegisteringAfterVerification: error.message}});
         }
     }
 
-    const requestForOtp = async (email: string, username: string, resend: boolean) => {
+    const requestForOtp = async (email: string, resend: boolean) => {
         try {
             resend ? 
             setLoading(prev => ({
@@ -88,7 +88,7 @@ export const VerificationPage: React.FC = () => {
                 page: true
             }));
 
-            await requestOTP(email, username, resend);
+            await requestOTP(email, resend);
         }
         catch (error: any) {
             setError(prev => ({
@@ -128,7 +128,7 @@ export const VerificationPage: React.FC = () => {
                 ...prev,
                 otpSubmit: true
             }))
-            username && await verifyOtp(username, otp);
+            email && await verifyOtp(email, otp);
             setUserVerified(true);
         }
         catch (error: any) {
@@ -146,7 +146,7 @@ export const VerificationPage: React.FC = () => {
     }
 
     const handleResendButton = async () => {
-        email && username && await requestForOtp(email, username, true);
+        email && username && await requestForOtp(email, true);
         setOtpReSent(true);
     }
 

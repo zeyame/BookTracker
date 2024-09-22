@@ -61,13 +61,13 @@ public class OtpService {
      *
      * This method checks for an OTP that is not used and has not expired.
      *
-     * @param username the username for which to find the active OTP
+     * @param email the username for which to find the active OTP
      * @return an {@link Optional} containing the active {@link OtpVerification} if found, or an empty {@link Optional} if no active OTP exists for the user
      * @throws CustomBadRequestException if the username is null or empty
      */
-    public Optional<OtpVerification> findActiveOtpByUsername(String username) {
+    public Optional<OtpVerification> findActiveOtpByEmail(String email) {
         try {
-            return otpRepository.findActiveOtpByUsername(username);
+            return otpRepository.findActiveOtpByEmail(email);
         }
         catch (DataAccessException exception) {
             throw new RuntimeException("An unexpected database error occurred when fetching active otp for user.");
@@ -79,13 +79,13 @@ public class OtpService {
      *
      * This method will remove any active OTPs stored in the database for the given username.
      *
-     * @param username the username for which the OTP should be deleted
+     * @param email the username for which the OTP should be deleted
      * @throws CustomBadRequestException if the username is null or empty
      */
     @Transactional
-    public void deleteOtpByUsername (String username) {
+    public void deleteOtpByEmail (String email) {
         try {
-            otpRepository.deleteOtpByUsername(username);
+            otpRepository.deleteOtpByEmail(email);
         }
         catch (DataAccessException exception) {
             throw new RuntimeException("An unexpected database error occurred when deleting otp for user.");
@@ -99,25 +99,25 @@ public class OtpService {
      * and if none are found, creates and saves a new OTP along with its expiration time.
      *
      * @param otpValue the OTP value to be saved
-     * @param username the username associated with the OTP
+     * @param email the username associated with the OTP
      * @throws CustomBadRequestException if the username is null or empty
      * @throws OtpAlreadySentException if an OTP has already been sent to the user
      */
     @Transactional
-    public void save(String otpValue, String username) {
+    public void save(String otpValue, String email) {
         // validating username parameter
-        if (username == null || username.trim().isEmpty()) {
-            throw new CustomBadRequestException("Username is required to generate the OTP.");
+        if (email == null || email.trim().isEmpty()) {
+            throw new CustomBadRequestException("Email is required to generate the OTP.");
         }
 
         // ensuring user has no currently active OTPs
-        if (findActiveOtpByUsername(username).isPresent()) {
-            deleteOtpByUsername(username);
+        if (findActiveOtpByEmail(email).isPresent()) {
+            deleteOtpByEmail(email);
         }
 
         // creating and saving the OTP
         OtpVerification otp = new OtpVerification();
-        otp.setUsername(username);
+        otp.setEmail(email);
         otp.setOtp(otpValue);
         Date expirationDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
         otp.setExpirationTime(expirationDate);
@@ -143,14 +143,14 @@ public class OtpService {
      * @throws InvalidOtpException if there is no active OTP for the specified username
      */
     public void verify(VerifyOtpRequestDTO verifyOtpRequestDTO) {
+        String email = verifyOtpRequestDTO.getEmail();
         String otp = verifyOtpRequestDTO.getOtp();
-        String username = verifyOtpRequestDTO.getUsername();
 
-        if (Stream.of(otp, username).anyMatch(val -> val == null || val.trim().isEmpty())) {
-            throw new CustomBadRequestException("Both username and otp are required for otp validation.");
+        if (Stream.of(email, otp).anyMatch(val -> val == null || val.trim().isEmpty())) {
+            throw new CustomBadRequestException("Both email and otp are required for otp validation.");
         }
 
-        Optional<OtpVerification> possibleOtpVerification = findActiveOtpByUsername(username);
+        Optional<OtpVerification> possibleOtpVerification = findActiveOtpByEmail(email);
         if (possibleOtpVerification.isPresent()) {
             OtpVerification otpVerification = possibleOtpVerification.get();
             String storedOtp = otpVerification.getOtp();

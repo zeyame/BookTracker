@@ -1,6 +1,7 @@
 import React from "react";
 
 interface FieldProps {
+    value: string
     placeholder: string
     handleInputField: (inputFieldName: string, inputValue: string) => void
     handleCreateAccount: () => void
@@ -8,12 +9,12 @@ interface FieldProps {
     error: string
 }
 
-export const RegistrationFormField: React.FC<FieldProps> = ({placeholder, handleInputField, handleCreateAccount, handleKeyDown, error}) => {
+export const RegistrationFormField: React.FC<FieldProps> = ({value, placeholder, handleInputField, handleCreateAccount, handleKeyDown, error}) => {
     const isPasswordField: boolean = placeholder.toLowerCase() === 'password' || placeholder.toLowerCase() === 'confirm password';
 
     return (
         <div className="registration-form-field-container">
-            <input type={isPasswordField ? 'password' : 'text'} className="registration-field-input" placeholder={placeholder} onChange={(inputValue) => handleInputField(placeholder,inputValue.target.value)} onKeyDown={(event) => handleKeyDown(event, handleCreateAccount)} />
+            <input type={isPasswordField ? 'password' : 'text'} className="registration-field-input" value={value} placeholder={placeholder} onChange={(inputValue) => handleInputField(placeholder,inputValue.target.value)} onKeyDown={(event) => handleKeyDown(event, handleCreateAccount)} />
             {
                     error.length > 0 
                 &&
