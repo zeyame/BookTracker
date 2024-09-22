@@ -102,6 +102,23 @@ public class UserService {
         }
     }
 
+    public void validate (UserRegistrationDTO userRegistrationDTO) {
+        String username = userRegistrationDTO.getUsername();
+        String email = userRegistrationDTO.getEmail();
+
+        if (Stream.of(username, email).anyMatch(val -> val == null || val.trim().isEmpty())) {
+            throw new CustomBadRequestException("Email and username are both required to ensure user does not already exist.");
+        }
+
+        if (findByEmail(email).isPresent()) {
+            throw new EmailAlreadyRegisteredException("An account with this email already exists.");
+        }
+
+        if (findByUsername(username).isPresent()) {
+            throw new UsernameAlreadyRegisteredException("This username is already taken.");
+        }
+
+    }
 
     /**
      * Registers a new user by saving their details to the database.
@@ -143,21 +160,6 @@ public class UserService {
         save(user);
     }
 
-    @Transactional
-    public void verify(String username) {
-
-        Optional<User> optionalUser = findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            user.setIsVerified(true);
-            save(user);
-        }
-        else {
-            throw new UsernameNotFoundException("User is not registered in order to verify their account.");
-        }
-
-    }
-
 
     /**
      * Authenticates a user based on the provided login credentials.
@@ -185,10 +187,6 @@ public class UserService {
         Optional<User> possibleUser = findByUsername(username);
         if (possibleUser.isPresent()) {
             User user = possibleUser.get();
-            if (!user.isVerified()) {
-                throw new UserNotVerifiedException("Authentication failed. User not yet verified.");        // 401
-            }
-
             String storedHashedPassword = user.getPassword();
 
             if (!encoder.matches(enteredPassword, storedHashedPassword)) {

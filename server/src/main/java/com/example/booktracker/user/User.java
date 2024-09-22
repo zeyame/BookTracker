@@ -38,9 +38,6 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "is_verified")
-    private Boolean isVerified = false;
-
     public String getUsername() {
         return username;
     }
@@ -81,11 +78,4 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Boolean isVerified() {
-        return isVerified;
-    }
-
-    public void setIsVerified(Boolean updatedStatus) {
-        this.isVerified = updatedStatus;
-    }
 }

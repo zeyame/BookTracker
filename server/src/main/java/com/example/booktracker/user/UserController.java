@@ -26,6 +26,17 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
+    @PostMapping("/validate")
+    public ResponseEntity<Map<String, String>> validateUser (@RequestBody UserRegistrationDTO userRegistrationDTO) {
+        // validating user details
+        userService.validate(userRegistrationDTO);
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("message", "User data is valid and can be used to register a new account.");
+
+        return ResponseEntity.ok(responseMap);
+    }
+
 
     /**
      * Registers a new user and sends a verification email to the provided email address.

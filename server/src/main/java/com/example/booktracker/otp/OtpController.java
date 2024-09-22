@@ -6,6 +6,7 @@ import com.example.booktracker.otp.exception.IncorrectOtpException;
 import com.example.booktracker.otp.exception.InvalidOtpException;
 import com.example.booktracker.user.UserService;
 import com.example.booktracker.user.exception.UserAlreadyVerifiedException;
+import com.example.booktracker.user.exception.UsernameAlreadyRegisteredException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,19 +51,20 @@ public class OtpController {
     public ResponseEntity<Map<String, String>> sendOtp(@RequestBody OtpRequestDTO otpRequest) {
         String username = otpRequest.getUsername();
         String email = otpRequest.getEmail();
+        boolean isResendRequest = otpRequest.isResend();
 
-        // user must be registered first to get an OTP for verification
-        if (userService.findByUsername(username).isEmpty()) {
-            throw new UsernameNotFoundException("An OTP could not be sent as user is not yet registered.");
-        }
-
-        // has the user already been verified (avoids accidental extra requests for OTPs)
-        if (userService.findByUsername(username).get().isVerified()) {
-            throw new UserAlreadyVerifiedException("User is already verified.");
+        // has the user already been registered
+        if (userService.findByUsername(username).isPresent()) {
+            throw new UsernameAlreadyRegisteredException("User already registered. No need to verify.");
         }
 
         // Generate the OTP
         String otp = otpService.generateOtp();
+
+        // if user already had an active otp but is now requesting a resend or navigating back to the verification page after leaving it
+        if (otpService.findActiveOtpByUsername(username).isPresent()) {
+            otpService.deleteOtpByUsername(username);
+        }
 
         // save otp with username
         otpService.save(otp, username);
@@ -98,9 +100,6 @@ public class OtpController {
 
         // delete the otp once validated
         otpService.deleteOtpByUsername(verifyOtpRequestDTO.getUsername());
-
-        // update user's verification status in the users table
-        userService.verify(verifyOtpRequestDTO.getUsername());
 
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("message", "User is now verified and can login. ");

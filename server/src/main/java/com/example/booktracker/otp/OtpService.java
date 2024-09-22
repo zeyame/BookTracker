@@ -84,7 +84,12 @@ public class OtpService {
      */
     @Transactional
     public void deleteOtpByUsername (String username) {
-        otpRepository.deleteOtpByUsername(username);
+        try {
+            otpRepository.deleteOtpByUsername(username);
+        }
+        catch (DataAccessException exception) {
+            throw new RuntimeException("An unexpected database error occurred when deleting otp for user.");
+        }
     }
 
     /**
@@ -107,7 +112,7 @@ public class OtpService {
 
         // ensuring user has no currently active OTPs
         if (findActiveOtpByUsername(username).isPresent()) {
-            throw new OtpAlreadySentException("An OTP has already been sent to the user. Please use the existing OTP or wait before requesting a new one.");
+            deleteOtpByUsername(username);
         }
 
         // creating and saving the OTP

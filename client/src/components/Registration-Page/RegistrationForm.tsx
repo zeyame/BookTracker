@@ -13,7 +13,16 @@ interface RegistrationFormProps {
 }
 
 
+
 export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserRegistration, handleCreateAccount, handleKeyDown, loading, registrationError}) => {
+    
+    const errorMap: Record<string, string> = {
+        'Email': registrationError.emailError,
+        'Username': registrationError.usernameError,
+        'Password': registrationError.passwordError,
+        'Confirm Password': registrationError.otherError,  // Or handle this appropriately
+    };
+    
     return (
         <div className="registration-form-container">
             <div>
@@ -25,10 +34,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({handleUserReg
                     key={field}
                     placeholder={field} 
                     handleInputField={handleUserRegistration} 
-                    error={
-                        field === 'Confirm Password' ? registrationError.otherError 
-                            : 
-                        registrationError[`${field.toLowerCase()}Error` as keyof RegistrationError]}
+                    error={errorMap[field] || ''}
                     handleCreateAccount={handleCreateAccount}
                     handleKeyDown={handleKeyDown}
                         />
