@@ -176,7 +176,7 @@
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     width: 300px;
-    padding: 20px;
+    padding: 50px;
     z-index: 1000;
     animation: modalFadeIn 0.3s ease;
 }
@@ -185,12 +185,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     padding-left: 10px;
 }
 
 .modal-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     margin: 0;
 }
@@ -198,9 +198,11 @@
 .exit-modal-button {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 30px;
     cursor: pointer;
     color: #999;
+    margin-right: -10px;
+    margin-top: -7px;
 }
 
 .modal-want-to-read-button,
@@ -226,19 +228,20 @@
 
 .modal-remove-from-shelf-container {
     display: flex;
-    align-items: center;
+    justify-content: center;
     margin-top: 20px;
     margin-bottom: 20px;
-    color: #999;
 }
 
 .modal-remove-from-shelf-button {
     background: none;
     border: none;
-    color: #999;
-    text-decoration: underline;
     cursor: pointer;
-    margin-left: 10px;
+    margin-left: 0px;
+}
+
+.modal-remove-from-shelf-button {
+    text-decoration: underline;
 }
 
 .modal-done-button {

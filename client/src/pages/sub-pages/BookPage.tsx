@@ -12,6 +12,7 @@ import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 import { PencilIcon } from "../../components/Book-Page/PencilIcon";
+import { ShelfModal } from "../../components/Book-Page/ShelfModal";
 
 type Loading = {
     aboutAuthor: boolean
@@ -320,39 +321,9 @@ export const BookPage: React.FC = () => {
                     <span>Shelved as "want to read"</span>
                 </div>
             )}
-            {
-                showModal && (
-                    <>
-                        <div className="modal-backdrop"></div>
-                        <div className="shelf-modal">
-                            <div className="modal-title-container">
-                                <h3 className="modal-title">
-                                    Choose a shelf for this book
-                                </h3>
-                                <button className="exit-modal-button">x</button>
-                            </div>
-                            <button className="modal-want-to-read-button">
-                                Want to read
-                            </button>
-                            <button className="modal-currently-reading-button">
-                                Currently reading
-                            </button>
-                            <button className="modal-read-button">
-                                Read
-                            </button>
-                            <div className="modal-remove-from-shelf-container">
-                                garbage icon here
-                                <button className="modal-remove-from-shelf-button">
-                                    Remove from my shelf
-                                </button>
-                            </div>
-                            <button className="modal-done-button">
-                                Done
-                            </button>
-                        </div>
-                    </>
-                )
-            }
+
+            {showModal && <ShelfModal />}
+            
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
