@@ -334,6 +334,15 @@ export const BookPage: React.FC = () => {
     const handleDone = () => {
         setShowModal(false);
         setBookStatus(selectedShelf);
+
+        // if the selected option was not the same as the current reading status we show a new message popup
+        if (selectedShelf !== bookStatus) {
+            setShowPopUp(true);
+            // Hide the popup after 3 seconds
+            setTimeout(() => {
+                setShowPopUp(false);
+            }, 3000);
+        }
     }
 
     if (!book) {
@@ -347,7 +356,7 @@ export const BookPage: React.FC = () => {
             <SearchBar />
             {showPopUp && (
                 <div className="shelf-added-popup">
-                    <span>Shelved as "want to read"</span>
+                    <span>Shelved as "{bookStatus}"</span>
                 </div>
             )}
 
