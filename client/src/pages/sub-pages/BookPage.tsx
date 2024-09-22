@@ -54,7 +54,8 @@ export const BookPage: React.FC = () => {
         const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
         const [bookStatus, setBookStatus] = useState<string>("");
-        const[showPopUp, setShowPopUp] = useState<boolean>(false);
+        const [showPopUp, setShowPopUp] = useState<boolean>(false);
+        const [showModal, setShowModal] = useState<boolean>(false);
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
@@ -289,6 +290,13 @@ export const BookPage: React.FC = () => {
     }
 
     const handleWantToRead = () => {
+
+        // if the reading status button was clicked already, show modal 
+        if (bookStatus.length > 0) {
+            setShowModal(true);
+            return;
+        }
+
         setBookStatus("Want to read");
         setShowPopUp(true);
 
@@ -312,6 +320,39 @@ export const BookPage: React.FC = () => {
                     <span>Shelved as "want to read"</span>
                 </div>
             )}
+            {
+                showModal && (
+                    <>
+                        <div className="modal-backdrop"></div>
+                        <div className="shelf-modal">
+                            <div className="modal-title-container">
+                                <h3 className="modal-title">
+                                    Choose a shelf for this book
+                                </h3>
+                                <button className="exit-modal-button">x</button>
+                            </div>
+                            <button className="modal-want-to-read-button">
+                                Want to read
+                            </button>
+                            <button className="modal-currently-reading-button">
+                                Currently reading
+                            </button>
+                            <button className="modal-read-button">
+                                Read
+                            </button>
+                            <div className="modal-remove-from-shelf-container">
+                                garbage icon here
+                                <button className="modal-remove-from-shelf-button">
+                                    Remove from my shelf
+                                </button>
+                            </div>
+                            <button className="modal-done-button">
+                                Done
+                            </button>
+                        </div>
+                    </>
+                )
+            }
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
