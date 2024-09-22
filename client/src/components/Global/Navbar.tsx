@@ -12,13 +12,16 @@ export const Navbar: React.FC = () => {
                 <NavButton id='trending-books-nav' name='Trending Books' link='/trending-books' />
                 <NavButton id='popular-authors-nav' name='Popular Authors' link='/popular-authors'/>
                 <NavButton id='add-book-nav' name='Add Book' link='/add-book' />
+
                 <MenuHeader title='Your library' />
-                <NavButton id='reading-nav' name='Reading' link='/reading' />
-                <NavButton id='to-read-nav' name='Want to read' link='/to-read' />
-                <NavButton id='read-nav' name='Read' link='/read' />
+                <NavButton id='reading-nav' name='Reading' link='/user/:username/current-reads' />
+                <NavButton id='to-read-nav' name='Want to read' link='/user/:username/future-reads' />
+                <NavButton id='read-nav' name='Read' link='/user/:username/past-reads' />
+
                 <MenuHeader title='Your activity' />
                 <NavButton id='goals-nav' name='Goals' link='/goals' />
                 <NavButton id='stats-nav' name='Stats' link='/stats' />
+
                 <MenuHeader title="Account" />
                 {
                     sessionStorage.getItem("token") ? 

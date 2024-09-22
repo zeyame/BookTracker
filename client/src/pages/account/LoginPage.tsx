@@ -38,6 +38,15 @@ export const LoginPage: React.FC = () => {
     
     }, []);
 
+    // if user came from logout, delete token 
+    useEffect(() => {
+        const token : string | null = sessionStorage.getItem("token");
+        if (token) {
+            sessionStorage.removeItem("token");
+        }
+    }, []);
+    
+
     
     const handleLoginField = (inputFieldName: string, inputValue: string) => {
         const adjustedInputFieldName: string = inputFieldName.replace(/\s+/g, '').toLowerCase();

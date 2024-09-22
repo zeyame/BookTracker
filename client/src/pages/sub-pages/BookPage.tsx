@@ -10,6 +10,7 @@ import { Author } from "../../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../../services/authorSearch";
 import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
+import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 
 type Loading = {
     aboutAuthor: boolean
@@ -296,7 +297,12 @@ export const BookPage: React.FC = () => {
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
-                    <button className="reading-status-btn">Want to read</button>
+                    <div className="reading-status-btn-container">
+                        <button className="reading-status-btn">Want to read</button>
+                        <button className="choose-shelf-btn">
+                            <DownArrowIcon className="choose-shelf-icon" width="15" height="15" />
+                        </button>
+                    </div>
                     <button className="buy-amazon-btn">Buy on Amazon</button>
                 </div>
                 <div className="book-page-main-content">
