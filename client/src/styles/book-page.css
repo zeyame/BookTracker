@@ -205,9 +205,13 @@
     margin-top: -7px;
 }
 
-.modal-want-to-read-button,
-.modal-currently-reading-button,
-.modal-read-button {
+.shelf-modal-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.shelf-modal-button {
     font-size: 16px;
     background-color: white;
     color: black;
@@ -220,10 +224,17 @@
     margin-bottom: 20px;
 }
 
-.modal-want-to-read-button:hover,
-.modal-currently-reading-button:hover,
-.modal-read-button:hover {
+.shelf-modal-button:hover {
     background-color: rgb(239, 237, 237);
+}
+
+.shelf-modal-button.selected {
+    background-color: rgb(151, 151, 151);
+}
+
+.shelf-modal-tick-icon {
+    width: 30px;
+    height: 15px;
 }
 
 .modal-remove-from-shelf-container {

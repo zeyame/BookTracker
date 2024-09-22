@@ -57,6 +57,9 @@ export const BookPage: React.FC = () => {
         const [bookStatus, setBookStatus] = useState<string>("");
         const [showPopUp, setShowPopUp] = useState<boolean>(false);
         const [showModal, setShowModal] = useState<boolean>(false);
+        const [selectedShelf, setselectedShelf] = useState<string>("");
+        const [showRemoveFromShelfModal, setShowRemoveFromShelfModal] = useState<boolean>(false);
+
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
@@ -306,7 +309,33 @@ export const BookPage: React.FC = () => {
             setShowPopUp(false);
         }, 3000);
     }
+
+    const handleExitModal = () => {
+        setShowModal(false);
+    }
+
+    const handleModalWantToRead = () => {
+        setselectedShelf("Want to read");
+    }
+
+    const handleCurrentlyReading = () => {
+        setselectedShelf("Currently reading");
+    }
     
+    const handleRead = () => {
+        setselectedShelf("Read");
+    }
+
+    const handleRemoveFromShelf = () => {
+        setShowModal(false);
+        setShowRemoveFromShelfModal(true);
+    }
+
+    const handleDone = () => {
+        setShowModal(false);
+        setBookStatus(selectedShelf);
+    }
+
     if (!book) {
         return (
             <div>Book Not Found.</div>
@@ -322,8 +351,8 @@ export const BookPage: React.FC = () => {
                 </div>
             )}
 
-            {showModal && <ShelfModal />}
-            
+            {showModal && <ShelfModal handleExitModal={handleExitModal} handleCurrentlyReading={handleCurrentlyReading} handleModalWantToRead={handleModalWantToRead} handleRead={handleRead} handleRemoveFromShelf={handleRemoveFromShelf} handleDone={handleDone} selectedShelf={selectedShelf} />}
+
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
