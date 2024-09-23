@@ -14,9 +14,9 @@ export const Navbar: React.FC = () => {
                 <NavButton id='add-book-nav' name='Add Book' link='/add-book' />
 
                 <MenuHeader title='Your library' />
-                <NavButton id='reading-nav' name='Reading' link='/user/:username/current-reads' />
-                <NavButton id='to-read-nav' name='Want to read' link='/user/:username/future-reads' />
-                <NavButton id='read-nav' name='Read' link='/user/:username/past-reads' />
+                <NavButton id='reading-nav' name='Reading' link='/user/:username/currently-reading' />
+                <NavButton id='to-read-nav' name='Want to read' link='/user/:username/to-read' />
+                <NavButton id='read-nav' name='Read' link='/user/:username/read' />
 
                 <MenuHeader title='Your activity' />
                 <NavButton id='goals-nav' name='Goals' link='/goals' />

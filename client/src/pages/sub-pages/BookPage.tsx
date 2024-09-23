@@ -14,6 +14,13 @@ import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 import { PencilIcon } from "../../components/Book-Page/PencilIcon";
 import { ShelfModal } from "../../components/Book-Page/ShelfModal";
 
+
+interface BookWithStatus {
+    bookData: book, 
+    status: string
+}
+
+
 type Loading = {
     aboutAuthor: boolean
     similarBooks: boolean
@@ -54,10 +61,10 @@ export const BookPage: React.FC = () => {
         const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
         const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
-        const [bookStatus, setBookStatus] = useState<string>("");
+        const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(book));
         const [showPopUp, setShowPopUp] = useState<boolean>(false);
         const [showModal, setShowModal] = useState<boolean>(false);
-        const [selectedShelf, setselectedShelf] = useState<string>(bookStatus);
+        const [selectedShelf, setselectedShelf] = useState<string>('');
         const [showRemoveFromShelfModal, setShowRemoveFromShelfModal] = useState<boolean>(false);
 
 
@@ -203,15 +210,56 @@ export const BookPage: React.FC = () => {
     useEffect(() => {
         if (book) {
             setBookDescription(sliceDescription(book.description));
+            setBookStatus(getStoredBookStatus(book));
         }
 
         return () => {
             setBookDescription('');
+            setBookStatus('');
         }
     }, [book]);
 
 
+    // saving book status to local storage
+    useEffect(() => {
+        if (book && bookStatus) {
+
+            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
+
+            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
+
+            books[book.id] = {bookData: book, status: bookStatus};
+
+            localStorage.setItem("booksWithStatus", JSON.stringify(books));
+
+        }
+
+    }, [book, bookStatus]);
+
+
     // functions
+
+    // gets the current reading status of a book
+    function getStoredBookStatus (book: book | null): string {
+        if (!book) {
+            return ""
+        }
+
+        const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
+
+        if (storedBooksWithStatus) {
+            try {
+                const books: Record<string, BookWithStatus> = JSON.parse(storedBooksWithStatus);
+                const bookWithStatus = books[book.id];
+                return bookWithStatus?.status || "";
+            }
+            catch (error: any) {
+                console.error("Error parsing stored books to get reading status.");
+                return "";
+            }
+        }
+        return "";
+    }
 
     // handles the show more button of book and author descriptions
     const handleShowMore = (descriptionType: string) => {
