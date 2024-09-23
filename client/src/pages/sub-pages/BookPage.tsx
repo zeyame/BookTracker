@@ -13,6 +13,7 @@ import { sliceDescription } from "../../utils/sliceDescription";
 import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 import { PencilIcon } from "../../components/Book-Page/PencilIcon";
 import { ShelfModal } from "../../components/Book-Page/ShelfModal";
+import { RemoveFromShelfModal } from "../../components/Book-Page/RemoveFromShelfModal";
 
 
 interface BookWithStatus {
@@ -315,6 +316,9 @@ export const BookPage: React.FC = () => {
         }
     }
 
+
+    // SIMILAR BOOKS NAVIGATION FUNCTIONS
+
     // gets the last 5 similar books from the history
     const handleLeftArrowClick = () => {
         if (similarBooksHistory.length > 0) {
@@ -341,6 +345,8 @@ export const BookPage: React.FC = () => {
         }
     }
 
+
+    // SHELF OPTIONS MODAL FUNCTIONS
     const handleWantToRead = () => {
 
         // if the reading status button was clicked already, show modal 
@@ -393,6 +399,15 @@ export const BookPage: React.FC = () => {
         }
     }
 
+
+    // REMOVE FROM SHELF MODAL FUNCTIONS
+
+    // exiting the remove from shelf modal
+    const handleExitRemoveFromShelfModal = () => {
+        setShowRemoveFromShelfModal(false);
+        setShowModal(true);
+    }
+
     if (!book) {
         return (
             <div>Book Not Found.</div>
@@ -408,8 +423,23 @@ export const BookPage: React.FC = () => {
                 </div>
             )}
 
-            {showModal && <ShelfModal handleExitModal={handleExitModal} handleCurrentlyReading={handleCurrentlyReading} handleModalWantToRead={handleModalWantToRead} handleRead={handleRead} handleRemoveFromShelf={handleRemoveFromShelf} handleDone={handleDone} selectedShelf={selectedShelf} />}
+            {showModal && <ShelfModal 
+                            handleExitModal={handleExitModal} 
+                            handleCurrentlyReading={handleCurrentlyReading} 
+                            handleModalWantToRead={handleModalWantToRead} 
+                            handleRead={handleRead} 
+                            handleRemoveFromShelf={handleRemoveFromShelf} 
+                            handleDone={handleDone} 
+                            selectedShelf={selectedShelf} 
+                        />
+            }
 
+            {showRemoveFromShelfModal && <RemoveFromShelfModal 
+                                            handleExitRemoveFromShelfModal={handleExitRemoveFromShelfModal} 
+                                            handleCancelRemoveFromShelf={handleExitRemoveFromShelfModal} 
+                                        /> 
+            }
+            
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
