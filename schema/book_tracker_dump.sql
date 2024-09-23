@@ -5,7 +5,7 @@
 -- Dumped from database version 16.4
 -- Dumped by pg_dump version 16.4
 
--- Started on 2024-09-17 14:48:31
+-- Started on 2024-09-22 22:47:29
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -74,6 +74,48 @@ CREATE TABLE public.future_reads (
 ALTER TABLE public.future_reads OWNER TO postgres;
 
 --
+-- TOC entry 221 (class 1259 OID 24759)
+-- Name: otp_verifications; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.otp_verifications (
+    id integer NOT NULL,
+    otp character varying(255) NOT NULL,
+    expiration_time timestamp without time zone NOT NULL,
+    used boolean DEFAULT false,
+    email character varying(255),
+    username character varying(255)
+);
+
+
+ALTER TABLE public.otp_verifications OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 24758)
+-- Name: otp_verifications_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.otp_verifications_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.otp_verifications_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 4840 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: otp_verifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.otp_verifications_id_seq OWNED BY public.otp_verifications.id;
+
+
+--
 -- TOC entry 218 (class 1259 OID 24687)
 -- Name: past_reads; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -93,19 +135,27 @@ ALTER TABLE public.past_reads OWNER TO postgres;
 --
 
 CREATE TABLE public.users (
-    username character varying(50) NOT NULL,
-    email character varying(100) NOT NULL,
-    hashed_password text NOT NULL,
+    username character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    hashed_password character varying(255) NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    is_verified boolean DEFAULT true
+    is_verified boolean
 );
 
 
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 4819 (class 0 OID 24607)
+-- TOC entry 4659 (class 2604 OID 24762)
+-- Name: otp_verifications id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp_verifications ALTER COLUMN id SET DEFAULT nextval('public.otp_verifications_id_seq'::regclass);
+
+
+--
+-- TOC entry 4829 (class 0 OID 24607)
 -- Dependencies: 216
 -- Data for Name: books; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -115,7 +165,7 @@ COPY public.books (id, title, authors, publisher, publisheddate, description, pa
 
 
 --
--- TOC entry 4820 (class 0 OID 24668)
+-- TOC entry 4830 (class 0 OID 24668)
 -- Dependencies: 217
 -- Data for Name: current_reads; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -125,7 +175,7 @@ COPY public.current_reads (username, book_id, added_at, current_page, start_date
 
 
 --
--- TOC entry 4822 (class 0 OID 24713)
+-- TOC entry 4832 (class 0 OID 24713)
 -- Dependencies: 219
 -- Data for Name: future_reads; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -135,7 +185,17 @@ COPY public.future_reads (username, book_id) FROM stdin;
 
 
 --
--- TOC entry 4821 (class 0 OID 24687)
+-- TOC entry 4834 (class 0 OID 24759)
+-- Dependencies: 221
+-- Data for Name: otp_verifications; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.otp_verifications (id, otp, expiration_time, used, email, username) FROM stdin;
+\.
+
+
+--
+-- TOC entry 4831 (class 0 OID 24687)
 -- Dependencies: 218
 -- Data for Name: past_reads; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -145,7 +205,7 @@ COPY public.past_reads (username, book_id, finished_at) FROM stdin;
 
 
 --
--- TOC entry 4818 (class 0 OID 24593)
+-- TOC entry 4828 (class 0 OID 24593)
 -- Dependencies: 215
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -155,7 +215,16 @@ COPY public.users (username, email, hashed_password, created_at, updated_at, is_
 
 
 --
--- TOC entry 4662 (class 2606 OID 24613)
+-- TOC entry 4841 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: otp_verifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.otp_verifications_id_seq', 207, true);
+
+
+--
+-- TOC entry 4668 (class 2606 OID 24613)
 -- Name: books book_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -164,7 +233,7 @@ ALTER TABLE ONLY public.books
 
 
 --
--- TOC entry 4664 (class 2606 OID 24676)
+-- TOC entry 4670 (class 2606 OID 24676)
 -- Name: current_reads current_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -173,7 +242,7 @@ ALTER TABLE ONLY public.current_reads
 
 
 --
--- TOC entry 4668 (class 2606 OID 24717)
+-- TOC entry 4674 (class 2606 OID 24717)
 -- Name: future_reads future_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -182,7 +251,16 @@ ALTER TABLE ONLY public.future_reads
 
 
 --
--- TOC entry 4666 (class 2606 OID 24692)
+-- TOC entry 4676 (class 2606 OID 24765)
+-- Name: otp_verifications otp_verifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp_verifications
+    ADD CONSTRAINT otp_verifications_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4672 (class 2606 OID 24692)
 -- Name: past_reads past_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -191,7 +269,16 @@ ALTER TABLE ONLY public.past_reads
 
 
 --
--- TOC entry 4656 (class 2606 OID 24606)
+-- TOC entry 4678 (class 2606 OID 24785)
+-- Name: otp_verifications unique_email; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.otp_verifications
+    ADD CONSTRAINT unique_email UNIQUE (email);
+
+
+--
+-- TOC entry 4662 (class 2606 OID 24749)
 -- Name: users user_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -200,7 +287,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4658 (class 2606 OID 24604)
+-- TOC entry 4664 (class 2606 OID 24730)
 -- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -209,7 +296,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4660 (class 2606 OID 24667)
+-- TOC entry 4666 (class 2606 OID 24776)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -218,7 +305,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4669 (class 2606 OID 24682)
+-- TOC entry 4679 (class 2606 OID 24682)
 -- Name: current_reads current_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -227,7 +314,7 @@ ALTER TABLE ONLY public.current_reads
 
 
 --
--- TOC entry 4670 (class 2606 OID 24677)
+-- TOC entry 4680 (class 2606 OID 24733)
 -- Name: current_reads current_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -236,7 +323,7 @@ ALTER TABLE ONLY public.current_reads
 
 
 --
--- TOC entry 4673 (class 2606 OID 24723)
+-- TOC entry 4683 (class 2606 OID 24723)
 -- Name: future_reads future_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -245,7 +332,7 @@ ALTER TABLE ONLY public.future_reads
 
 
 --
--- TOC entry 4674 (class 2606 OID 24718)
+-- TOC entry 4684 (class 2606 OID 24743)
 -- Name: future_reads future_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -254,7 +341,7 @@ ALTER TABLE ONLY public.future_reads
 
 
 --
--- TOC entry 4671 (class 2606 OID 24698)
+-- TOC entry 4681 (class 2606 OID 24698)
 -- Name: past_reads past_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -263,7 +350,7 @@ ALTER TABLE ONLY public.past_reads
 
 
 --
--- TOC entry 4672 (class 2606 OID 24693)
+-- TOC entry 4682 (class 2606 OID 24738)
 -- Name: past_reads past_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -271,7 +358,7 @@ ALTER TABLE ONLY public.past_reads
     ADD CONSTRAINT past_reads_username_fkey FOREIGN KEY (username) REFERENCES public.users(username) ON DELETE CASCADE;
 
 
--- Completed on 2024-09-17 14:48:31
+-- Completed on 2024-09-22 22:47:29
 
 --
 -- PostgreSQL database dump complete

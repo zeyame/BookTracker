@@ -43,15 +43,15 @@ const router = createBrowserRouter([
         element: <AddBookPage />
       },
       {
-        path: '/user/:username/past-reads',
+        path: '/user/:username/read',
         element: <ReadPage />
       },
       {
-        path: '/user/:username/current-reads',
+        path: '/user/:username/currently-reading',
         element: <ReadingPage />
       },
       {
-        path: '/user/:username/future-reads',
+        path: '/user/:username/to-read',
         element: <ToReadPage />
       },
       {

@@ -526,9 +526,9 @@ export const BookPage: React.FC = () => {
                                     <div className="similar-books">
                                         {
                                             // attempting to fetch similar books successful but might return nothing if no books found
-                                            similarBooks.length > 0 ?
+                                            similarBooks && similarBooks.length > 0 ?
                                                 similarBooks.map((book, index) => 
-                                                    <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} />
+                                                    book && <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} />
                                                 )
                                             :
                                             <div className="no-similar-books-found">No similar books could be found for {book.title}</div>
