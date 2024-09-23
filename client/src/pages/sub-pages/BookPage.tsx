@@ -408,6 +408,42 @@ export const BookPage: React.FC = () => {
         setShowModal(true);
     }
 
+    // removing a book from its current shelf
+    const handleRemoveFromShelfButton = (book: book | null): void => {
+        if (!book) {
+            console.warn("Attempted to remove a null book from shelf");
+            return;
+        }
+    
+        const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
+    
+        if (!storedBooksWithStatus) {
+            console.warn("No books with status found in localStorage");
+            return;
+        }
+    
+        try {
+            let books: Record<string, BookWithStatus> = JSON.parse(storedBooksWithStatus);
+    
+            if (book.id in books) {
+                // Remove the book entirely instead of setting status to empty string
+                delete books[book.id];
+    
+                // Update localStorage
+                localStorage.setItem("booksWithStatus", JSON.stringify(books));
+    
+                // Update local state
+                setBookStatus("");
+                setShowRemoveFromShelfModal(false);
+    
+            } else {
+                console.warn(`Book "${book.title}" not found in stored books`);
+            }
+        } catch (error) {
+            console.error("Error parsing or updating stored books:", error);
+        }
+    };
+
     if (!book) {
         return (
             <div>Book Not Found.</div>
@@ -423,23 +459,27 @@ export const BookPage: React.FC = () => {
                 </div>
             )}
 
-            {showModal && <ShelfModal 
-                            handleExitModal={handleExitModal} 
-                            handleCurrentlyReading={handleCurrentlyReading} 
-                            handleModalWantToRead={handleModalWantToRead} 
-                            handleRead={handleRead} 
-                            handleRemoveFromShelf={handleRemoveFromShelf} 
-                            handleDone={handleDone} 
-                            selectedShelf={selectedShelf} 
-                        />
+            {showModal && 
+                <ShelfModal 
+                    handleExitModal={handleExitModal} 
+                    handleCurrentlyReading={handleCurrentlyReading} 
+                    handleModalWantToRead={handleModalWantToRead} 
+                    handleRead={handleRead} 
+                    handleRemoveFromShelf={handleRemoveFromShelf} 
+                    handleDone={handleDone} 
+                    selectedShelf={selectedShelf} 
+                />
             }
 
-            {showRemoveFromShelfModal && <RemoveFromShelfModal 
-                                            handleExitRemoveFromShelfModal={handleExitRemoveFromShelfModal} 
-                                            handleCancelRemoveFromShelf={handleExitRemoveFromShelfModal} 
-                                        /> 
+            {showRemoveFromShelfModal && 
+                <RemoveFromShelfModal 
+                    handleExitRemoveFromShelfModal={handleExitRemoveFromShelfModal} 
+                    handleCancelRemoveFromShelf={handleExitRemoveFromShelfModal} 
+                    handleRemoveFromShelfButton={handleRemoveFromShelfButton}
+                    book={book}
+                /> 
             }
-            
+
             <div className="book-page-main">
                 <div className="book-page-left-column">
                     <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />

@@ -1,11 +1,14 @@
 import React from "react";
+import { book } from "../../interfaces/BookInterface";
 
 interface RemoveFromShelfModalProps {
     handleExitRemoveFromShelfModal: () => void
     handleCancelRemoveFromShelf: () => void
+    handleRemoveFromShelfButton: (book: book | null) => void
+    book: book | null
 }
 
-export const RemoveFromShelfModal: React.FC<RemoveFromShelfModalProps> = ({handleExitRemoveFromShelfModal, handleCancelRemoveFromShelf}) => {
+export const RemoveFromShelfModal: React.FC<RemoveFromShelfModalProps> = ({handleExitRemoveFromShelfModal, handleCancelRemoveFromShelf, handleRemoveFromShelfButton, book}) => {
     return (
         <>
             <div className="modal-backdrop"></div>
@@ -23,7 +26,7 @@ export const RemoveFromShelfModal: React.FC<RemoveFromShelfModalProps> = ({handl
                     <button className="cancel-remove-from-shelf" onClick={handleCancelRemoveFromShelf}>
                         Cancel
                     </button>
-                    <button className="remove-from-shelf-button">
+                    <button className="remove-from-shelf-button" onClick={() => handleRemoveFromShelfButton(book)}>
                         Remove
                     </button>
                 </div>
