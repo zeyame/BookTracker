@@ -1,9 +1,14 @@
 import React from "react"
+import { BookListByStatus } from "../../components/Global/BookListByStatus"
+import { BookPageByStatus } from "../../components/Global/BookPageByStatus"
+import "../../styles/reading-page.css";
+import { ReadingStatus } from "../../interfaces/ReadingStatus";
 
 export const ReadingPage: React.FC = () => {
     return (
-        <div>
-            Reading Page
+        <div className="reading-page-container">
+            <BookListByStatus status={ReadingStatus.CurrentlyReading} />
+            <BookPageByStatus />
         </div>
     )
 }

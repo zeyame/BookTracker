@@ -14,12 +14,7 @@ import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 import { PencilIcon } from "../../components/Book-Page/PencilIcon";
 import { ShelfModal } from "../../components/Book-Page/ShelfModal";
 import { RemoveFromShelfModal } from "../../components/Book-Page/RemoveFromShelfModal";
-
-
-interface BookWithStatus {
-    bookData: book, 
-    status: string
-}
+import { BookWithStatus } from "../../interfaces/BookWithStatus";
 
 
 type Loading = {
@@ -262,6 +257,9 @@ export const BookPage: React.FC = () => {
         return "";
     }
 
+
+    // BOOK AND AUTHOR DETAILS SECTION FUNCTIONS
+
     // handles the show more button of book and author descriptions
     const handleShowMore = (descriptionType: string) => {
         if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
@@ -346,7 +344,7 @@ export const BookPage: React.FC = () => {
     }
 
 
-    // SHELF OPTIONS MODAL FUNCTIONS
+    // BOOK BUTTON HANDLER FUNCTIONS
     const handleWantToRead = () => {
 
         // if the reading status button was clicked already, show modal 
@@ -363,6 +361,13 @@ export const BookPage: React.FC = () => {
             setShowPopUp(false);
         }, 3000);
     }
+
+    const handleChooseShelfButton = () => {
+        setShowModal(true);
+    }
+        
+
+    // SHELF OPTIONS MODAL FUNCTIONS
 
     const handleExitModal = () => {
         setShowModal(false);
@@ -435,7 +440,6 @@ export const BookPage: React.FC = () => {
                 // Update local state
                 setBookStatus("");
                 setShowRemoveFromShelfModal(false);
-    
             } else {
                 console.warn(`Book "${book.title}" not found in stored books`);
             }
@@ -499,7 +503,7 @@ export const BookPage: React.FC = () => {
                         </button>
                         {
                             bookStatus.length < 1 && 
-                            <button className="choose-shelf-btn">
+                            <button className="choose-shelf-btn" onClick={handleChooseShelfButton}>
                                 <DownArrowIcon className="choose-shelf-icon" width="15" height="15" />
                             </button>
                         }

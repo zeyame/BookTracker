@@ -1,0 +1,53 @@
+.book-by-status-container {
+    display: flex;
+    width: 80%;
+    height: 100px;
+    max-height: 300px;
+    max-width: 600px;
+    margin-left: 45px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.book-by-status-cover {
+    height: 100%;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.book-by-status-cover:hover {
+    transform: scale(1.1);
+    transition: transform 0.5s ease;
+}
+
+.book-by-status-title-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.book-by-status-title {
+    font-size: 16px;
+    margin-top: 5px;
+    margin-bottom: 6px;
+}
+
+.book-by-status-title:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.book-by-status-authors-container {
+    display: flex;
+    margin-top: 0px;
+}
+
+.book-by-status-author {
+    font-size: 12px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+.book-by-status-author:hover {
+    text-decoration: underline;
+}

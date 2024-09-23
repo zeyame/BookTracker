@@ -52,8 +52,10 @@
 .reading-status-btn {
     margin-top: 10px;
     width: 210px;
-    background-color: rgb(63, 131, 99);
-    border: 1px solid rgba(55, 116, 88, 0.5);
+    background-color: rgb(45, 32, 73);
+    border: 1px solid rgba(45, 32, 73, 0.5);
+    /* background-color: rgb(63, 131, 99); */
+    /* border: 1px solid rgba(55, 116, 88, 0.5); */
     border-radius: 100px 0px 0px 100px;
     padding-top: 7px;
     padding-bottom: 7px;
@@ -66,7 +68,8 @@
 }
 
 .reading-status-btn:hover {
-    background-color: rgb(71, 150, 113);
+    /* background-color: rgb(71, 150, 113); */
+    background-color: rgb(56, 41, 89);
 }
 
 .reading-status-btn.added-to-shelf {
@@ -111,8 +114,10 @@
     margin-top: 10px;
     width: 40px;
     height: 30px;
-    background-color: rgb(63, 131, 99);
-    border: 1px solid rgba(55, 116, 88, 0.5);
+    background-color: rgb(45, 32, 73);
+    border: 1px solid rgba(45, 32, 73, 0.5);
+    /* background-color: rgb(63, 131, 99); */
+    /* border: 1px solid rgba(55, 116, 88, 0.5); */
     border-radius: 0px 100px 100px 0px;
     padding-top: 7px;
     padding-bottom: 7px;
@@ -125,7 +130,8 @@
 }
 
 .choose-shelf-btn:hover {
-    background-color: rgb(71, 150, 113);
+    background-color: rgb(56, 41, 89);
+    /* background-color: rgb(71, 150, 113); */
 }
 
 .buy-amazon-btn {
@@ -259,7 +265,7 @@
     display: block;
     width: 100%;
     padding: 10px;
-    background-color: black;
+    background-color: rgb(45, 32, 73);
     border-radius: 100px;
     color: white;
     border: none;
@@ -269,7 +275,7 @@
 }
 
 .modal-done-button:hover {
-    background-color: rgb(40, 39, 39);
+    background-color: rgb(56, 41, 89);
 }
 
 .modal-backdrop {
@@ -312,7 +318,7 @@
 
 .remove-from-shelf-button {
     font-size: 16px;
-    background-color: black;
+    background-color: rgb(45, 32, 73);
     color: white;
     border-radius: 100px;
     width: 45%;
@@ -323,7 +329,7 @@
 }
 
 .remove-from-shelf-button:hover {
-    background-color: rgb(40, 39, 39);
+    background-color: rgb(56, 41, 89);
 }
 
 .book-page-main-content {

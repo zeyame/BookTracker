@@ -1,0 +1,38 @@
+.search-bar-by-status-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 40px;
+    margin-top: 10px;
+}
+
+.search-bar-by-status {
+    display: flex;
+    align-items: center;
+    height: 35px;
+    width: 85%;
+    flex-shrink: 0;
+    margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding-left: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: rgb(248, 248, 248); /* Matching background color */
+}
+
+.search-bar-by-status-icon {
+    cursor: pointer;
+    margin-right: 15px;
+    height: 20px;
+    width: 15px;
+}
+
+.search-bar-by-status-input {
+    height: 80%;
+    width: 100%;
+    border: none;
+    margin-left: 0px;
+    background-color: rgb(248, 248, 248);
+}
+
+.search-bar-by-status-input:focus {
+    outline: none;
+}
