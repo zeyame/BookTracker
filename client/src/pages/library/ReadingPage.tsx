@@ -18,7 +18,7 @@ export const ReadingPage: React.FC = () => {
         <div className="reading-page-container">
             <BookListByStatus status={ReadingStatus.CurrentlyReading} handleSelectedBook={handleSelectedBook} />
             {
-                selectedBook ? <BookPageByStatus book={selectedBook} /> : <BookPageByStatus />
+                selectedBook ? <BookPageByStatus book={selectedBook} /> : <div>No books</div>
             }
         </div>
     )

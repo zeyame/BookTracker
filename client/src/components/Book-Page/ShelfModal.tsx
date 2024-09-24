@@ -1,6 +1,7 @@
 import React from "react";
 import GarbageIcon from "../Global/GarbageIcon";
 import TickIcon from "./TickIcon";
+import { ReadingStatus } from "../../interfaces/ReadingStatus";
 
 interface ShelfModalProps {
     handleExitModal: () => void
@@ -12,11 +13,6 @@ interface ShelfModalProps {
     selectedShelf: string
 }
 
-enum ShelfType {
-    WantToRead = "Want to read",
-    CurrentlyReading = "Currently reading",
-    Read = "Read"
-}
 
 export const ShelfModal: React.FC<ShelfModalProps> = ({handleExitModal, handleModalWantToRead, handleCurrentlyReading, handleRead, handleRemoveFromShelf, handleDone, selectedShelf}) => {
     return (
@@ -30,18 +26,18 @@ export const ShelfModal: React.FC<ShelfModalProps> = ({handleExitModal, handleMo
                     <button className="exit-modal-button" onClick={handleExitModal}>x</button>
                 </div>
 
-                <button className={`shelf-modal-button ${selectedShelf===ShelfType.WantToRead && 'selected'}`} onClick={handleModalWantToRead}>
-                    {selectedShelf===ShelfType.WantToRead && <TickIcon classname="shelf-modal-tick-icon" width="10" height="10" />}
+                <button className={`shelf-modal-button ${selectedShelf===ReadingStatus.WantToRead && 'selected'}`} onClick={handleModalWantToRead}>
+                    {selectedShelf===ReadingStatus.WantToRead && <TickIcon classname="shelf-modal-tick-icon" width="10" height="10" />}
                     Want to read
                 </button>
 
-                <button className={`shelf-modal-button ${selectedShelf===ShelfType.CurrentlyReading && 'selected'}`} onClick={handleCurrentlyReading}>
-                    {selectedShelf===ShelfType.CurrentlyReading && <TickIcon classname="shelf-modal-tick-icon" width="18" />}
+                <button className={`shelf-modal-button ${selectedShelf===ReadingStatus.CurrentlyReading && 'selected'}`} onClick={handleCurrentlyReading}>
+                    {selectedShelf===ReadingStatus.CurrentlyReading && <TickIcon classname="shelf-modal-tick-icon" width="18" />}
                     Currently reading
                 </button>
 
-                <button className={`shelf-modal-button ${selectedShelf===ShelfType.Read && 'selected'}`} onClick={handleRead}>
-                    {selectedShelf===ShelfType.Read && <TickIcon classname="shelf-modal-tick-icon" />}
+                <button className={`shelf-modal-button ${selectedShelf===ReadingStatus.Read && 'selected'}`} onClick={handleRead}>
+                    {selectedShelf===ReadingStatus.Read && <TickIcon classname="shelf-modal-tick-icon" />}
                     Read    
                 </button>
 
