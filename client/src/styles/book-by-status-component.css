@@ -4,9 +4,15 @@
     height: 100px;
     max-height: 300px;
     max-width: 600px;
-    margin-left: 45px;
+    margin-left: 25px;
     margin-top: 30px;
     margin-bottom: 30px;
+    transition: all 0.5s ease;
+}
+
+.book-by-status-container:hover {
+    cursor: pointer;
+    background-color: rgb(230, 230, 230);
 }
 
 .book-by-status-cover {
@@ -24,6 +30,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
 }
 
 .book-by-status-title {
@@ -45,9 +52,4 @@
 .book-by-status-author {
     font-size: 12px;
     margin: 0px;
-    cursor: pointer;
-}
-
-.book-by-status-author:hover {
-    text-decoration: underline;
 }

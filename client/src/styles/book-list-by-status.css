@@ -2,5 +2,33 @@
     width: 24%;
     height: 100%;
     border-right: 1px solid rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+/* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+.book-list-by-status-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* For other browsers like Firefox */
+.book-list-by-status-container {
+    scrollbar-width: none;  /* Firefox */
+}
+
+.book-list-by-status-title {
+    margin-top: 40px;
+    margin-left: 25px;
+    word-wrap: break-word;
+}
+
+.no-books-in-list-message {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    cursor: pointer;
+}
+
+.no-books-in-list-message:hover {
+    text-decoration: underline;
 }
