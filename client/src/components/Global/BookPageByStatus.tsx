@@ -4,8 +4,8 @@ import "../../styles/book-page-by-status.css";
 import { Link } from "react-router-dom";
 import { sliceDescriptionBySentences } from "../../utils/sliceDescription";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
-import { ShelfModal } from "../Book-Page/ShelfModal";
-import { RemoveFromShelfModal } from "../Book-Page/RemoveFromShelfModal";
+import { ShelfModal } from "./ShelfModal";
+import { RemoveFromShelfModal } from "./RemoveFromShelfModal";
 
 interface BookPageByStatusProps {
     book: BookWithStatus;
@@ -28,7 +28,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(book.status, setBookStatus, setShowPopUp);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
     
     const [numberOfSentences, setNumberOfSentences] = useState<number>(0);
 
@@ -43,23 +43,6 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
             setNumberOfSentences(sentenceCount);
         }
     }, [book]);
-
-    
-    // saving book status to local storage
-    useEffect(() => {
-        if (book && bookStatus) {
-
-            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-
-            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
-
-            books[book.bookData.id].status = bookStatus;
-
-            localStorage.setItem("booksWithStatus", JSON.stringify(books));
-
-        }
-
-    }, [book, bookStatus]);
 
     let numberOfDivisions: number = numberOfSentences <= 3 ? 2 : 3;
 
@@ -105,7 +88,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
                             </p>
                         </Link>
                         <button className="book-page-by-status-reading-status-button" onClick={() => setShowModal(true)}>
-                            {bookStatus}
+                            {bookStatus.length > 0 ? bookStatus : "Shelf book"}
                         </button>
                     </div>
                 </div>
@@ -123,9 +106,12 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
                                 {sliceDescriptionBySentences(book.bookData.description, Math.floor((2 * numberOfSentences) / numberOfDivisions), numberOfSentences - Math.floor((2 * numberOfSentences) / numberOfDivisions))}
                             </p>
                         </div>
-                        <div className="book-page-by-status-author-description">
-                            {book.authorDescription}
-                        </div>
+                        {
+                            book.authorDescription && 
+                            <div className="book-page-by-status-author-description">
+                                {book.authorDescription}
+                            </div>
+                        }
                     </div>
                 )}
             </div>

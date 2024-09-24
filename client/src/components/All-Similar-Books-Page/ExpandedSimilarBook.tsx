@@ -2,6 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { book } from "../../interfaces/BookInterface";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { Link } from "react-router-dom";
+import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
+import { useShelfModal } from "../../custom-hooks/UseShelfModal";
+import { ShelfModal } from "../Global/ShelfModal";
+import { RemoveFromShelfModal } from "../Global/RemoveFromShelfModal";
+import { BookWithStatus } from "../../interfaces/BookWithStatus";
 
 interface ExpandedSimilarBookProps {
     similarBook: book
@@ -12,6 +17,38 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
     // states
     const [bookDescription, setBookDescription] = useState<string>('');
     const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
+    const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(similarBook));
+    const [showPopUp, setShowPopUp] = useState<boolean>(false);
+
+    // saving book status to local storage
+    useEffect(() => {
+        if (similarBook && bookStatus) {
+  
+            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
+  
+            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
+
+            books[similarBook.id] = {bookData: similarBook, status: bookStatus}
+  
+            localStorage.setItem("booksWithStatus", JSON.stringify(books));
+        }
+  
+    }, [similarBook, bookStatus]);
+
+    const {
+        showModal,
+        setShowModal,
+        selectedShelf,
+        showRemoveFromShelfModal,
+        handleExitModal,
+        handleModalWantToRead,
+        handleCurrentlyReading,
+        handleRead,
+        handleRemoveFromShelf,
+        handleDone,
+        handleExitRemoveFromShelfModal,
+        handleRemoveFromShelfButton
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
 
     // refs
     const fullBookDescriptionRef = useRef<string>(similarBook.description);
@@ -34,6 +71,34 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
 
     return (
         <div className="expanded-similar-book">
+            {
+                showPopUp && (
+                    <div className="shelf-added-popup">
+                        <span>Shelved as "{bookStatus}"</span>
+                    </div>
+                )
+            }
+
+            {showModal && 
+                <ShelfModal 
+                    handleExitModal={handleExitModal} 
+                    handleCurrentlyReading={handleCurrentlyReading} 
+                    handleModalWantToRead={handleModalWantToRead} 
+                    handleRead={handleRead} 
+                    handleRemoveFromShelf={handleRemoveFromShelf} 
+                    handleDone={handleDone} 
+                    selectedShelf={selectedShelf} 
+                />
+            }
+            
+            {showRemoveFromShelfModal && 
+                <RemoveFromShelfModal 
+                    handleExitRemoveFromShelfModal={handleExitRemoveFromShelfModal} 
+                    handleCancelRemoveFromShelf={handleExitRemoveFromShelfModal} 
+                    handleRemoveFromShelfButton={() => handleRemoveFromShelfButton(similarBook)}
+                /> 
+            }
+            
             <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
                 <img className="expanded-similar-book-cover" src={similarBook.imageUrl} alt="Book cover" />    
             </Link>
@@ -81,8 +146,8 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
                             }
                         </>
                 }
-                <button className="expanded-similar-book-reading-status-btn">
-                    Want to Read
+                <button className="expanded-similar-book-reading-status-btn" onClick={() => setShowModal(true)}>
+                    {bookStatus.length > 0 ? bookStatus : "Shelf book"}
                 </button>
             </div>
         </div>

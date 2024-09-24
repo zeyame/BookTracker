@@ -1,6 +1,6 @@
 import React from "react";
-import GarbageIcon from "../Global/GarbageIcon";
-import TickIcon from "./TickIcon";
+import GarbageIcon from "./GarbageIcon";
+import TickIcon from "../Book-Page/TickIcon";
 import { ReadingStatus } from "../../interfaces/ReadingStatus";
 
 interface ShelfModalProps {

@@ -12,10 +12,11 @@ import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
 import { PencilIcon } from "../../components/Book-Page/PencilIcon";
-import { ShelfModal } from "../../components/Book-Page/ShelfModal";
-import { RemoveFromShelfModal } from "../../components/Book-Page/RemoveFromShelfModal";
+import { ShelfModal } from "../../components/Global/ShelfModal";
+import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfModal";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
+import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
 
 type Loading = {
     aboutAuthor: boolean
@@ -247,28 +248,6 @@ export const BookPage: React.FC = () => {
 
 
     // functions
-
-    // gets the current reading status of a book
-    function getStoredBookStatus (book: book | null): string {
-        if (!book) {
-            return ""
-        }
-
-        const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-
-        if (storedBooksWithStatus) {
-            try {
-                const books: Record<string, BookWithStatus> = JSON.parse(storedBooksWithStatus);
-                const bookWithStatus = books[book.id];
-                return bookWithStatus?.status || "";
-            }
-            catch (error: any) {
-                console.error("Error parsing stored books to get reading status.");
-                return "";
-            }
-        }
-        return "";
-    }
 
 
     // BOOK AND AUTHOR DETAILS SECTION FUNCTIONS
