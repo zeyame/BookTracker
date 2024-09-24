@@ -44,6 +44,22 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
         }
     }, [book]);
 
+    
+    // saving book status to local storage
+    useEffect(() => {
+        if (book && bookStatus) {
+  
+            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
+  
+            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
+  
+            books[book.bookData.id].status = bookStatus;
+  
+            localStorage.setItem("booksWithStatus", JSON.stringify(books));
+        }
+  
+    }, [book, bookStatus]);
+
     let numberOfDivisions: number = numberOfSentences <= 3 ? 2 : 3;
 
     return (
