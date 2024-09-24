@@ -224,7 +224,7 @@ export const BookPage: React.FC = () => {
 
             let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
 
-            books[book.id] = {bookData: book, status: bookStatus};
+            books[book.id] = {bookData: book, status: bookStatus, authorDescription: fullAuthorDescriptionRef.current};
 
             localStorage.setItem("booksWithStatus", JSON.stringify(books));
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { book } from "../../interfaces/BookInterface";
 import '../../styles/all-similar-books-page.css';
@@ -8,12 +8,12 @@ import { ExpandedSimilarBook } from "../../components/All-Similar-Books-Page/Exp
 export const AllSimilarBooksPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const originalBook: book | null = location.state?.originalBook ?? null;
-    const similarBooks: Array<book> | null = location.state?.similarBooks ?? null;
+    const originalBook: book | null = location.state?.originalBook;
+    const similarBooks: Array<book> | null = location.state?.similarBooks;
     
     if (!originalBook || !similarBooks || similarBooks.length === 0) {
         navigate('/');
-        return null;
+        return <div>No books.</div>;
     }
 
     return (
@@ -23,11 +23,14 @@ export const AllSimilarBooksPage: React.FC = () => {
                 <h2>Readers who enjoyed</h2>
                 <ExpandedSimilarBook similarBook={originalBook} />
                 <h2>also enjoyed</h2>
-                {
-                    similarBooks.map(book => 
-                        <ExpandedSimilarBook key={book.id} similarBook={book} />
-                    )
-                }
+                {similarBooks.map((book, index) => 
+                    book ? (
+                        <ExpandedSimilarBook 
+                            key={book.id || `book-${index}`} 
+                            similarBook={book} 
+                        />
+                    ) : null
+                )}
             </div>
         </div>
     );
