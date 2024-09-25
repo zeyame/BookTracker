@@ -75,7 +75,7 @@ export const LoginPage: React.FC = () => {
                 // once user logs in once for the session they are remembered if they log out within the same session
                 sessionStorage.setItem("userLogin", JSON.stringify(userLogin));
                 
-                navigate(`/user/${userLogin.username}/read`);
+                navigate(`/app`, {replace: true});
             }
             catch (error: any) {
                 // error set to password always to be displayed right below the password field

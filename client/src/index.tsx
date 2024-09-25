@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {RouterProvider, createBrowserRouter} from 'react-router-dom';
+import {Navigate, RouterProvider, createBrowserRouter} from 'react-router-dom';
 import { SearchPage } from './pages/explore/SearchPage';
 import { TrendingBooksPage } from './pages/explore/TrendingBooksPage';
 import { PopularAuthorsPage } from './pages/explore/PopularAuthorsPage';
@@ -21,62 +21,11 @@ import { LoginPage } from './pages/account/LoginPage';
 import { RegistrationPage } from './pages/account/RegistrationPage';
 import { VerificationPage } from './pages/account/VerificationPage';
 
-const router = createBrowserRouter([
+const router = createBrowserRouter([ 
   {
-    path: '/',
-    element: <App />,
-    children: [
-      {
-        path: '/',
-        element: <SearchPage />
-      },
-      {
-        path: '/trending-books',
-        element: <TrendingBooksPage />
-      },
-      {
-        path: '/popular-authors',
-        element: <PopularAuthorsPage />
-      },
-      {
-        path: '/add-book',
-        element: <AddBookPage />
-      },
-      {
-        path: '/user/:username/read',
-        element: <ReadPage />
-      },
-      {
-        path: '/user/:username/currently-reading',
-        element: <ReadingPage />
-      },
-      {
-        path: '/user/:username/to-read',
-        element: <ToReadPage />
-      },
-      {
-        path: '/goals',
-        element: <GoalsPage />
-      },
-      {
-        path: '/stats',
-        element: <StatsPage />
-      },
-      {
-        path: '/book/:bookId',
-        element: <BookPage />
-      },
-      {
-        path: '/similar-books/:bookId',
-        element: <AllSimilarBooksPage />
-      },
-      {
-        path: '/author/:authorName',
-        element: <AuthorPage />
-      },
-    ],
-    errorElement: <ErrorPage />
-  },  
+    path: "/",
+    element: <Navigate to={"/user/registration"} replace />
+  },
   { 
     path: '/user/registration',
     element: <RegistrationPage />,  
@@ -89,7 +38,61 @@ const router = createBrowserRouter([
     path: '/user/login',
     element: <LoginPage />
   },
-
+  {
+    path: '/app',
+    element: <App />,
+    children: [
+      {
+        path: '',
+        element: <SearchPage />
+      },
+      {
+        path: 'trending-books',
+        element: <TrendingBooksPage />
+      },
+      {
+        path: 'popular-authors',
+        element: <PopularAuthorsPage />
+      },
+      {
+        path: 'add-book',
+        element: <AddBookPage />
+      },
+      {
+        path: 'read',
+        element: <ReadPage />
+      },
+      {
+        path: 'currently-reading',
+        element: <ReadingPage />
+      },
+      {
+        path: 'to-read',
+        element: <ToReadPage />
+      },
+      {
+        path: 'goals',
+        element: <GoalsPage />
+      },
+      {
+        path: 'stats',
+        element: <StatsPage />
+      },
+      {
+        path: 'book/:bookId',
+        element: <BookPage />
+      },
+      {
+        path: 'similar-books/:bookId',
+        element: <AllSimilarBooksPage />
+      },
+      {
+        path: 'author/:authorName',
+        element: <AuthorPage />
+      },
+    ],
+    errorElement: <ErrorPage />
+  }
 ]);
 
 const element = document.getElementById('root') as HTMLElement;

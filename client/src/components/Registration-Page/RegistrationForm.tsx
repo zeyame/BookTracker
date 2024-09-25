@@ -40,7 +40,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({userRegistrat
                     error={errorMap[field] || ''}
                     handleCreateAccount={handleCreateAccount}
                     handleKeyDown={handleKeyDown}
-                        />
+                />
             )}
 
             <div className="registration-button-container">
@@ -58,7 +58,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({userRegistrat
 
             <div className="already-have-account-message-div">
                 <p className="already-have-account-message">
-                    Already have an account? <Link className="already-have-account-sign-in-link" to={"/user/login"}>Sign in</Link>
+                    Already have an account? <Link className="already-have-account-sign-in-link" to={"/user/login"} replace>Sign in</Link>
                 </p>
             </div>
         </div>

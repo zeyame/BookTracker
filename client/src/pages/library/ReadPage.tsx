@@ -5,8 +5,10 @@ import "../../styles/reading-page.css";
 import { ReadingStatus } from "../../interfaces/ReadingStatus";
 import { book } from "../../interfaces/BookInterface";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
+import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
 
 export const ReadPage: React.FC = () => {
+    useAuthRedirect();
 
     const [selectedBook, setSelectedBook] = useState<BookWithStatus | null>(null);
 

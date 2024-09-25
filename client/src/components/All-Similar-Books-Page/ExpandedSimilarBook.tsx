@@ -99,20 +99,22 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
                 /> 
             }
             
-            <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
+            <Link to={`/app/book/${similarBook.id}`} state={ {bookData: similarBook} }>
                 <img className="expanded-similar-book-cover" src={similarBook.imageUrl} alt="Book cover" />    
             </Link>
             <div className="expanded-similar-book-details">
-                <Link to={`/book/${similarBook.id}`} state={ {bookData: similarBook} }>
+                <Link to={`/app/book/${similarBook.id}`} state={ {bookData: similarBook} }>
                     <h3 className="expanded-similar-book-title">
                         {similarBook.title}
                     </h3>
                 </Link>
                 <div className="expanded-similar-book-authors">
                     by {similarBook.authors.map((author, index) => 
+                    <Link key={author} to={`/app/author/${author}`}>
                         <p key={author} className="expanded-similar-book-author">
                             {index === 0 ? author : ', ' + author}
                         </p>
+                    </Link>
                     )}
                 </div>
                 {

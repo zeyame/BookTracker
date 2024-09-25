@@ -17,6 +17,7 @@ import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfMod
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
+import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
 
 type Loading = {
     aboutAuthor: boolean
@@ -34,6 +35,7 @@ type showMoreButton = {
 }
 
 export const BookPage: React.FC = () => {
+    useAuthRedirect();
 
     const location = useLocation();
     const book: book | null = location.state?.bookData;
@@ -427,7 +429,7 @@ export const BookPage: React.FC = () => {
                     <div className="book-page-metadata-section">
                         <div className="book-page-authors">
                             {book.authors.map((author, index) => 
-                                <Link key={author} to={`/author/${author}`} state={ {authorData: author} }>
+                                <Link key={author} to={`/app/author/${author}`} state={ {authorData: author} }>
                                     <h3 key={author} className="book-page-author" >{index > 0 && ', '}{author}</h3>
                                 </Link>
                             )}
@@ -567,7 +569,7 @@ export const BookPage: React.FC = () => {
                                         }
                                     </div>   
                                 }
-                                <Link to={`/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
+                                <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
                                     <div className="all-similar-books-btn-container">
                                         <button className="all-similar-books-btn">All similar books</button>
                                         <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />

@@ -6,8 +6,11 @@ import { initializeCaching, getCachedBooks, updateCache } from "../../services/c
 import { book } from "../../interfaces/BookInterface";
 import { LoadingIcon } from "../../components/Global/LoadingIcon";
 import { SearchBar } from "../../components/Global/SearchBar";
+import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
 
 export const SearchPage: React.FC = () => {
+    useAuthRedirect();
+
     const genres: Array<string> = ['nonfiction', 'fiction', 'thriller', 'action', 'mystery', 'history', 'horror', 'fantasy'];
 
     // states

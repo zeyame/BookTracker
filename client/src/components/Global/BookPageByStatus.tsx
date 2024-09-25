@@ -98,7 +98,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
                         <h2 className="book-page-by-status-title">
                             {book.bookData.title}
                         </h2>
-                        <Link to={`/author/${book.bookData.authors[0]}`}>
+                        <Link to={`/app/author/${book.bookData.authors[0]}`}>
                             <p className="book-page-by-status-author">
                                 {book.bookData.authors[0]}
                             </p>
