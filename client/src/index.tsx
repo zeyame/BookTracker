@@ -15,7 +15,6 @@ import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
 import { BookPage } from './pages/sub-pages/BookPage';
 import { AllSimilarBooksPage } from './pages/sub-pages/AllSimilarBooksPage';
-import { AboutAuthor } from './components/Book-Page/AboutAuthor';
 import { AuthorPage } from './pages/sub-pages/AuthorPage';
 import { LoginPage } from './pages/account/LoginPage';
 import { RegistrationPage } from './pages/account/RegistrationPage';
