@@ -4,7 +4,7 @@ import { book } from "../../interfaces/BookInterface";
 import '../../styles/all-similar-books-page.css';
 import { SearchBar } from "../../components/Global/SearchBar";
 import { ExpandedSimilarBook } from "../../components/All-Similar-Books-Page/ExpandedSimilarBook";
-import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
+import { useAuthRedirect } from "../../utils/useCheckForToken";
 
 export const AllSimilarBooksPage: React.FC = () => {
     useAuthRedirect();

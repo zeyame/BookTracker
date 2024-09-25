@@ -6,7 +6,7 @@ import { initializeCaching, getCachedBooks, updateCache } from "../../services/c
 import { book } from "../../interfaces/BookInterface";
 import { LoadingIcon } from "../../components/Global/LoadingIcon";
 import { SearchBar } from "../../components/Global/SearchBar";
-import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
+import { useAuthRedirect } from "../../utils/useCheckForToken";
 
 export const SearchPage: React.FC = () => {
     useAuthRedirect();

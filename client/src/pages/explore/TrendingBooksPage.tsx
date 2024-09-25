@@ -1,5 +1,5 @@
 import React from "react"
-import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
+import { useAuthRedirect } from "../../utils/useCheckForToken";
 
 export const TrendingBooksPage: React.FC = () => {
     useAuthRedirect();

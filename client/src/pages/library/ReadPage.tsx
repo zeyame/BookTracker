@@ -5,7 +5,7 @@ import "../../styles/reading-page.css";
 import { ReadingStatus } from "../../interfaces/ReadingStatus";
 import { book } from "../../interfaces/BookInterface";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
-import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
+import { useAuthRedirect } from "../../utils/useCheckForToken";
 
 export const ReadPage: React.FC = () => {
     useAuthRedirect();

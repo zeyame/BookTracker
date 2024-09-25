@@ -4,8 +4,6 @@ import { book } from "../../interfaces/BookInterface";
 import { SearchBar } from "../../components/Global/SearchBar";
 import '../../styles/book-page.css';
 import { LoadingIcon } from "../../components/Global/LoadingIcon";
-import { fetchSimilarBooks } from "../../services/similarBookSearch";
-import { SimilarBook } from "../../components/Book-Page/SimilarBook";
 import { Author } from "../../interfaces/AuthorInterface";
 import { fetchAuthorDetails } from "../../services/authorSearch";
 import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
@@ -17,17 +15,9 @@ import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfMod
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
-import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
-
-type Loading = {
-    aboutAuthor: boolean
-    similarBooks: boolean
-}
-
-type customError = {
-    aboutAuthor: boolean
-    similarBooks: boolean
-}
+import { useAuthRedirect } from "../../utils/useCheckForToken";
+import { useFetchSimilarBooks } from "../../custom-hooks/useFetchSimilarBooks";
+import { SimilarBooks } from "../../components/Book-Page/SimilarBooks";
 
 type showMoreButton = {
     aboutAuthor: boolean
@@ -45,23 +35,26 @@ export const BookPage: React.FC = () => {
             description: '',
             imageUrl: ''
         });
-        const [loading, setLoading] = useState<Loading>({
-            aboutAuthor: false,
-            similarBooks: false
-        });
-        const [error, setError] = useState<customError>({
-            aboutAuthor: false,
-            similarBooks: false
-        });
+        const [loading, setLoading] = useState<boolean>(false);           
+        const [error, setError] = useState<boolean>(false);
+
         const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<showMoreButton>({
             aboutAuthor: false,
             bookDescription: false
         });
-        const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
-        const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
         const [bookDescription, setBookDescription] = useState<string>('');
         const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(book));
         const [showPopUp, setShowPopUp] = useState<boolean>(false);
+
+        // useFetchSimilarBooks custom hook handles all fetching and handling logic for the similar books
+        const {
+            similarBooks,
+            similarBooksLoading,
+            similarBooksError,
+            handleLeftArrowClick,
+            handleRightArrowClick,
+            allSimilarBooksRef
+        } = useFetchSimilarBooks(book);
 
         // useShelfModal custom hook encompasses all logic for both the shelf modal and the remove from shelf modal components 
         const {
@@ -82,8 +75,6 @@ export const BookPage: React.FC = () => {
 
         // refs 
         const fullAuthorDescriptionRef = useRef<string>('');
-        const similarBooksCacheRef = useRef<Array<book>>([]);       // dynamic cache for similar books that is added to and removed from
-        const allSimilarBooksRef = useRef<Array<book>>([]);
 
         // effects
         // fetches description about the author of the book
@@ -104,10 +95,7 @@ export const BookPage: React.FC = () => {
                             }));
                         } 
                         else {
-                            setLoading(prevState => ({
-                                ...prevState,
-                                aboutAuthor: true
-                            }));
+                            setLoading(true);
                             const authorDetails: Author | null = await fetchAuthorDetails(book.authors[0]);
 
                             // if fetching author details did not return empty, we get the description
@@ -130,16 +118,10 @@ export const BookPage: React.FC = () => {
                     }
                 } 
                 catch (error) {
-                    setError(prevState => ({
-                        ...prevState,
-                        aboutAuthor: true
-                    }));
+                    setError(true);
                 } 
                 finally {
-                    setLoading(prevState => ({
-                        ...prevState,
-                        aboutAuthor: false
-                    }));
+                    setLoading(false);
                 }
             };
     
@@ -152,70 +134,6 @@ export const BookPage: React.FC = () => {
                 'imageUrl': ''
             }));
         };
-    }, [book]);
-
-    // fetches a specified number of similar books 
-    useEffect(() => {
-        const getSimilarBooks = async () => {
-            if (book) {
-                try {
-                    if (sessionStorage.getItem(`${book.title}-similar-books`)) {
-                        const storedSimilarBooks = sessionStorage.getItem(`${book.title}-similar-books`);
-                        if (storedSimilarBooks) {
-                            const similarBooks: Array<book> = JSON.parse(storedSimilarBooks);
-                            allSimilarBooksRef.current = [...similarBooks];
-                            similarBooksCacheRef.current = [...similarBooks];
-
-                            const newSimilarBooks = similarBooksCacheRef.current.slice(-5);
-
-                            // updating history
-                            setSimilarBooksHistory([newSimilarBooks]);
-                            setSimilarBooks(newSimilarBooks);
-                            similarBooksCacheRef.current.splice(-5);
-                        }
-                    }
-                    else {
-                        setLoading(prevState => ({
-                            ...prevState,
-                            similarBooks: true
-                        }));
-                        const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 20);
-                        if (similarBooks && similarBooks.length > 0) {
-                            allSimilarBooksRef.current = [...similarBooks];
-                            similarBooksCacheRef.current = [...similarBooks];
-
-                            const newSimilarBooks = similarBooksCacheRef.current.slice(0, 5);
-                            
-                            // updating history
-                            setSimilarBooksHistory([newSimilarBooks]);
-
-                            setSimilarBooks(newSimilarBooks);
-
-                            // saving full cache to storage and removing the retrieved books 
-                            sessionStorage.setItem(`${book.title}-similar-books`, JSON.stringify(allSimilarBooksRef.current));
-                            similarBooksCacheRef.current.splice(0, 5);
-                        }
-                    }
-                }   
-                catch {
-                    setError(prevState => ({
-                        ...prevState,
-                        similarBooks: true
-                    }));
-                }
-                finally {
-                    setLoading(prevState => ({
-                        ...prevState,
-                        similarBooks: false
-                    }));
-                }
-            }
-        }
-        getSimilarBooks();
-        return () => {
-            setSimilarBooks([]);
-            setSimilarBooksHistory([]);
-        }
     }, [book]);
 
 
@@ -305,35 +223,6 @@ export const BookPage: React.FC = () => {
         }
         else {
             console.log("Parameter given to handleShowLess function must either be 'about author' or 'book description'.");
-        }
-    }
-
-
-    // SIMILAR BOOKS NAVIGATION FUNCTIONS
-
-    // gets the last 5 similar books from the history
-    const handleLeftArrowClick = () => {
-        if (similarBooksHistory.length > 0) {
-            // updating history
-            const newHistory = similarBooksHistory.slice(0, -1);
-
-            if (newHistory.length > 0) {
-                // sending back current similar books to the cache
-                similarBooksCacheRef.current.unshift(...similarBooks);
-                const lastSimilarBooks = newHistory[newHistory.length-1];
-                setSimilarBooks(lastSimilarBooks);
-                setSimilarBooksHistory(newHistory);
-            }
-        }
-    }
-
-    // gets the last 5 similar books from the cache
-    const handleRightArrowClick = () => {
-        if (similarBooksCacheRef.current.length > 0) {
-            const newSimilarBooks = similarBooksCacheRef.current.slice(0, 5);
-            setSimilarBooksHistory(prevHistory => [...prevHistory, newSimilarBooks]);
-            setSimilarBooks(newSimilarBooks);
-            similarBooksCacheRef.current.splice(0, 5);
         }
     }
 
@@ -483,13 +372,13 @@ export const BookPage: React.FC = () => {
                                 About the author
                             </p>
                             {
-                                loading.aboutAuthor ? 
+                                loading ? 
                                     <div className="loading-about-author">
                                         <p>Loading</p>
                                         <LoadingIcon />
                                     </div>
                                 : 
-                                error.aboutAuthor ?
+                                error ?
                                     <div className="about-author-error">
                                         <p className="about-author-error-message">Failed to fetch author's description. Please refresh to try again.</p>
                                     </div>
@@ -532,46 +421,13 @@ export const BookPage: React.FC = () => {
                                     <hr className="about-author-divider"/>
                                 </div>
                             }
-
-                            <div className="similar-books-container">
-                                <div className="similar-books-header-div">
-                                    <p className="similar-books-header">
-                                        Readers also enjoyed
-                                    </p>
+                            <SimilarBooks loading={similarBooksLoading} error={similarBooksError} similarBooks={similarBooks} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} book={book} />
+                            <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
+                                <div className="all-similar-books-btn-container">
+                                    <button className="all-similar-books-btn">All similar books</button>
+                                    <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />
                                 </div>
-                                {
-                                    // request to fetch similar books in progress
-                                    loading.similarBooks ? 
-                                        <div className="loading-similar-books">
-                                            <p>Loading</p>
-                                            <LoadingIcon />
-                                        </div>
-                                    :
-                                    // request to fetch similar books unexpectedly fails
-                                    error.similarBooks ? 
-                                        <div className="similar-books-error">
-                                            <p className="about-author-error-message">Failed to fetch similar books. Please refresh to try again.</p>
-                                        </div>
-                                    :
-                                    <div className="similar-books">
-                                        {
-                                            // attempting to fetch similar books successful but might return nothing if no books found
-                                            similarBooks && similarBooks.length > 0 ?
-                                                similarBooks.map((book, index) => 
-                                                    book && <SimilarBook key={book.id} book={book} isLast={index === similarBooks.length-1} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} />
-                                                )
-                                            :
-                                            <div className="no-similar-books-found">No similar books could be found for {book.title}</div>
-                                        }
-                                    </div>   
-                                }
-                                <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
-                                    <div className="all-similar-books-btn-container">
-                                        <button className="all-similar-books-btn">All similar books</button>
-                                        <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />
-                                    </div>
-                                </Link>
-                            </div>
+                            </Link>
                             <hr className="similar-books-divider" />
                         </div>
                     </div>
