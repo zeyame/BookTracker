@@ -309,7 +309,6 @@ export const BookPage: React.FC = () => {
                             </button>
                         }
                     </div>
-                    <button className="buy-amazon-btn">Buy on Amazon</button>
                 </div>
                 <div className="book-page-main-content">
                     <div className="book-page-title-section">
