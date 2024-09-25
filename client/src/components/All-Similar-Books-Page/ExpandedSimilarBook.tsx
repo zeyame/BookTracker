@@ -110,11 +110,9 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
                 </Link>
                 <div className="expanded-similar-book-authors">
                     by {similarBook.authors.map((author, index) => 
-                    <Link key={author} to={`/app/author/${author}`}>
                         <p key={author} className="expanded-similar-book-author">
                             {index === 0 ? author : ', ' + author}
                         </p>
-                    </Link>
                     )}
                 </div>
                 {

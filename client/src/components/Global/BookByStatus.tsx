@@ -10,10 +10,10 @@ interface BookByStatusProps {
 
 export const BookByStatus: React.FC<BookByStatusProps> = ({bookWithStatus, handleSelectedBook}) => {
     return (
-        <div className="book-by-status-container" onClick={() => handleSelectedBook(bookWithStatus)}>
-            <img className="book-by-status-cover" src={bookWithStatus.bookData.imageUrl} alt="Book cover" />
+        <div className="book-by-status-container">
+            <img className="book-by-status-cover" src={bookWithStatus.bookData.imageUrl} alt="Book cover" onClick={() => handleSelectedBook(bookWithStatus)}/>
             <div className="book-by-status-title-container">
-                <p className="book-by-status-title" >
+                <p className="book-by-status-title" onClick={() => handleSelectedBook(bookWithStatus)} >
                     {bookWithStatus.bookData.title}
                 </p>
                 <div className="book-by-status-authors-container">

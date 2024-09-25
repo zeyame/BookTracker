@@ -10,11 +10,6 @@
     transition: all 0.5s ease;
 }
 
-.book-by-status-container:hover {
-    cursor: pointer;
-    background-color: rgb(230, 230, 230);
-}
-
 .book-by-status-cover {
     height: 100%;
     margin-right: 20px;

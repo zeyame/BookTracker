@@ -53,10 +53,6 @@
     margin-top: 3px;
 }
 
-.book-page-by-status-author:hover {
-    text-decoration: underline;
-}
-
 .book-page-by-status-reading-status-button {
     background-color: rgb(30, 22, 48);
     font-size: 12px;

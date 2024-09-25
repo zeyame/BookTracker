@@ -98,11 +98,9 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
                         <h2 className="book-page-by-status-title">
                             {book.bookData.title}
                         </h2>
-                        <Link to={`/app/author/${book.bookData.authors[0]}`}>
-                            <p className="book-page-by-status-author">
-                                {book.bookData.authors[0]}
-                            </p>
-                        </Link>
+                        <p className="book-page-by-status-author">
+                            {book.bookData.authors[0]}
+                        </p>
                         <button className="book-page-by-status-reading-status-button" onClick={() => setShowModal(true)}>
                             {bookStatus.length > 0 ? bookStatus : "Shelf book"}
                         </button>

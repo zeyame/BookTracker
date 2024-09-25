@@ -31,10 +31,13 @@ export const useShelfModal = (bookStatus: string, setBookStatus: (status: string
   
     const handleDone = () => {
       setShowModal(false);
-      setBookStatus(selectedShelf);
+
+      if (selectedShelf.length > 0) {
+        setBookStatus(selectedShelf);
+      }
 
         // if the selected option was not the same as the current reading status we show a new message popup
-        if (selectedShelf !== bookStatus) {
+        if (selectedShelf.length > 0 && selectedShelf !== bookStatus) {
             setShowPopUp(true);
             // Hide the popup after 3 seconds
             setTimeout(() => {

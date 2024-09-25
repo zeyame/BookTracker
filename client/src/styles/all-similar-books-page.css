@@ -57,11 +57,6 @@
 .expanded-similar-book-author {
     margin: 0px;
     margin-left: 6px;
-    cursor: pointer;
-}
-
-.expanded-similar-book-author:hover {
-    text-decoration: underline;
 }
 
 .expanded-similar-book-description-container {
