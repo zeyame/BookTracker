@@ -18,11 +18,8 @@ import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
 import { useAuthRedirect } from "../../utils/useCheckForToken";
 import { useFetchSimilarBooks } from "../../custom-hooks/useFetchSimilarBooks";
 import { SimilarBooks } from "../../components/Book-Page/SimilarBooks";
-
-type showMoreButton = {
-    aboutAuthor: boolean
-    bookDescription: boolean
-}
+import { AboutAuthor } from "../../components/Book-Page/AboutAuthor";
+import { useFetchAuthorDetails } from "../../custom-hooks/useFetchAuthorDetails";
 
 export const BookPage: React.FC = () => {
     useAuthRedirect();
@@ -30,111 +27,51 @@ export const BookPage: React.FC = () => {
     const location = useLocation();
     const book: book | null = location.state?.bookData;
 
-        // states
-        const [aboutAuthor, setAboutAuthor] = useState<Author>({
-            description: '',
-            imageUrl: ''
-        });
-        const [loading, setLoading] = useState<boolean>(false);           
-        const [error, setError] = useState<boolean>(false);
+    // states
+    const [bookShowMoreClicked, setBookShowMoreClicked] = useState<boolean>(false);
+    const [bookDescription, setBookDescription] = useState<string>('');
+    const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(book));
+    const [showPopUp, setShowPopUp] = useState<boolean>(false);
 
-        const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<showMoreButton>({
-            aboutAuthor: false,
-            bookDescription: false
-        });
-        const [bookDescription, setBookDescription] = useState<string>('');
-        const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(book));
-        const [showPopUp, setShowPopUp] = useState<boolean>(false);
+    // useFetchAuthorDetails custom hook handles all fetching and handling logic for the AboutAuthor section/component
+    const {
+        loading: aboutAuthorLoading,
+        error: aboutAuthorError,
+        aboutAuthor,
+        showMoreButtonClicked: authorShowMoreClicked,
+        fullAuthorDescriptionRef,
+        handleShowMore: authorHandleShowMore,
+        handleShowLess: authorHandleShowLess,
+    } = useFetchAuthorDetails(book);
 
-        // useFetchSimilarBooks custom hook handles all fetching and handling logic for the similar books
-        const {
-            similarBooks,
-            similarBooksLoading,
-            similarBooksError,
-            handleLeftArrowClick,
-            handleRightArrowClick,
-            allSimilarBooksRef
-        } = useFetchSimilarBooks(book);
+    // useFetchSimilarBooks custom hook handles all fetching and handling logic for the similar books
+    const {
+        similarBooks,
+        similarBooksLoading,
+        similarBooksError,
+        handleLeftArrowClick,
+        handleRightArrowClick,
+        allSimilarBooksRef
+    } = useFetchSimilarBooks(book);
 
-        // useShelfModal custom hook encompasses all logic for both the shelf modal and the remove from shelf modal components 
-        const {
-            showModal,
-            setShowModal,
-            selectedShelf,
-            showRemoveFromShelfModal,
-            handleExitModal,
-            handleModalWantToRead,
-            handleCurrentlyReading,
-            handleRead,
-            handleRemoveFromShelf,
-            handleDone,
-            handleExitRemoveFromShelfModal,
-            handleRemoveFromShelfButton
-        } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
+    // useShelfModal custom hook encompasses all logic for both the shelf modal and the remove from shelf modal components 
+    const {
+        showModal,
+        setShowModal,
+        selectedShelf,
+        showRemoveFromShelfModal,
+        handleExitModal,
+        handleModalWantToRead,
+        handleCurrentlyReading,
+        handleRead,
+        handleRemoveFromShelf,
+        handleDone,
+        handleExitRemoveFromShelfModal,
+        handleRemoveFromShelfButton
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
 
 
-        // refs 
-        const fullAuthorDescriptionRef = useRef<string>('');
-
-        // effects
-        // fetches description about the author of the book
-        useEffect(() => {
-            const fetchDescription = async () => {
-                try {
-                    if (book) {
-                        const storedAuthorDetails = sessionStorage.getItem(`author-${book.authors[0]}`);
-                        if (storedAuthorDetails) {
-                            const parsedDetails: Author = JSON.parse(storedAuthorDetails);
-                            const storedDescription = parsedDetails.description;
-                            const storedImage = parsedDetails.imageUrl;
-                            fullAuthorDescriptionRef.current = storedDescription;
-                            setAboutAuthor(prevState => ({
-                                ...prevState,
-                                'description': sliceDescription(storedDescription),
-                                'imageUrl': storedImage
-                            }));
-                        } 
-                        else {
-                            setLoading(true);
-                            const authorDetails: Author | null = await fetchAuthorDetails(book.authors[0]);
-
-                            // if fetching author details did not return empty, we get the description
-                            if (authorDetails) {
-                                const authorDescription = authorDetails.description;
-                                const imageUrl = authorDetails.imageUrl;
-                                fullAuthorDescriptionRef.current = authorDescription;
-
-                                setAboutAuthor(prevState => ({
-                                    ...prevState,
-                                    description: sliceDescription(authorDescription),
-                                    imageUrl: imageUrl
-                                }));
-                                sessionStorage.setItem(`author-${book.authors[0]}`, JSON.stringify({
-                                    'description': authorDescription,
-                                    'imageUrl': imageUrl
-                                }));
-                            }
-                        }
-                    }
-                } 
-                catch (error) {
-                    setError(true);
-                } 
-                finally {
-                    setLoading(false);
-                }
-            };
-    
-        fetchDescription();
-        
-        return () => {
-            setAboutAuthor(prevState => ({
-                ...prevState,
-                'description': '',
-                'imageUrl': ''
-            }));
-        };
-    }, [book]);
+    // effects
 
 
     useEffect(() => {
@@ -174,23 +111,10 @@ export const BookPage: React.FC = () => {
 
     // handles the show more button of book and author descriptions
     const handleShowMore = (descriptionType: string) => {
-        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
-            setAboutAuthor(prevState => ({
-                ...prevState,
-                'description': fullAuthorDescriptionRef.current
-            }));
-            setShowMoreButtonClicked(prevState => ({
-                ...prevState,
-                aboutAuthor: true
-            }));
-        }
-        else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
+        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
             if (book) {
                 setBookDescription(book.description);
-                setShowMoreButtonClicked(prevState => ({
-                    ...prevState, 
-                    bookDescription: true
-                }));  
+                setBookShowMoreClicked(true);
             }
         }
         else {
@@ -200,25 +124,10 @@ export const BookPage: React.FC = () => {
 
     // handles the show less button of book and author descriptions
     const handleShowLess = (descriptionType: string) => {
-        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'aboutauthor') {
-            const currentDescription = aboutAuthor.description;
-            const slicedDescription = sliceDescription(currentDescription);
-            setAboutAuthor(prevState => ({
-                ...prevState,
-                'description': slicedDescription
-            }));
-            setShowMoreButtonClicked(prevState => ({
-                ...prevState,
-                aboutAuthor: false
-            }));
-        }
-        else if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
+        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
             if (book) {
                 setBookDescription(sliceDescription(bookDescription));
-                setShowMoreButtonClicked(prevState => ({
-                    ...prevState, 
-                    bookDescription: false
-                }));           
+                setBookShowMoreClicked(true);          
             } 
         }
         else {
@@ -339,7 +248,7 @@ export const BookPage: React.FC = () => {
                                                 {bookDescription}
                                             </p>
                                             {
-                                                showMoreButtonClicked.bookDescription &&
+                                                bookShowMoreClicked &&
                                                 <>
                                                     <button className="show-more-btn" onClick={() => handleShowLess('bookDescription')}>Show less</button>
                                                     <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowLess('bookDescription')} >
@@ -365,70 +274,15 @@ export const BookPage: React.FC = () => {
                             <p className="published">Published {book.publishedDate} by {book.publisher}</p>
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>
-                        <div className="about-author-container">
-                            <hr className="about-author-divider" />
-                            <p className="about-author-header">
-                                About the author
-                            </p>
-                            {
-                                loading ? 
-                                    <div className="loading-about-author">
-                                        <p>Loading</p>
-                                        <LoadingIcon />
-                                    </div>
-                                : 
-                                error ?
-                                    <div className="about-author-error">
-                                        <p className="about-author-error-message">Failed to fetch author's description. Please refresh to try again.</p>
-                                    </div>
-                                :
-                                <div>
-                                    {aboutAuthor.imageUrl &&
-                                        <div className="book-page-author-details">
-                                            <img className="book-page-author-picture" src={aboutAuthor.imageUrl} alt="Author's image" />
-                                            <p className="book-page-author-name">{book.authors[0]}</p>
-                                        </div>
-                                    }
-                                    {
-                                        aboutAuthor.description.length < fullAuthorDescriptionRef.current.length ?
-                                        <>
-                                            <p className= "description-faded" >
-                                                {aboutAuthor.description}
-                                            </p>
-
-                                            <button className="show-more-btn" onClick={() => handleShowMore('aboutAuthor')}>Show more</button>
-                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                            </svg>
-                                        </>
-                                        :
-                                        <>
-                                            <p className= "description" >
-                                                {aboutAuthor.description}
-                                            </p>
-                                            {
-                                                showMoreButtonClicked.aboutAuthor &&
-                                                <>
-                                                    <button className="show-more-btn" onClick={() => handleShowLess('aboutAuthor')}>Show less</button>
-                                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                                    </svg>
-                                                </>
-                                            }
-                                        </>
-                                    }
-                                    <hr className="about-author-divider"/>
-                                </div>
-                            }
-                            <SimilarBooks loading={similarBooksLoading} error={similarBooksError} similarBooks={similarBooks} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} book={book} />
-                            <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
-                                <div className="all-similar-books-btn-container">
-                                    <button className="all-similar-books-btn">All similar books</button>
-                                    <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />
-                                </div>
-                            </Link>
-                            <hr className="similar-books-divider" />
-                        </div>
+                        <AboutAuthor book={book} loading={aboutAuthorLoading} error={aboutAuthorError} aboutAuthor={aboutAuthor} fullAuthorDescriptionRef={fullAuthorDescriptionRef.current} showMoreButtonClicked={authorShowMoreClicked} handleShowMore={authorHandleShowMore} handleShowLess={authorHandleShowLess}  />
+                        <SimilarBooks loading={similarBooksLoading} error={similarBooksError} similarBooks={similarBooks} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} book={book} />
+                        <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
+                            <div className="all-similar-books-btn-container">
+                                <button className="all-similar-books-btn">All similar books</button>
+                                <RightArrowIcon height="20" width="20" className="all-similar-books-btn-svg" />
+                            </div>
+                        </Link>
+                        <hr className="similar-books-divider" />
                     </div>
                 </div>
             </div>
