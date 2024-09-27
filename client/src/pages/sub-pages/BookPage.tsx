@@ -1,15 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import '../../styles/book-page.css';
 import { Link, useLocation } from "react-router-dom";
 import { book } from "../../interfaces/BookInterface";
 import { SearchBar } from "../../components/Global/SearchBar";
-import '../../styles/book-page.css';
-import { LoadingIcon } from "../../components/Global/LoadingIcon";
-import { Author } from "../../interfaces/AuthorInterface";
-import { fetchAuthorDetails } from "../../services/authorSearch";
 import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
-import { DownArrowIcon } from "../../components/Global/DownArrowIcon";
-import { PencilIcon } from "../../components/Book-Page/PencilIcon";
 import { ShelfModal } from "../../components/Global/ShelfModal";
 import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfModal";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
@@ -20,6 +15,8 @@ import { useFetchSimilarBooks } from "../../custom-hooks/useFetchSimilarBooks";
 import { SimilarBooks } from "../../components/Book-Page/SimilarBooks";
 import { AboutAuthor } from "../../components/Book-Page/AboutAuthor";
 import { useFetchAuthorDetails } from "../../custom-hooks/useFetchAuthorDetails";
+import { BookDescription } from "../../components/Book-Page/BookDescription";
+import { BookCoverAndStatus } from "../../components/Book-Page/BookCoverAndStatus";
 
 export const BookPage: React.FC = () => {
     useAuthRedirect();
@@ -73,7 +70,7 @@ export const BookPage: React.FC = () => {
 
     // effects
 
-
+    // displays a shortened book description and gets the current reading status of the book from storage
     useEffect(() => {
         if (book) {
             setBookDescription(sliceDescription(book.description));
@@ -106,37 +103,27 @@ export const BookPage: React.FC = () => {
 
     // functions
 
+    // BOOK DESCRIPTION SECTION HELPER FUNCTIONS
 
-    // BOOK AND AUTHOR DETAILS SECTION FUNCTIONS
-
-    // handles the show more button of book and author descriptions
-    const handleShowMore = (descriptionType: string) => {
-        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
-            if (book) {
-                setBookDescription(book.description);
-                setBookShowMoreClicked(true);
-            }
-        }
-        else {
-            console.log("Parameter given to handleShowMore function must either be 'about author' or 'book description'.");
+    // handles the show more button of the book description section
+    const handleBookShowMore = () => {
+        if (book) {
+            setBookDescription(book.description);
+            setBookShowMoreClicked(true);
         }
     }
 
-    // handles the show less button of book and author descriptions
-    const handleShowLess = (descriptionType: string) => {
-        if (descriptionType.toLowerCase().replace('/\s+/g', '') === 'bookdescription') {
-            if (book) {
-                setBookDescription(sliceDescription(bookDescription));
-                setBookShowMoreClicked(true);          
-            } 
-        }
-        else {
-            console.log("Parameter given to handleShowLess function must either be 'about author' or 'book description'.");
-        }
+    // handles the show less button of the book description section
+    const handleBookShowLess = () => {
+        if (book) {
+            setBookDescription(sliceDescription(bookDescription));
+            setBookShowMoreClicked(true);          
+        } 
     }
 
+    // BOOK STATUS HANDLER FUNCTIONS
 
-    // BOOK BUTTON HANDLER FUNCTIONS
+    // handles a click on the defaultly displayed Want To Read button
     const handleWantToRead = () => {
 
         // if the reading status button was clicked already, show modal 
@@ -145,6 +132,7 @@ export const BookPage: React.FC = () => {
             return;
         }
 
+        // if first click
         setBookStatus("Want to read");
         setShowPopUp(true);
 
@@ -154,6 +142,7 @@ export const BookPage: React.FC = () => {
         }, 3000);
     }
 
+    // handles clicks for the drop down button next to reading status
     const handleChooseShelfButton = () => {
         setShowModal(true);
     }
@@ -168,6 +157,7 @@ export const BookPage: React.FC = () => {
     return (
         <div className="book-page-container">
             <SearchBar />
+            
             {showPopUp && (
                 <div className="shelf-added-popup">
                     <span>Shelved as "{bookStatus}"</span>
@@ -195,30 +185,13 @@ export const BookPage: React.FC = () => {
             }
 
             <div className="book-page-main">
-                <div className="book-page-left-column">
-                    <img className="book-page-book-cover" src={book.imageUrl} alt="Book cover" />
-                    <div className="reading-status-btn-container">
-                        <button className={`reading-status-btn ${bookStatus.length > 0 ? 'added-to-shelf' : ''}`} onClick={handleWantToRead}>
-                            {
-                                bookStatus.length > 0 ? 
-                                <>
-                                    <PencilIcon className="pencil-icon" />
-                                    {bookStatus}
-                                </>
-                                :
-                                <>
-                                    Want to read
-                                </>
-                            }
-                        </button>
-                        {
-                            bookStatus.length < 1 && 
-                            <button className="choose-shelf-btn" onClick={handleChooseShelfButton}>
-                                <DownArrowIcon className="choose-shelf-icon" width="15" height="15" />
-                            </button>
-                        }
-                    </div>
-                </div>
+                <BookCoverAndStatus 
+                    book={book} 
+                    bookStatus={bookStatus} 
+                    handleWantToRead={handleWantToRead} 
+                    handleChooseShelfButton={handleChooseShelfButton} 
+                />
+
                 <div className="book-page-main-content">
                     <div className="book-page-title-section">
                         <h1 className="book-title-header">{book.title}</h1>
@@ -229,37 +202,17 @@ export const BookPage: React.FC = () => {
                                 <h3 key={author} className="book-page-author" >{index > 0 && ', '}{author}</h3>
                             )}
                         </div>
-                            { bookDescription &&
-                                <div className="book-page-description">
-                                    { bookDescription.length < book.description.length ?
-                                        <>
-                                            <p className= "description-faded" >
-                                                {bookDescription}
-                                            </p>
 
-                                            <button className="show-more-btn" onClick={() => handleShowMore('bookDescription')}>Show more</button>
-                                            <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowMore('bookDescription')} >
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                            </svg>
-                                        </>
-                                        :
-                                        <>
-                                            <p className= "description" >
-                                                {bookDescription}
-                                            </p>
-                                            {
-                                                bookShowMoreClicked &&
-                                                <>
-                                                    <button className="show-more-btn" onClick={() => handleShowLess('bookDescription')}>Show less</button>
-                                                    <svg className="arrow-down-icon" height='10' width='10' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" onClick={() => handleShowLess('bookDescription')} >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-                                                    </svg>
-                                                </>
-                                            }
-                                        </>
-                                    }
-                                </div>
-                            }                        
+                        { bookDescription &&
+                            <BookDescription 
+                                bookDescription={bookDescription} 
+                                fullBookDescription={book.description} 
+                                bookShowMoreClicked={bookShowMoreClicked} 
+                                handleShowMore={handleBookShowMore} 
+                                handleShowLess={handleBookShowLess} 
+                            />
+                        }  
+
                         {book.categories.length > 0 &&
                             <div className="book-page-genres">
                                 <p>Genres:</p> 
@@ -268,14 +221,34 @@ export const BookPage: React.FC = () => {
                                 )}
                             </div>
                         }
+
                         <div className="edition-details">
                             <p className="edition-details-title">This edition</p>
                             <p className="page-count">Page count: {book.pageCount}</p>
                             <p className="published">Published {book.publishedDate} by {book.publisher}</p>
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>
-                        <AboutAuthor book={book} loading={aboutAuthorLoading} error={aboutAuthorError} aboutAuthor={aboutAuthor} fullAuthorDescriptionRef={fullAuthorDescriptionRef.current} showMoreButtonClicked={authorShowMoreClicked} handleShowMore={authorHandleShowMore} handleShowLess={authorHandleShowLess}  />
-                        <SimilarBooks loading={similarBooksLoading} error={similarBooksError} similarBooks={similarBooks} handleLeftArrowClick={handleLeftArrowClick} handleRightArrowClick={handleRightArrowClick} book={book} />
+
+                        <AboutAuthor 
+                            book={book} 
+                            loading={aboutAuthorLoading} 
+                            error={aboutAuthorError} 
+                            aboutAuthor={aboutAuthor} 
+                            fullAuthorDescriptionRef={fullAuthorDescriptionRef.current} 
+                            showMoreButtonClicked={authorShowMoreClicked} 
+                            handleShowMore={authorHandleShowMore} 
+                            handleShowLess={authorHandleShowLess}  
+                        />
+
+                        <SimilarBooks 
+                            loading={similarBooksLoading} 
+                            error={similarBooksError} 
+                            similarBooks={similarBooks} 
+                            handleLeftArrowClick={handleLeftArrowClick} 
+                            handleRightArrowClick={handleRightArrowClick} 
+                            book={book} 
+                        />
+
                         <Link to={`/app/similar-books/${book.id}`} state={ { originalBook: book, similarBooks: allSimilarBooksRef.current } }>
                             <div className="all-similar-books-btn-container">
                                 <button className="all-similar-books-btn">All similar books</button>
