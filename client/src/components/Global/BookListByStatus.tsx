@@ -15,6 +15,8 @@ interface BookListByStatusProps {
 export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handleSelectedBook}) => {
 
     const [storedBooks, setStoredBooks] = useState<Array<BookWithStatus>>([]);
+    const [filteredBooks, setFilteredBooks] = useState<Array<BookWithStatus>>([]);
+    const [searchValue, setSearchValue] = useState<string>('');
 
     // depending on status, get the stored books
     useEffect(() => {
@@ -37,22 +39,50 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
         }
     }, [status]);
 
+    useEffect(() => {
+        if (searchValue) {
+            const filtered: Array<BookWithStatus> = storedBooks.filter(book => 
+                book.bookData.title.toLowerCase().includes(searchValue.toLowerCase())
+            );
+            setFilteredBooks(filtered);
+        }
+        else {
+            setFilteredBooks(storedBooks);
+        }
+    }, [searchValue, storedBooks]);
+
+    const handleSearchBarInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchValue(event.target.value);
+    }
+
     return (
         <div className="book-list-by-status-container">
-            <SearchBarByStatus status={status} />
+            <SearchBarByStatus status={status} handleSearchBarInput={handleSearchBarInput} />
 
             {
-                storedBooks.length > 0 ? 
+                filteredBooks.length > 0 ? 
                 <>
                     <h2 className="book-list-by-status-title">
-                        {status === ReadingStatus.CurrentlyReading ? "Your current reads" : status === ReadingStatus.WantToRead ? "Your future reads" : "Your past reads"}
+                        {status === ReadingStatus.CurrentlyReading 
+                            ? "Your current reads" 
+                            : status === ReadingStatus.WantToRead 
+                            ? "Your future reads" 
+                            : "Your past reads"
+                        }
                     </h2>
                     {
-                        storedBooks.map(book =>
-                            <BookByStatus key={book.bookData.id} bookWithStatus={book} handleSelectedBook={handleSelectedBook} />
+                        filteredBooks.map(book =>
+                            <BookByStatus 
+                                key={book.bookData.id} 
+                                bookWithStatus={book} 
+                                handleSelectedBook={handleSelectedBook} 
+                            />
                         )
                     }
                 </>
+                :
+                searchValue.length > 0 ? 
+                <div className="book-list-by-status-no-books-found">No books found.</div>
                 :
                 <Link to={"/"}>
                     <div className="no-books-in-list-message">

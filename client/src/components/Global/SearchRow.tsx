@@ -8,7 +8,7 @@ interface SearchRowProps {
 
 export const SearchRow: React.FC<SearchRowProps> = ( { book, customNavigate } ) => {
     return (
-            <div className="search-row" onClick={() => customNavigate(`/book/${book.id}`, {state: { bookData: book }})} >
+            <div className="search-row" onClick={() => customNavigate(`/app/book/${book.id}`, {state: { bookData: book }})} >
                 <img className="search-row-image" src={book.imageUrl} />
                 <div className="search-row-details">
                     <p className="search-row-title">{book.title}</p>

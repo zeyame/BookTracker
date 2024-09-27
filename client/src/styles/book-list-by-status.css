@@ -32,3 +32,8 @@
 .no-books-in-list-message:hover {
     text-decoration: underline;
 }
+
+.book-list-by-status-no-books-found {
+    margin-top: 30px;
+    margin-left: 110px;
+}
