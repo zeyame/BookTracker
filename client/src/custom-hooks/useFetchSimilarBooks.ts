@@ -7,8 +7,8 @@ export const useFetchSimilarBooks = (book: book | null ) => {
     // states
     const [similarBooks, setSimilarBooks] = useState<Array<book>>([]);
     const [similarBooksHistory, setSimilarBooksHistory] = useState<Array<Array<book>>>([]);
-    const [similarBooksLoading, setSimilarBooksLoading] = useState<boolean>(false);
-    const [similarBooksError, setSimilarBooksError] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<boolean>(false);
 
     const similarBooksCacheRef = useRef<Array<book>>([]);
     const allSimilarBooksRef = useRef<Array<book>>([]);
@@ -30,7 +30,7 @@ export const useFetchSimilarBooks = (book: book | null ) => {
                     getStoredSimilarBooks();
                 }
                 else {
-                    setSimilarBooksLoading(true);
+                    setLoading(true);
 
                     const similarBooks: Array<book> | null = await fetchSimilarBooks(book.title, 20);
                     if (similarBooks && similarBooks.length > 0) {
@@ -51,10 +51,10 @@ export const useFetchSimilarBooks = (book: book | null ) => {
                 }
             }   
             catch {
-                setSimilarBooksError(true);
+                setError(true);
             }
             finally {
-                setSimilarBooksLoading(false);
+                setLoading(false);
             }
         }
     }
@@ -109,8 +109,8 @@ export const useFetchSimilarBooks = (book: book | null ) => {
 
     return {
         similarBooks,
-        similarBooksLoading, 
-        similarBooksError,
+        loading, 
+        error,
         handleLeftArrowClick,
         handleRightArrowClick,
         allSimilarBooksRef

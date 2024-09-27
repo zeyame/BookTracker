@@ -47,8 +47,8 @@ export const BookPage: React.FC = () => {
     // useFetchSimilarBooks custom hook handles all fetching and handling logic for the similar books
     const {
         similarBooks,
-        similarBooksLoading,
-        similarBooksError,
+        loading: similarBooksLoading,
+        error: similarBooksError,
         handleLeftArrowClick,
         handleRightArrowClick,
         allSimilarBooksRef
