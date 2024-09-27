@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { book } from "../interfaces/BookInterface";
 import { BookWithStatus } from "../interfaces/BookWithStatus";
+import { ReadingStatus } from "../interfaces/ReadingStatus";
 
 export const useShelfModal = (bookStatus: string, setBookStatus: (status: string) => void, setShowPopUp: (showPopUp: boolean) => void) => {
     const [showModal, setShowModal] = useState<boolean>(false);
@@ -13,15 +14,15 @@ export const useShelfModal = (bookStatus: string, setBookStatus: (status: string
     };
   
     const handleModalWantToRead = () => {
-      setSelectedShelf("Want to read");
+      setSelectedShelf(ReadingStatus.WantToRead);
     };
   
     const handleCurrentlyReading = () => {
-      setSelectedShelf("Currently reading");
+      setSelectedShelf(ReadingStatus.CurrentlyReading);
     };
   
     const handleRead = () => {
-      setSelectedShelf("Read");
+      setSelectedShelf(ReadingStatus.Read);
     };
   
     const handleRemoveFromShelf = () => {

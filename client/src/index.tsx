@@ -2,14 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {Navigate, RouterProvider, createBrowserRouter} from 'react-router-dom';
 import { SearchPage } from './pages/explore/SearchPage';
-import { TrendingBooksPage } from './pages/explore/TrendingBooksPage';
-import { PopularAuthorsPage } from './pages/explore/PopularAuthorsPage';
 import { AddBookPage } from './pages/explore/AddBookPage';
 import { ReadPage } from './pages/library/ReadPage';
 import { ToReadPage } from './pages/library/ToReadPage';
 import { ReadingPage } from './pages/library/ReadingPage';
-import { GoalsPage } from './pages/activity/GoalsPage';
-import { StatsPage } from './pages/activity/StatsPage';
 import './styles/index.css';
 import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
@@ -45,14 +41,6 @@ const router = createBrowserRouter([
         element: <SearchPage />
       },
       {
-        path: 'trending-books',
-        element: <TrendingBooksPage />
-      },
-      {
-        path: 'popular-authors',
-        element: <PopularAuthorsPage />
-      },
-      {
         path: 'add-book',
         element: <AddBookPage />
       },
@@ -67,14 +55,6 @@ const router = createBrowserRouter([
       {
         path: 'to-read',
         element: <ToReadPage />
-      },
-      {
-        path: 'goals',
-        element: <GoalsPage />
-      },
-      {
-        path: 'stats',
-        element: <StatsPage />
       },
       {
         path: 'book/:bookId',
