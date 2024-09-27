@@ -15,7 +15,6 @@ import {App} from './App';
 import { ErrorPage } from './pages/ErrorPage';
 import { BookPage } from './pages/sub-pages/BookPage';
 import { AllSimilarBooksPage } from './pages/sub-pages/AllSimilarBooksPage';
-import { AuthorPage } from './pages/sub-pages/AuthorPage';
 import { LoginPage } from './pages/account/LoginPage';
 import { RegistrationPage } from './pages/account/RegistrationPage';
 import { VerificationPage } from './pages/account/VerificationPage';
@@ -84,11 +83,7 @@ const router = createBrowserRouter([
       {
         path: 'similar-books/:bookId',
         element: <AllSimilarBooksPage />
-      },
-      {
-        path: 'author/:authorName',
-        element: <AuthorPage />
-      },
+      }
     ],
     errorElement: <ErrorPage />
   }
