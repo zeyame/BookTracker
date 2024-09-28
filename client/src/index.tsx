@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {Navigate, RouterProvider, createBrowserRouter} from 'react-router-dom';
 import { SearchPage } from './pages/explore/SearchPage';
-import { AddBookPage } from './pages/explore/AddBookPage';
 import { ReadPage } from './pages/library/ReadPage';
 import { ToReadPage } from './pages/library/ToReadPage';
 import { ReadingPage } from './pages/library/ReadingPage';
@@ -39,10 +38,6 @@ const router = createBrowserRouter([
       {
         path: '',
         element: <SearchPage />
-      },
-      {
-        path: 'add-book',
-        element: <AddBookPage />
       },
       {
         path: 'read',
