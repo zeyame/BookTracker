@@ -10,8 +10,8 @@ export const initializeCaching = async (limit: number) => {
         if (!response.ok) {
             throw new Error(`Server failed to set up the cache`);
         }
-        const data = await response.json();
-        console.log(data);         // logging the response
+        
+        localStorage.setItem("cache", "initialized.");
     }
     catch (error: any) {
         throw error;
@@ -41,8 +41,6 @@ export const updateCache = async (genreName: string, limit: number) => {
         if (!response.ok) {
             throw new Error(`Failed response from the backend when requested to update the cache for ${genreName} genre.`);
         }
-        const data = await response.json();
-        console.log(data);
     }
     catch (error: any) {
         throw error;

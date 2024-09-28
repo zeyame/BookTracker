@@ -58,9 +58,18 @@ export const SearchPage: React.FC = () => {
 
     useEffect(() => {
         if (initialBooksFetched && !cacheInitialized) {
-            initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
+            // checking if cache had already bee initialized in the backend
+            const initialCache: string | null = localStorage.getItem("cache");
+            if (initialCache) {
+                setCacheInitialized(true);
+            }
+            else{
+                // call backend to initialize the cache
+                initializeCaching(9).then(() => setCacheInitialized(true)).catch(console.error);
+            }
         }
     }, [initialBooksFetched, cacheInitialized]);
+
 
     // functions
     const handlePagination = async (genreName: string) => {
