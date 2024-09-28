@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class BookDTO {
 
-    private final UUID id;
+    private final String id;
     private final String title;
     private final List<String> authors;
     private final String publisher;
@@ -15,7 +15,7 @@ public class BookDTO {
     private final String imageUrl;
     private final String language;
 
-    public BookDTO(UUID id, String title, List<String> authors, String publisher, String description, int pageCount, List<String> categories, String imageUrl, String language) {
+    public BookDTO(String id, String title, List<String> authors, String publisher, String description, int pageCount, List<String> categories, String imageUrl, String language) {
         this.id = id;
         this.title = title;
         this.authors = authors;
@@ -27,7 +27,7 @@ public class BookDTO {
         this.language = language;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

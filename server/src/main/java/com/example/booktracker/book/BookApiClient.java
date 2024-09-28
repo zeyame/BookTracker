@@ -65,29 +65,7 @@ public class BookApiClient {
                 return mapToBookDTO(bookItem); // Convert to BookDTO
 
             } catch (RestClientResponseException exception) {
-                HttpStatusCode statusCode = exception.getStatusCode();
-
-                // Handling client-side errors
-                if (statusCode.is4xxClientError()) {
-                    switch (statusCode.value()) {
-                        case 400:
-                            throw new CustomBadRequestException("Bad request when fetching book with title: " + title + ". Check query parameters.");
-                        case 401:
-                        case 403:
-                            throw new CustomAuthenticationException("Unauthorized request when fetching book with title: " + title + ". Check validity of API key.");
-                        case 404:
-                            throw new BookNotFoundException("No book found with the title: " + title + ".");
-                        default:
-                            throw new RuntimeException("Client error occurred when fetching book with title: " + title + ".");
-                    }
-                }
-
-                // Handling server-side errors (external service)
-                else if (statusCode.is5xxServerError()) {
-                    throw new ExternalServiceException("External service error occurred when fetching book with title: " + title + ".");
-                } else {
-                    throw new ExternalServiceException("Unexpected error occurred when fetching book with title: " + title + ".");
-                }
+                throw handleApiException(exception, "fetching book with title: " + title);
             } catch (Exception e) {
                 // Handle other exceptions
                 throw new RuntimeException("Unexpected error occurred while fetching book with title: " + title + ". " + e.getMessage());
@@ -140,32 +118,7 @@ public class BookApiClient {
             return books;
         }
         catch (RestClientResponseException e) {
-            HttpStatusCode statusCode = e.getStatusCode();
-
-            // handling client side errors
-            if (statusCode.is4xxClientError()) {
-                switch (statusCode.value()) {
-                    case 400:
-                        throw new CustomBadRequestException("Bad request when fetching books for search: " + search + ". Check parameters.");
-
-                    case 401:
-                    case 403:
-                        throw new CustomAuthenticationException("Unauthenticated/unauthorized request when fetching books for search: " + search + ". Check key validity.");
-
-                    case 404:
-                        throw new BookNotFoundException("No books found for search: " + search + ".");
-
-                    default:
-                        throw new RuntimeException("Client error occurred when fetching books for search: " + search + ".");
-                }
-            }
-            // handling server-side errors
-            else if (statusCode.is5xxServerError()) {
-                throw new ExternalServiceException("External service error occurred when fetching books for search: " + search + ".");
-            }
-            else {
-                throw new ExternalServiceException("Unexpected error occurred when fetching books for search: " + search + ".");
-            }
+            throw handleApiException(e, "fetching books for search " + search);
         }
         catch (Exception e) {
             // Handle other exceptions
@@ -218,34 +171,7 @@ public class BookApiClient {
             return books;
         }
         catch (RestClientResponseException exception) {
-            HttpStatusCode statusCode = exception.getStatusCode();
-
-            // handling client-side errors
-            if (statusCode.is4xxClientError()) {
-                switch (statusCode.value()) {
-
-                    case 400:
-                        throw new CustomBadRequestException("Bad request when fetching books for the genre: " + genre + ". Check query parameters.");
-
-                    case 401:
-                    case 403:
-                        throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching books for the genre: " + genre + ". Check validity of API key.");
-
-                    case 404:
-                        throw new BookNotFoundException("No books found for genre: " + genre + ".");
-
-                    default:
-                        throw new RuntimeException("Client error occurred when fetching books for genre: " + genre + ".");
-                }
-            }
-
-            // handling server-side errors (external service)
-            else if (statusCode.is5xxServerError()) {
-                throw new ExternalServiceException("External service error occurred when fetching books for genre: " + genre + ".");
-            }
-            else {
-                throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
-            }
+            throw handleApiException(exception, "fetching books for the genre " + genre);
         }
         catch (Exception e) {
             // Handle other exceptions
@@ -295,34 +221,7 @@ public class BookApiClient {
             return books;
         }
         catch (RestClientResponseException exception) {
-            HttpStatusCode statusCode = exception.getStatusCode();
-
-            // handling client-side errors
-            if (statusCode.is4xxClientError()) {
-                switch (statusCode.value()) {
-
-                    case 400:
-                        throw new CustomBadRequestException("Bad request when fetching books for the genre: " + genre + ". Check query parameters.");
-
-                    case 401:
-                    case 403:
-                        throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching books for the genre: " + genre + ". Check validity of API key.");
-
-                    case 404:
-                        throw new BookNotFoundException("No books found for genre: " + genre + ".");
-
-                    default:
-                        throw new RuntimeException("Client error occurred when fetching books for genre: " + genre + ".");
-                }
-            }
-
-            // handling server-side errors (external service)
-            else if (statusCode.is5xxServerError()) {
-                throw new ExternalServiceException("External service error occurred when fetching books for genre: " + genre + ".");
-            }
-            else {
-                throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
-            }
+            throw handleApiException(exception, "fetching books for the genre " + genre);
         }
         catch (Exception e) {
             // Handle other exceptions
@@ -369,27 +268,7 @@ public class BookApiClient {
                 }).exceptionally(ex -> {
 
                     if (ex.getCause() instanceof RestClientResponseException restEx) {
-                        HttpStatusCode statusCode = restEx.getStatusCode();
-
-                        if (statusCode.is4xxClientError()) {
-                            switch (statusCode.value()) {
-                                case 400:
-                                    throw new CustomBadRequestException("Bad request when fetching books for the genre: " + genre + ". Check query parameters.");
-
-                                case 401:
-                                case 403:
-                                    throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching books for the genre: " + genre + ". Check validity of API key.");
-
-                                case 404:
-                                    throw new BookNotFoundException("No books found for genre: " + genre + ".");
-
-                                default:
-                                    throw new RuntimeException("Client error occurred when fetching books for genre: " + genre + ".");
-                            }
-                        }
-                        if (statusCode.is5xxServerError()) {
-                            throw new ExternalServiceException("External service error occurred when fetching books for genre: " + genre + ".");
-                        }
+                        throw handleApiException(restEx, "fetching books for the genre " + genre);
                     }
 
                     throw new ExternalServiceException("Unexpected error occurred when fetching books for genre: " + genre + ".");
@@ -441,33 +320,7 @@ public class BookApiClient {
             }
         }
         catch (RestClientResponseException exception) {
-            HttpStatusCode statusCode = exception.getStatusCode();
-            // handling client-side errors
-            if (statusCode.is4xxClientError()) {
-                switch (statusCode.value()) {
-
-                    case 400:
-                        throw new CustomBadRequestException("Bad request when fetching similar books to the book: " + title + ". Check query parameters.");
-
-                    case 401:
-                    case 403:
-                        throw new CustomAuthenticationException("Unathenticated/unathorized request when fetching similar books to the book: " + title + ". Check validity of API key.");
-
-                    case 404:
-                        throw new BookNotFoundException("No similar books found to the book: " + title + ".");
-
-                    default:
-                        throw new RuntimeException("Client error occurred when fetching similar books to book: " + title + ".");
-                }
-            }
-
-            // handling server-side errors (external service)
-            else if (statusCode.is5xxServerError()) {
-                throw new ExternalServiceException("External service error occurred when fetching similar books to the book: " + title + ".");
-            }
-            else {
-                throw new ExternalServiceException("Unexpected error occurred when fetching similar books to the book: " + title + ".");
-            }
+            throw handleApiException(exception, "fetching similar books to the book: " + title);
         }
         catch (Exception e) {
             // Handle other exceptions
@@ -507,6 +360,22 @@ public class BookApiClient {
         return new SimilarBooksResponse(errorsMap, similarBooks);
     }
 
+    private RuntimeException handleApiException(RestClientResponseException exception, String context) {
+        HttpStatusCode statusCode = exception.getStatusCode();
+        if (statusCode.is4xxClientError()) {
+            return switch (statusCode.value()) {
+                case 400 -> new CustomBadRequestException("Bad request when " + context + ". Check query parameters.");
+                case 401, 403 -> new CustomAuthenticationException("Unauthorized request when " + context + ". Check validity of API key.");
+                case 404 -> new BookNotFoundException("No books found when " + context + ".");
+                default -> new RuntimeException("Client error occurred when " + context + ".");
+            };
+        } else if (statusCode.is5xxServerError()) {
+            return new ExternalServiceException("External service error occurred when " + context + ".");
+        } else {
+            return new ExternalServiceException("Unexpected error occurred when " + context + ".");
+        }
+    }
+
 
     /**
      * Maps a given {@link JsonNode} representing a book's details to a {@link BookDTO} object.
@@ -518,10 +387,10 @@ public class BookApiClient {
      * @return a {@link BookDTO} containing the mapped data, or {@code null} if no "volumeInfo" is present
      */
     public BookDTO mapToBookDTO(JsonNode bookItem) {
-        JsonNode volumeInfo = bookItem.get("volumeInfo");
+        String bookId = getTextOrEmpty(bookItem, "id");
 
+        JsonNode volumeInfo = bookItem.get("volumeInfo");
         if (volumeInfo != null) {
-            UUID id = UUID.randomUUID();
             String title = getTextOrEmpty(volumeInfo, "title");
             List<String> authors = getAuthors(volumeInfo);
             String publisher = getTextOrEmpty(volumeInfo, "publisher");
@@ -531,7 +400,7 @@ public class BookApiClient {
             String imageUrl = getImageUrl(volumeInfo);
             String language = getTextOrEmpty(volumeInfo, "language");
 
-            return new BookDTO(id, title, authors, publisher, description, pageCount, categories, imageUrl, language);
+            return new BookDTO(bookId, title, authors, publisher, description, pageCount, categories, imageUrl, language);
         }
 
         return null;

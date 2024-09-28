@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { book } from "../../interfaces/BookInterface";
 import '../../styles/all-similar-books-page.css';
+import '../../styles/search-page.css';
 import { SearchBar } from "../../components/Global/SearchBar";
 import { ExpandedSimilarBook } from "../../components/All-Similar-Books-Page/ExpandedSimilarBook";
 import { useAuthRedirect } from "../../utils/useCheckForToken";

@@ -4,6 +4,7 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
+    min-width: 100%;
     font-weight: bold;
     overflow-y: hidden;
 }

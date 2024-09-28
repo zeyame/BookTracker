@@ -1,4 +1,6 @@
 .all-similar-books-page-container {
+    display: flex;
+    flex-direction: column;
     height: 100vh;
     width: 100%;
     padding-top: 20px;
@@ -9,6 +11,17 @@
     flex-direction: column;
     margin-left: 200px;
     margin-top: 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.all-similar-books-page-main-content::-webkit-scrollbar {
+    display: none;
+}
+
+.all-similar-books-page-main-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .expanded-similar-book {

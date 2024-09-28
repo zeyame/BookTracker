@@ -84,7 +84,7 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
                 searchValue.length > 0 ? 
                 <div className="book-list-by-status-no-books-found">No books found.</div>
                 :
-                <Link to={"/"}>
+                <Link to={"/app"}>
                     <div className="no-books-in-list-message">
                         Start by adding some books.
                     </div>

@@ -3,6 +3,7 @@ import { book } from "../../interfaces/BookInterface";
 import { getBooks } from "../../services/userBookSearch";
 import { SearchRow } from "./SearchRow";
 import { useNavigate } from "react-router-dom";
+import '../../styles/search-bar.css';
 
 export const SearchBar: React.FC = () => {
     // states

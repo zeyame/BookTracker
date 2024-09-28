@@ -1,0 +1,113 @@
+.search-bar-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    height: 35px;
+    width: 25.2%;
+    margin-left: 530px;
+    flex-shrink: 0;
+    margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding-left: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-bar-icon {
+    cursor: pointer;
+    margin-right: 15px;
+    height: 20px;
+    width: 15px;
+}
+
+.search-input {
+    height: 80%;
+    width: 100%;
+    border: none;
+    margin-left: 0px;
+    background-color: rgb(248, 248, 248);
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.search-results-container {
+    position: absolute;
+    width: 433px;
+    left: 37.5%;
+    top: 7%;
+    background-color: white;
+    z-index: 10;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    padding-top: 5px;
+    padding-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: white;
+    word-wrap: break-word;
+}
+
+.search-row:hover {
+    background-color: rgb(235, 234, 232);
+}
+
+.search-row img {
+    width: 35px;
+    height: 100%;
+}
+
+.search-row-details {
+    display: flex;
+    flex-direction: column;
+    margin-left: 11px;
+    height: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.search-row-title {
+    font-size: 11px;
+    font-weight: 620;
+    margin: 0px;
+}
+
+.search-row-author {
+    font-size: 10px;
+    margin: 0px;
+    margin-top: 2px;
+}
+
+.no-results-row {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 4.9%;
+    left: 40.6%;
+    width: 288px;
+    height: 22px;
+    padding-top: 5px;
+    padding-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.searching-message {
+    position: absolute;
+    top: 8%;
+    left: 46%;
+    font-size: 18px;
+}

@@ -19,13 +19,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
-    private final JwtService jwtService;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder, JwtService jwtService) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.encoder = encoder;
-        this.jwtService = jwtService;
     }
 
 
@@ -102,6 +100,27 @@ public class UserService {
         }
     }
 
+
+    /**
+     * Validates the user registration data, ensuring both username and email are provided
+     * and checking if the user already exists in the system.
+     *
+     * This method performs the following validations:
+     * <ul>
+     *     <li>Both username and email must not be null or empty. If either is null or empty,
+     *     a {@link CustomBadRequestException} is thrown.</li>
+     *     <li>It checks if an account with the provided email already exists. If so, an
+     *     {@link EmailAlreadyRegisteredException} is thrown.</li>
+     *     <li>It checks if the provided username is already taken. If so, a
+     *     {@link UsernameAlreadyRegisteredException} is thrown.</li>
+     * </ul>
+     *
+     * @param userRegistrationDTO the {@link UserRegistrationDTO} object containing the user's
+     *                            registration data such as username and email
+     * @throws CustomBadRequestException if either the username or email is null or empty
+     * @throws EmailAlreadyRegisteredException if an account with the provided email already exists
+     * @throws UsernameAlreadyRegisteredException if the provided username is already taken
+     */
     public void validate (UserRegistrationDTO userRegistrationDTO) {
         String username = userRegistrationDTO.getUsername();
         String email = userRegistrationDTO.getEmail();
@@ -199,6 +218,12 @@ public class UserService {
     }
 
     public List<User> findAll() {
-        return userRepository.findAll();
+        try {
+            return userRepository.findAll();
+        }
+        catch (DataAccessException e) {
+            String errorMessage = "Error occurred when retrieving all users. " + e.getMessage();
+            throw new RuntimeException(errorMessage);
+        }
     }
 }

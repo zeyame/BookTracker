@@ -26,6 +26,22 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Validates the user registration details provided in the request body.
+     *
+     * This endpoint accepts a {@link UserRegistrationDTO} object containing user data (such as
+     * username and email), validates it, and returns a success message if the data is valid.
+     * The validation process is delegated to the {@link UserService#validate(UserRegistrationDTO)} method.
+     *
+     * If the validation is successful, a response with a success message is returned.
+     * If the validation fails, appropriate exceptions (e.g. {@link CustomBadRequestException},
+     * {@link EmailAlreadyRegisteredException}, {@link UsernameAlreadyRegisteredException}) are thrown.
+     *
+     * @param userRegistrationDTO the {@link UserRegistrationDTO} object containing the user's
+     *                            registration details to be validated
+     * @return a {@link ResponseEntity} containing a message in a {@link Map}, indicating
+     *         that the user data is valid and can be used for registration
+     */
     @PostMapping("/validate")
     public ResponseEntity<Map<String, String>> validateUser (@RequestBody UserRegistrationDTO userRegistrationDTO) {
         // validating user details
@@ -102,29 +118,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
     }
 
-    @GetMapping("/verify-token")
-    public ResponseEntity<Map<String, String>> verifyToken(String token) {
-        // to do
-        return null;
-    }
-
-    //testing endpoint
-    @PostMapping("/{username}/delete")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
-        userService.deleteByUsername(username);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("message", "User with username " + username + " deleted.");
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
-    }
-
-    // testing endpoint
-    @GetMapping
-    public ResponseEntity<Map<String, List<User>>> getUsers() {
-        List<User> users = userService.findAll();
-
-        Map<String, List<User>> responseMap = new HashMap<>();
-        responseMap.put("Users", users);
-
-        return ResponseEntity.ok(responseMap);
-    }
+//    @GetMapping("/verify-token")
+//    public ResponseEntity<Map<String, String>> verifyToken(String token) {
+//        return null;
+//    }
 }
