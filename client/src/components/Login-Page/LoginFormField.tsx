@@ -22,7 +22,7 @@ export const LoginFormField: React.FC<LoginFormFieldProps> = ({placeholder, valu
                         {
                             error.length > 0 && <p className="password-required-error">{error}</p>
                         }                    
-                        <p className="forgot-password">Forgot password?</p>    
+                        {/* <p className="forgot-password">Forgot password?</p>     */}
                     </div>
                 :
                 error.length > 0 &&
