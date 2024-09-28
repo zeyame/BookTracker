@@ -20,18 +20,30 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
 
     // depending on status, get the stored books
     useEffect(() => {
-        const storedBooks: string | null = localStorage.getItem("booksWithStatus");
-        
-        if (storedBooks) {
-            const booksRecord: Record<string, BookWithStatus> = JSON.parse(storedBooks);
-            const books: Array<BookWithStatus> = Object.values(booksRecord)
-                .filter(bookWithStatus => bookWithStatus.status === status);
+        let username: string;
 
-            if (books.length > 0) {
-                handleSelectedBook(books[0]);
+        const storedUser: string | null = sessionStorage.getItem("userLogin");
+        if (storedUser) {
+            const userDetails: UserLogin = JSON.parse(storedUser);
+            username = userDetails.username;
+
+            const storedBooks: string | null = localStorage.getItem(`booksWithStatus-${username}`);
+            
+            if (storedBooks) {
+                const booksRecord: Record<string, BookWithStatus> = JSON.parse(storedBooks);
+                const books: Array<BookWithStatus> = Object.values(booksRecord)
+                    .filter(bookWithStatus => bookWithStatus.status === status);
+    
+                if (books.length > 0) {
+                    handleSelectedBook(books[0]);
+                }
+    
+                setStoredBooks(books);
             }
 
-            setStoredBooks(books);
+        }
+        else {
+            console.error("User not logged in");
         }
     
         return () => {

@@ -7,6 +7,7 @@ import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { ShelfModal } from "../Global/ShelfModal";
 import { RemoveFromShelfModal } from "../Global/RemoveFromShelfModal";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
+import { updateBookStatus } from "../../utils/updateBookStatus";
 
 interface ExpandedSimilarBookProps {
     similarBook: book
@@ -23,16 +24,8 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
     // saving book status to local storage
     useEffect(() => {
         if (similarBook && bookStatus) {
-  
-            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-  
-            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
-
-            books[similarBook.id] = {bookData: similarBook, status: bookStatus}
-  
-            localStorage.setItem("booksWithStatus", JSON.stringify(books));
+            updateBookStatus(similarBook, bookStatus);
         }
-  
     }, [similarBook, bookStatus]);
 
     const {

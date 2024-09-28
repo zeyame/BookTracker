@@ -6,6 +6,7 @@ import { sliceDescriptionBySentences } from "../../utils/sliceDescription";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { ShelfModal } from "./ShelfModal";
 import { RemoveFromShelfModal } from "./RemoveFromShelfModal";
+import { updateBookStatus } from "../../utils/updateBookStatus";
 
 interface BookPageByStatusProps {
     book: BookWithStatus;
@@ -48,14 +49,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
     // saving book status to local storage
     useEffect(() => {
         if (book && bookStatus) {
-  
-            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-  
-            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
-  
-            books[book.bookData.id].status = bookStatus;
-  
-            localStorage.setItem("booksWithStatus", JSON.stringify(books));
+            updateBookStatus(book.bookData, bookStatus);
         }
   
     }, [book, bookStatus]);

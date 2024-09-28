@@ -7,16 +7,16 @@ import { RightArrowIcon } from "../../components/Global/RightArrowIcon";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { ShelfModal } from "../../components/Global/ShelfModal";
 import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfModal";
-import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
-import { useAuthRedirect } from "../../utils/useCheckForToken";
+import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
 import { useFetchSimilarBooks } from "../../custom-hooks/useFetchSimilarBooks";
 import { SimilarBooks } from "../../components/Book-Page/SimilarBooks";
 import { AboutAuthor } from "../../components/Book-Page/AboutAuthor";
 import { useFetchAuthorDetails } from "../../custom-hooks/useFetchAuthorDetails";
 import { BookDescription } from "../../components/Book-Page/BookDescription";
 import { BookCoverAndStatus } from "../../components/Book-Page/BookCoverAndStatus";
+import { updateBookStatus } from "../../utils/updateBookStatus";
 
 export const BookPage: React.FC = () => {
     useAuthRedirect();
@@ -87,15 +87,7 @@ export const BookPage: React.FC = () => {
     // saving book status to local storage
     useEffect(() => {
         if (book && bookStatus) {
-
-            const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-
-            let books: Record<string, BookWithStatus> = storedBooksWithStatus ? JSON.parse(storedBooksWithStatus) : {};
-
-            books[book.id] = {bookData: book, status: bookStatus, authorDescription: fullAuthorDescriptionRef.current};
-
-            localStorage.setItem("booksWithStatus", JSON.stringify(books));
-
+            updateBookStatus(book, bookStatus, fullAuthorDescriptionRef.current);
         }
 
     }, [book, bookStatus]);
