@@ -19,11 +19,11 @@ a {
     width: 40px;
     height: 55px;
     cursor: pointer;
+    transition: all 0.4s ease;
 }
 
 .book-cover:hover {
     transform: scale(1.1);
-    transition: transform 0.3s ease;
 }
 
 .book-info {

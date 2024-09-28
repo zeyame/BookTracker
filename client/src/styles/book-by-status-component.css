@@ -13,12 +13,12 @@
 .book-by-status-cover {
     height: 100%;
     margin-right: 20px;
+    transition: all 0.4s ease;
     cursor: pointer;
 }
 
 .book-by-status-cover:hover {
     transform: scale(1.1);
-    transition: transform 0.5s ease;
 }
 
 .book-by-status-title-container {
