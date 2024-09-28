@@ -5,9 +5,8 @@
     width: 75%;
     overflow-y: scroll;
     overflow-x: hidden;
-    /* Ensure scrollbars are hidden */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
@@ -76,9 +75,11 @@
 
 .book-page-by-status-book-description {
     margin-top: 20px;
+    margin-bottom: 20px;
     word-wrap: break-word;
 }
 
 .book-page-by-status-author-description {
     margin-top: 40px;
+    margin-bottom: 30px;
 }
