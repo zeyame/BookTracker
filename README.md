@@ -32,7 +32,7 @@ This project is built using the following technologies:
 
 There are two ways to run the Book Tracker App:
 
-### Option 1: Using Docker
+### Option 1: Using Docker (Recommended)
 
 **Prerequisites**: 
 - Ensure you have Docker Engine installed on your system. If you don't have it installed, please visit the [official Docker website](https://docs.docker.com/get-docker/) and follow the installation instructions for your operating system.
