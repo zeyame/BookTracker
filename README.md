@@ -38,7 +38,7 @@ There are two ways to run the Book Tracker App:
 - Ensure you have Docker Engine installed on your system. If you don't have it installed, please visit the [official Docker website](https://docs.docker.com/get-docker/) and follow the installation instructions for your operating system.
 
 1. **Set Up the Environment File**:
-   Create a `.env` file in the root directory of your project with the following configurations:
+   Create a `.env` file in the root directory of the project with the following configurations:
 
    ```env
    # Database Configuration
