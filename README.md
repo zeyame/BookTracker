@@ -1,4 +1,4 @@
-# Book Tracker App
+# Shelf Quest
 
 ## Table of Contents
 - [Overview](#overview)
@@ -11,7 +11,7 @@
 
 ## Overview
 
-The **Book Tracker App** is a user-friendly application designed to help book enthusiasts explore and manage their reading habits. With a vast selection of genres, users can search for their favorite books, add them to various reading lists, and track their reading progress. The app also features user account functionality, allowing users to create accounts and sign in to view their personalized reading data.
+ **Shelf Quest** is a user-friendly application designed to help book enthusiasts explore and manage their reading habits. With a vast selection of genres, users can search for their favorite books, add them to various reading lists, and track their reading progress. The app also features user account functionality, allowing users to create accounts and sign in to view their personalized reading data.
 
 ## Features
 
