@@ -62,7 +62,7 @@ There are two ways to run the Book Tracker App:
    You can use any values for the database configuration. The remaining values in the file MUST remain the same.
 
 2. **Build and Run**: 
-   Execute the following commands in your terminal:
+   Ensure you are in the project's root directory and execute the following commands in your terminal:
    ```bash
    cd server
    mvn clean package -DskipTests
