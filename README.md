@@ -4,14 +4,15 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
 - [Running the Project](#running-the-project)
-  - [Option 1: Using Docker](#option-1-using-docker)
+  - [Option 1: Using Docker (Recommended)](#option-1-using-docker-recommended)
   - [Option 2: Running Applications Separately](#option-2-running-applications-separately)
 - [Conclusion](#conclusion)
 
 ## Overview
 
- **Shelf Quest** is a user-friendly application designed to help book enthusiasts explore and manage their reading habits. With a vast selection of genres, users can search for their favorite books, add them to various reading lists, and track their reading progress. The app also features user account functionality, allowing users to create accounts and sign in to view their personalized reading data.
+**Shelf Quest** is a user-friendly application designed to help book enthusiasts explore and manage their reading habits. With a vast selection of genres, users can search for their favorite books, add them to various reading lists, and track their reading progress. The app also features user account functionality, allowing users to create accounts and sign in to view their personalized reading data.
 
 ## Features
 
@@ -28,14 +29,22 @@ This project is built using the following technologies:
 - **Database**: PostgreSQL
 - **Containerization**: Docker and Docker-Compose
 
+## Prerequisites
+
+Before running the project, ensure you have the following installed:
+
+1. **Maven**: Required for packaging the application's server. 
+   - Visit the [official Apache Maven website](https://maven.apache.org/download.cgi) and follow the installation instructions for your operating system.
+   - Verify the installation by running `mvn -version` in your terminal.
+
+2. **Docker** (for Option 1 only): 
+   - If you plan to use Docker, visit the [official Docker website](https://docs.docker.com/get-docker/) and follow the installation instructions for your operating system.
+
 ## Running the Project
 
-There are two ways to run the Book Tracker App:
+There are two ways to run Shelf Quest:
 
 ### Option 1: Using Docker (Recommended)
-
-**Prerequisites**: 
-- Ensure you have Docker Engine installed on your system. If you don't have it installed, please visit the [official Docker website](https://docs.docker.com/get-docker/) and follow the installation instructions for your operating system.
 
 1. **Set Up the Environment File**:
    Create a `.env` file in the root directory of the project with the following configurations:
@@ -69,8 +78,7 @@ There are two ways to run the Book Tracker App:
    docker compose up --build -d
    ```
 
-3. Access the Application: Visit http://localhost:3000 in your web browser to demo the app.
-
+3. **Access the Application**: Visit http://localhost:3000 in your web browser to demo the app.
 
 ### Option 2: Running Applications Separately
 
@@ -140,5 +148,6 @@ There are two ways to run the Book Tracker App:
    ```
 4. Access the Application: Visit http://localhost:3000 in your web browser to demo the app.
 
-## Conclusion ##
-    This project was built to experiment with different technologies and bring together various components of modern web development. From React and TypeScript on the frontend to Spring Framework on the backend, and incorporating Docker for easy deployment, it provided an excellent opportunity to explore and integrate these powerful tools.
+## Conclusion
+
+This project was built to experiment with different technologies and bring together various components of modern web development. From React and TypeScript on the frontend to Spring Framework on the backend, and incorporating Docker for easy deployment, it provided an excellent opportunity to explore and integrate these powerful tools.
