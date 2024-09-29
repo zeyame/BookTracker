@@ -59,7 +59,7 @@ There are two ways to run the Book Tracker App:
    SECURITY_JWT_EXPIRATION_TIME=1800000
    ```
 
-   You can use any values for the database configuration. The remainining values in the file MUST remain the same.
+   You can use any values for the database configuration. The remaining values in the file MUST remain the same.
 
 2. **Build and Run**: 
    Execute the following commands in your terminal:
