@@ -8,6 +8,7 @@ import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.book.exception.ExternalServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -23,8 +24,11 @@ public class BookApiClient {
     private static final String TASTEDIVE_BASE_URL = "https://tastedive.com/api";
     private static final String GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1";
 
-    private final String TASTEDIVE_KEY = "1033070-BookTrac-59A622F3";
-    private final String GOOGLE_KEY = "AIzaSyD7tk0i-j5aVlJtsyTuZeGI5Y--C-9AWJE";
+    @Value("${tastedive.api-key}")
+    private String TASTEDIVE_KEY;
+
+    @Value("${google.books.api-key}")
+    private String GOOGLE_KEY;
 
     private final RestClient tasteDiveClient;
     private final RestClient googleBooksClient;

@@ -5,7 +5,7 @@
 -- Dumped from database version 16.4
 -- Dumped by pg_dump version 16.4
 
--- Started on 2024-09-22 22:47:29
+-- Started on 2024-09-29 12:05:57
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -23,58 +23,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 216 (class 1259 OID 24607)
--- Name: books; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.books (
-    id character varying(255) NOT NULL,
-    title character varying(255) NOT NULL,
-    authors jsonb,
-    publisher character varying(255),
-    publisheddate character varying(50),
-    description text,
-    pagecount integer,
-    categories jsonb,
-    imageurl text,
-    language character varying(50)
-);
-
-
-ALTER TABLE public.books OWNER TO postgres;
-
---
--- TOC entry 217 (class 1259 OID 24668)
--- Name: current_reads; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.current_reads (
-    username character varying(50) NOT NULL,
-    book_id character varying(255) NOT NULL,
-    added_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    current_page integer DEFAULT 0,
-    start_date date,
-    notes text
-);
-
-
-ALTER TABLE public.current_reads OWNER TO postgres;
-
---
--- TOC entry 219 (class 1259 OID 24713)
--- Name: future_reads; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.future_reads (
-    username character varying(50) NOT NULL,
-    book_id character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.future_reads OWNER TO postgres;
-
---
--- TOC entry 221 (class 1259 OID 24759)
+-- TOC entry 217 (class 1259 OID 24759)
 -- Name: otp_verifications; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -91,7 +40,7 @@ CREATE TABLE public.otp_verifications (
 ALTER TABLE public.otp_verifications OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1259 OID 24758)
+-- TOC entry 216 (class 1259 OID 24758)
 -- Name: otp_verifications_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -107,27 +56,13 @@ CREATE SEQUENCE public.otp_verifications_id_seq
 ALTER SEQUENCE public.otp_verifications_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4840 (class 0 OID 0)
--- Dependencies: 220
+-- TOC entry 4803 (class 0 OID 0)
+-- Dependencies: 216
 -- Name: otp_verifications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.otp_verifications_id_seq OWNED BY public.otp_verifications.id;
 
-
---
--- TOC entry 218 (class 1259 OID 24687)
--- Name: past_reads; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.past_reads (
-    username character varying(50) NOT NULL,
-    book_id character varying(255) NOT NULL,
-    finished_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
-);
-
-
-ALTER TABLE public.past_reads OWNER TO postgres;
 
 --
 -- TOC entry 215 (class 1259 OID 24593)
@@ -139,15 +74,14 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     hashed_password character varying(255) NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    is_verified boolean
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 4659 (class 2604 OID 24762)
+-- TOC entry 4640 (class 2604 OID 24762)
 -- Name: otp_verifications id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -155,38 +89,8 @@ ALTER TABLE ONLY public.otp_verifications ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
--- TOC entry 4829 (class 0 OID 24607)
--- Dependencies: 216
--- Data for Name: books; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.books (id, title, authors, publisher, publisheddate, description, pagecount, categories, imageurl, language) FROM stdin;
-\.
-
-
---
--- TOC entry 4830 (class 0 OID 24668)
+-- TOC entry 4797 (class 0 OID 24759)
 -- Dependencies: 217
--- Data for Name: current_reads; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.current_reads (username, book_id, added_at, current_page, start_date, notes) FROM stdin;
-\.
-
-
---
--- TOC entry 4832 (class 0 OID 24713)
--- Dependencies: 219
--- Data for Name: future_reads; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.future_reads (username, book_id) FROM stdin;
-\.
-
-
---
--- TOC entry 4834 (class 0 OID 24759)
--- Dependencies: 221
 -- Data for Name: otp_verifications; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -195,63 +99,26 @@ COPY public.otp_verifications (id, otp, expiration_time, used, email, username) 
 
 
 --
--- TOC entry 4831 (class 0 OID 24687)
--- Dependencies: 218
--- Data for Name: past_reads; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.past_reads (username, book_id, finished_at) FROM stdin;
-\.
-
-
---
--- TOC entry 4828 (class 0 OID 24593)
+-- TOC entry 4795 (class 0 OID 24593)
 -- Dependencies: 215
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (username, email, hashed_password, created_at, updated_at, is_verified) FROM stdin;
+COPY public.users (username, email, hashed_password, created_at, updated_at) FROM stdin;
 \.
 
 
 --
--- TOC entry 4841 (class 0 OID 0)
--- Dependencies: 220
+-- TOC entry 4804 (class 0 OID 0)
+-- Dependencies: 216
 -- Name: otp_verifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.otp_verifications_id_seq', 207, true);
+SELECT pg_catalog.setval('public.otp_verifications_id_seq', 213, true);
 
 
 --
--- TOC entry 4668 (class 2606 OID 24613)
--- Name: books book_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.books
-    ADD CONSTRAINT book_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 4670 (class 2606 OID 24676)
--- Name: current_reads current_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.current_reads
-    ADD CONSTRAINT current_reads_pkey PRIMARY KEY (username, book_id);
-
-
---
--- TOC entry 4674 (class 2606 OID 24717)
--- Name: future_reads future_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.future_reads
-    ADD CONSTRAINT future_reads_pkey PRIMARY KEY (username, book_id);
-
-
---
--- TOC entry 4676 (class 2606 OID 24765)
+-- TOC entry 4649 (class 2606 OID 24765)
 -- Name: otp_verifications otp_verifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -260,16 +127,7 @@ ALTER TABLE ONLY public.otp_verifications
 
 
 --
--- TOC entry 4672 (class 2606 OID 24692)
--- Name: past_reads past_reads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.past_reads
-    ADD CONSTRAINT past_reads_pkey PRIMARY KEY (username, book_id);
-
-
---
--- TOC entry 4678 (class 2606 OID 24785)
+-- TOC entry 4651 (class 2606 OID 24785)
 -- Name: otp_verifications unique_email; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -278,7 +136,7 @@ ALTER TABLE ONLY public.otp_verifications
 
 
 --
--- TOC entry 4662 (class 2606 OID 24749)
+-- TOC entry 4643 (class 2606 OID 24749)
 -- Name: users user_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -287,7 +145,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4664 (class 2606 OID 24730)
+-- TOC entry 4645 (class 2606 OID 24730)
 -- Name: users user_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -296,7 +154,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4666 (class 2606 OID 24776)
+-- TOC entry 4647 (class 2606 OID 24776)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -304,61 +162,7 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (username);
 
 
---
--- TOC entry 4679 (class 2606 OID 24682)
--- Name: current_reads current_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.current_reads
-    ADD CONSTRAINT current_reads_book_id_fkey FOREIGN KEY (book_id) REFERENCES public.books(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 4680 (class 2606 OID 24733)
--- Name: current_reads current_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.current_reads
-    ADD CONSTRAINT current_reads_username_fkey FOREIGN KEY (username) REFERENCES public.users(username) ON DELETE CASCADE;
-
-
---
--- TOC entry 4683 (class 2606 OID 24723)
--- Name: future_reads future_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.future_reads
-    ADD CONSTRAINT future_reads_book_id_fkey FOREIGN KEY (book_id) REFERENCES public.books(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 4684 (class 2606 OID 24743)
--- Name: future_reads future_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.future_reads
-    ADD CONSTRAINT future_reads_username_fkey FOREIGN KEY (username) REFERENCES public.users(username) ON DELETE CASCADE;
-
-
---
--- TOC entry 4681 (class 2606 OID 24698)
--- Name: past_reads past_reads_book_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.past_reads
-    ADD CONSTRAINT past_reads_book_id_fkey FOREIGN KEY (book_id) REFERENCES public.books(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 4682 (class 2606 OID 24738)
--- Name: past_reads past_reads_username_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.past_reads
-    ADD CONSTRAINT past_reads_username_fkey FOREIGN KEY (username) REFERENCES public.users(username) ON DELETE CASCADE;
-
-
--- Completed on 2024-09-22 22:47:29
+-- Completed on 2024-09-29 12:05:57
 
 --
 -- PostgreSQL database dump complete

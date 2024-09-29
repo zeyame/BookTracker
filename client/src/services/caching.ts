@@ -1,7 +1,6 @@
 // File handles fetching the initially displayed books for the user 
+import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
-
-const BASE_URL: string = "http://localhost:8080";       // Spring server
 
 // requests cache to be setup on the server
 export const initializeCaching = async (limit: number) => {
@@ -11,7 +10,7 @@ export const initializeCaching = async (limit: number) => {
             throw new Error(`Server failed to set up the cache`);
         }
         
-        localStorage.setItem("cache", "initialized.");
+        sessionStorage.setItem("cache", "initialized.");
     }
     catch (error: any) {
         throw error;

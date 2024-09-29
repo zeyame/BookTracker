@@ -1,8 +1,6 @@
 // File handles fetching the initially displayed books for the user 
+import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
-
-const BASE_URL: string = "http://127.0.0.1:8080";       // Spring server
-
 
 export const fetchDefaultBooks = async (limit: number, genres: Array<string>) => {
     try {

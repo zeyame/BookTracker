@@ -1,8 +1,6 @@
 // File handles fetching a book by either title, author, ISBN 
+import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
-
-const BASE_URL: string = "http://localhost:8080";       // Spring server
-
 
 export const getBooks = async (search: string, limit: number, signal?: AbortSignal) => {
     try {

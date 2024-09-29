@@ -216,7 +216,9 @@ export const BookPage: React.FC = () => {
 
                         <div className="edition-details">
                             <p className="edition-details-title">This edition</p>
-                            <p className="page-count">Page count: {book.pageCount}</p>
+                            {book.pageCount > 0 && 
+                                <p className="page-count">Page count: {book.pageCount}</p>  
+                            }
                             <p className="published">Published {book.publishedDate} by {book.publisher}</p>
                             <p className="language">Language: {book.language === 'en' ? 'English' : `${book.language}`}</p>
                         </div>

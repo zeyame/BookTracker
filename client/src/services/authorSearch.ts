@@ -1,6 +1,5 @@
+import { BASE_URL } from "../global-variables/BaseUrl";
 import { Author } from "../interfaces/AuthorInterface";
-
-const BASE_URL: string = "http://127.0.0.1:8080";       // Spring server
 
 export const fetchAuthorDetails = async (authorName: string): Promise<Author | null> => {
     try {

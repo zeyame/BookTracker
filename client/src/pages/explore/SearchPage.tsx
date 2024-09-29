@@ -59,7 +59,7 @@ export const SearchPage: React.FC = () => {
     useEffect(() => {
         if (initialBooksFetched && !cacheInitialized) {
             // checking if cache had already bee initialized in the backend
-            const initialCache: string | null = localStorage.getItem("cache");
+            const initialCache: string | null = sessionStorage.getItem("cache");
             if (initialCache) {
                 setCacheInitialized(true);
             }

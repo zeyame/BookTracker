@@ -1,7 +1,4 @@
-import { json } from "react-router-dom";
-
-const BASE_URL: string = "http://localhost:8080";       // Spring server
-
+import { BASE_URL } from "../global-variables/BaseUrl";
 
 export const validateUser = async (email: string, username: string, password: string): Promise<void> => {
 
