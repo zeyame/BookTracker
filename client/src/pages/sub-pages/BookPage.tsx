@@ -8,7 +8,6 @@ import { sliceDescription } from "../../utils/sliceDescription";
 import { ShelfModal } from "../../components/Global/ShelfModal";
 import { RemoveFromShelfModal } from "../../components/Global/RemoveFromShelfModal";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
-import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
 import { useAuthRedirect } from "../../custom-hooks/useAuthRedirect";
 import { useFetchSimilarBooks } from "../../custom-hooks/useFetchSimilarBooks";
 import { SimilarBooks } from "../../components/Book-Page/SimilarBooks";
@@ -16,18 +15,20 @@ import { AboutAuthor } from "../../components/Book-Page/AboutAuthor";
 import { useFetchAuthorDetails } from "../../custom-hooks/useFetchAuthorDetails";
 import { BookDescription } from "../../components/Book-Page/BookDescription";
 import { BookCoverAndStatus } from "../../components/Book-Page/BookCoverAndStatus";
-import { updateBookStatus } from "../../utils/updateBookStatus";
+import { addUserBookByStatus, getBookStatusById } from "../../services/userBookService";
+import { useBookStatus } from "../../custom-hooks/useBookStatus";
 
 export const BookPage: React.FC = () => {
     useAuthRedirect();
 
     const location = useLocation();
     const book: book | null = location.state?.bookData;
+    const token = sessionStorage.getItem("token") || "";
 
     // states
     const [bookShowMoreClicked, setBookShowMoreClicked] = useState<boolean>(false);
     const [bookDescription, setBookDescription] = useState<string>('');
-    const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(book));
+    const [bookStatus, setBookStatus] = useBookStatus(book?.id ?? "");
     const [showPopUp, setShowPopUp] = useState<boolean>(false);
 
     // useFetchAuthorDetails custom hook handles all fetching and handling logic for the AboutAuthor section/component
@@ -65,32 +66,15 @@ export const BookPage: React.FC = () => {
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book, token, fullAuthorDescriptionRef.current);
 
 
     // effects
-
-    // displays a shortened book description and gets the current reading status of the book from storage
     useEffect(() => {
         if (book) {
             setBookDescription(sliceDescription(book.description));
-            setBookStatus(getStoredBookStatus(book));
-        }
-
-        return () => {
-            setBookDescription('');
-            setBookStatus('');
         }
     }, [book]);
-
-
-    // saving book status to local storage
-    useEffect(() => {
-        if (book && bookStatus) {
-            updateBookStatus(book, bookStatus, fullAuthorDescriptionRef.current);
-        }
-
-    }, [book, bookStatus]);
 
 
     // functions
@@ -116,7 +100,8 @@ export const BookPage: React.FC = () => {
     // BOOK STATUS HANDLER FUNCTIONS
 
     // handles a click on the defaultly displayed Want To Read button
-    const handleWantToRead = () => {
+    const handleWantToRead = async () => {
+        if (!book) return;
 
         // if the reading status button was clicked already, show modal 
         if (bookStatus.length > 0) {
@@ -124,14 +109,18 @@ export const BookPage: React.FC = () => {
             return;
         }
 
-        // if first click
-        setBookStatus("Want to read");
-        setShowPopUp(true);
+        try {
+            // persist the book with "Want to read" status
+            await addUserBookByStatus(book, "Want to read", token, fullAuthorDescriptionRef.current);
+            setBookStatus("Want to read");
+            setShowPopUp(true);
 
-        // Hide the popup after 3 seconds
-        setTimeout(() => {
-            setShowPopUp(false);
-        }, 3000);
+            setTimeout(() => {
+                setShowPopUp(false);
+            }, 3000);
+        } catch (error) {
+            console.error("Failed to shelf book for the first time:", error);
+        }
     }
 
     // handles clicks for the drop down button next to reading status

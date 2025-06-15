@@ -1,5 +1,4 @@
 import React from "react";
-import { book } from "../../interfaces/BookInterface";
 import "../../styles/book-by-status-component.css";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 

@@ -2,12 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { book } from "../../interfaces/BookInterface";
 import { sliceDescription } from "../../utils/sliceDescription";
 import { Link } from "react-router-dom";
-import { getStoredBookStatus } from "../../utils/getStoredBookStatus";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { ShelfModal } from "../Global/ShelfModal";
 import { RemoveFromShelfModal } from "../Global/RemoveFromShelfModal";
-import { BookWithStatus } from "../../interfaces/BookWithStatus";
-import { updateBookStatus } from "../../utils/updateBookStatus";
+import { useBookStatus } from "../../custom-hooks/useBookStatus";
 
 interface ExpandedSimilarBookProps {
     similarBook: book
@@ -18,15 +16,9 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
     // states
     const [bookDescription, setBookDescription] = useState<string>('');
     const [showMoreButtonClicked, setShowMoreButtonClicked] = useState<boolean>(false);
-    const [bookStatus, setBookStatus] = useState<string>(getStoredBookStatus(similarBook));
+    const [bookStatus, setBookStatus] = useBookStatus(similarBook.id);
     const [showPopUp, setShowPopUp] = useState<boolean>(false);
-
-    // saving book status to local storage
-    useEffect(() => {
-        if (similarBook && bookStatus) {
-            updateBookStatus(similarBook, bookStatus);
-        }
-    }, [similarBook, bookStatus]);
+    const token = sessionStorage.getItem("token") || "";
 
     const {
         showModal,
@@ -41,7 +33,7 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, similarBook, token, "");
 
     // refs
     const fullBookDescriptionRef = useRef<string>(similarBook.description);

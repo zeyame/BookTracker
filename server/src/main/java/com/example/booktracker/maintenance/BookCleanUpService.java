@@ -24,7 +24,7 @@ public class BookCleanUpService {
         this.genreService = genreService;
     }
 
-    @Scheduled(cron = "0 0 */1 * * *") // Every hour
+    @Scheduled(fixedRate = 30000) // Every 30s
     @Transactional
     public void cleanUnreferencedBooks() {
         // remove all unreferenced books from the Book table

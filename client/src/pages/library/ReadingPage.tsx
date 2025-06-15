@@ -10,6 +10,13 @@ export const ReadingPage: React.FC = () => {
     useAuthRedirect();
 
     const [selectedBook, setSelectedBook] = useState<BookWithStatus | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+
+    const handleBookStatusChange = () => {
+        setSelectedBook(null);
+        setRefreshTrigger(prev => prev + 1);
+    };
+
 
     const handleSelectedBook = (book: BookWithStatus) => {
         setSelectedBook(book);
@@ -17,9 +24,9 @@ export const ReadingPage: React.FC = () => {
 
     return (
         <div className="reading-page-container">
-            <BookListByStatus status={ReadingStatus.CurrentlyReading} handleSelectedBook={handleSelectedBook} />
+            <BookListByStatus status={ReadingStatus.CurrentlyReading} handleSelectedBook={handleSelectedBook} refreshTrigger={refreshTrigger} />
             {
-                selectedBook && <BookPageByStatus book={selectedBook} />
+                selectedBook && <BookPageByStatus book={selectedBook} onStatusChange={handleBookStatusChange}/>
             }
         </div>
     )

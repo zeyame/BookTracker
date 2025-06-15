@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import "../../styles/book-page-by-status.css";
 import { sliceDescriptionBySentences } from "../../utils/sliceDescription";
-import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { ShelfModal } from "./ShelfModal";
 import { RemoveFromShelfModal } from "./RemoveFromShelfModal";
-import { updateBookStatus } from "../../utils/updateBookStatus";
+import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 
 interface BookPageByStatusProps {
     book: BookWithStatus;
+    onStatusChange: () => void; // callback to notify parent when book status changes
 }
 
-export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
+export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book, onStatusChange }) => {
     const [bookStatus, setBookStatus] = useState<string>(book.status);
     const [showPopUp, setShowPopUp] = useState<boolean>(false);
+    const token = sessionStorage.getItem("token") || ""
     
     const {
         showModal,
@@ -28,13 +29,20 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book.bookData, token, book.authorDescription, onStatusChange);
     
     const [numberOfSentences, setNumberOfSentences] = useState<number>(0);
 
     const getNumberOfSentences = (description: string): number => {
         const sentences: Array<string> = description.match(/[^.!?]+[.!?]+/g) || [];
         return sentences.length;
+    };
+
+    const handleDoneWrapper = async () => {
+        await handleDone(); // persists and triggers popup
+        setTimeout(() => {
+            onStatusChange(); // wait a moment before unmounting
+        }, 1500);
     };
 
     useEffect(() => {
@@ -45,14 +53,6 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
     }, [book]);
 
     
-    // saving book status to local storage
-    useEffect(() => {
-        if (book && bookStatus) {
-            updateBookStatus(book.bookData, bookStatus);
-        }
-  
-    }, [book, bookStatus]);
-
     let numberOfDivisions: number = numberOfSentences <= 3 ? 2 : 3;
 
     return (
@@ -70,7 +70,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book }) => {
                     handleModalWantToRead={handleModalWantToRead} 
                     handleRead={handleRead} 
                     handleRemoveFromShelf={handleRemoveFromShelf} 
-                    handleDone={handleDone} 
+                    handleDone={handleDoneWrapper} 
                     selectedShelf={selectedShelf} 
                 />
             }

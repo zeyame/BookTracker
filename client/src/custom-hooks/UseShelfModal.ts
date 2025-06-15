@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { book } from "../interfaces/BookInterface";
-import { BookWithStatus } from "../interfaces/BookWithStatus";
 import { ReadingStatus } from "../interfaces/ReadingStatus";
+import { addUserBookByStatus, doesUserHaveBook, removeUserBook, updateUserBookStatus } from "../services/userBookService";
+import { fetchDefaultBooks } from "../services/defaultBookSearch";
 
-export const useShelfModal = (bookStatus: string, setBookStatus: (status: string) => void, setShowPopUp: (showPopUp: boolean) => void) => {
+export const useShelfModal = (
+    bookStatus: string,
+    setBookStatus: (status: string) => void,
+    setShowPopUp: (show: boolean) => void,
+    book: book | null,
+    token: string,
+    authorDescription?: string,
+    onStatusChange?: () => void
+  ) => {
+
     const [showModal, setShowModal] = useState<boolean>(false);
     const [selectedShelf, setSelectedShelf] = useState<string>("");
     const [showRemoveFromShelfModal, setShowRemoveFromShelfModal] = useState<boolean>(false);
@@ -30,22 +40,33 @@ export const useShelfModal = (bookStatus: string, setBookStatus: (status: string
       setShowRemoveFromShelfModal(true);
     };
   
-    const handleDone = () => {
-      setShowModal(false);
+    const handleDone = async () => {
+        if (!book || !selectedShelf || bookStatus == selectedShelf) {
+          setShowModal(false);
+          return;
+        }
 
-      if (selectedShelf.length > 0) {
-        setBookStatus(selectedShelf);
-      }
+        setShowModal(false);
 
-        // if the selected option was not the same as the current reading status we show a new message popup
-        if (selectedShelf.length > 0 && selectedShelf !== bookStatus) {
+        try {
+            const alreadyExists = await doesUserHaveBook(book.id, token);
+
+            if (alreadyExists) {
+                // Update existing entry
+                await updateUserBookStatus(book.id, selectedShelf, token);
+            } else {
+                // Add new entry
+                await addUserBookByStatus(book, selectedShelf, token, authorDescription);
+            }
+
+            setBookStatus(selectedShelf);
             setShowPopUp(true);
-            // Hide the popup after 3 seconds
-            setTimeout(() => {
-                setShowPopUp(false);
-            }, 3000);
+            setTimeout(() => setShowPopUp(false), 3000);
+        } catch (error) {
+            console.error("Failed to persist book status:", error);
         }
     };
+
   
     // REMOVE FROM SHELF MODAL FUNCTIONS
 
@@ -56,37 +77,16 @@ export const useShelfModal = (bookStatus: string, setBookStatus: (status: string
     }
 
     // removing a book from its current shelf
-    const handleRemoveFromShelfButton = (book: book | null): void => {
-        if (!book) {
-            console.warn("Attempted to remove a null book from shelf");
-            return;
-        }
-    
-        const storedBooksWithStatus: string | null = localStorage.getItem("booksWithStatus");
-    
-        if (!storedBooksWithStatus) {
-            console.warn("No books with status found in localStorage");
-            return;
-        }
-    
+    const handleRemoveFromShelfButton = async (bookToRemove: book | null): Promise<void> => {
+        if (!bookToRemove) return;
+
         try {
-            let books: Record<string, BookWithStatus> = JSON.parse(storedBooksWithStatus);
-    
-            if (book.id in books) {
-                // Remove the book entirely instead of setting status to empty string
-                delete books[book.id];
-    
-                // Update localStorage
-                localStorage.setItem("booksWithStatus", JSON.stringify(books));
-    
-                // Update local state
-                setBookStatus("");
-                setShowRemoveFromShelfModal(false);
-            } else {
-                console.warn(`Book "${book.title}" not found in stored books`);
-            }
+            await removeUserBook(bookToRemove.id, token);
+            setBookStatus(""); // clear status
+            setShowRemoveFromShelfModal(false);
+            if (onStatusChange) onStatusChange();
         } catch (error) {
-            console.error("Error parsing or updating stored books:", error);
+            console.error("Failed to remove book from backend:", error);
         }
     };
 

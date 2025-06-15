@@ -5,6 +5,7 @@ import com.example.booktracker.book.exception.BookNotFoundException;
 import com.example.booktracker.book.exception.CustomBadRequestException;
 import com.example.booktracker.book.service.BookService;
 import com.example.booktracker.user.dto.UserDTO;
+import com.example.booktracker.user.model.User;
 import com.example.booktracker.user.service.UserService;
 import com.example.booktracker.user_book.ReadingStatus;
 import com.example.booktracker.user_book.model.UserBook;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserBookService {
@@ -31,7 +33,13 @@ public class UserBookService {
     }
 
     public UserDTO getUserByUsername(String username) {
-        return userService.findByUsername(username);        // may throw a UserNotFoundException
+        return userService.getByUsername(username);        // may throw a UserNotFoundException
+    }
+
+    public Optional<String> getUserBookStatus(String username, String bookId) {
+        UserDTO userDTO = userService.getByUsername(username);
+        return userBookRepository.findByUserIdAndBookId(userDTO.getId(), bookId)
+                .map(userBook -> userBook.getStatus().name());
     }
 
     public List<BookDTO> getUserBooksByIdAndStatus(Long userId, ReadingStatus status) {

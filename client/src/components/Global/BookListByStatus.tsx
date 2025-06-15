@@ -5,13 +5,16 @@ import { ReadingStatus } from "../../interfaces/ReadingStatus";     // enum
 import { BookByStatus } from "./BookByStatus";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { Link } from "react-router-dom";
+import { book } from "../../interfaces/BookInterface";
+import { getUserBooksByStatus } from "../../services/userBookService";
 
 interface BookListByStatusProps {
-    status: string
-    handleSelectedBook: (book: BookWithStatus) => void
+    status: string;
+    handleSelectedBook: (book: BookWithStatus) => void;
+    refreshTrigger: number;
 }
 
-export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handleSelectedBook}) => {
+export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handleSelectedBook, refreshTrigger}) => {
 
     const [storedBooks, setStoredBooks] = useState<Array<BookWithStatus>>([]);
     const [filteredBooks, setFilteredBooks] = useState<Array<BookWithStatus>>([]);
@@ -19,36 +22,37 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
 
     // depending on status, get the stored books
     useEffect(() => {
-        let username: string;
-
-        const storedUser: string | null = sessionStorage.getItem("userLogin");
-        if (storedUser) {
-            const userDetails: UserLogin = JSON.parse(storedUser);
-            username = userDetails.username;
-
-            const storedBooks: string | null = localStorage.getItem(`booksWithStatus-${username}`);
-            
-            if (storedBooks) {
-                const booksRecord: Record<string, BookWithStatus> = JSON.parse(storedBooks);
-                const books: Array<BookWithStatus> = Object.values(booksRecord)
-                    .filter(bookWithStatus => bookWithStatus.status === status);
-    
-                if (books.length > 0) {
-                    handleSelectedBook(books[0]);
-                }
-    
-                setStoredBooks(books);
+        const fetchBooks = async () => {
+            const token = sessionStorage.getItem("token");
+            if (!token) {
+                console.error("No access token.");
+                return;
             }
 
-        }
-        else {
-            console.error("User not logged in");
-        }
-    
+            try {
+                const storedBooks: Array<book> = await getUserBooksByStatus(status, token);
+                const booksWithStatus: BookWithStatus[] = storedBooks.map(book => ({
+                    bookData: book,
+                    status: status
+                }));
+
+                if (booksWithStatus.length > 0) {
+                    handleSelectedBook(booksWithStatus[0]);
+                }
+
+                setStoredBooks(booksWithStatus);
+            } catch (error) {
+                console.error("Failed to fetch books from backend:", error);
+            }
+        };
+
+        fetchBooks();
+
         return () => {
             setStoredBooks([]);
-        }
-    }, [status]);
+        };
+    }, [status, refreshTrigger]); 
+
 
     useEffect(() => {
         if (searchValue) {
@@ -65,6 +69,7 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
     const handleSearchBarInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(event.target.value);
     }
+
 
     return (
         <div className="book-list-by-status-container">

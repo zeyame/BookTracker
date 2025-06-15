@@ -18,7 +18,7 @@ export const initializeCaching = async (limit: number) => {
 }
 
 // retrieves a specified number of cached books for a specific genre which the user requested
-export const getCachedBooks = async (genreName: string, limit: number) => {
+export const getCachedBooks = async (genreName: string, limit: number) : Promise<Array<book>> => {
     try {
         const response = await fetch(`${BASE_URL}/api/books/cache/${genreName}?limit=${limit}`);
         if (!response.ok) {

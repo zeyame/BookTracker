@@ -50,30 +50,6 @@ public class UserService {
     }
 
     /**
-     * Retrieves a user by their username.
-     *
-     * This method attempts to find a user in the database by their username. If an error occurs during the database access,
-     * a {@link RuntimeException} is thrown with a descriptive error message.
-     *
-     * @param username The username of the user to be retrieved.
-     * @return An {@link UserDTO} if the user is found.
-     * @throws UserNotFoundException if the user is not found
-     * @throws RuntimeException If an error occurs when accessing the database.
-     */
-    public UserDTO findByUsername(String username) {
-        try {
-            return userRepository.findByUsername(username)
-                    .map(this::mapToDTO)
-                    .orElseThrow(() -> new UserNotFoundException("No user found with username " + username));
-        }
-        catch (DataAccessException e) {
-            String errorMessage = "Error occurred when retrieving user by their username from the database. " + e.getMessage();
-            throw new RuntimeException(errorMessage);
-        }
-    }
-
-
-    /**
      * Retrieves a user by their email.
      *
      * This method attempts to find a user in the database by their email. If an error occurs during the database access,

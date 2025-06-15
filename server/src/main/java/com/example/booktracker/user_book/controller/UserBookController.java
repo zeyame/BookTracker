@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user/books")
@@ -27,6 +28,17 @@ public class UserBookController {
         this.userBookService = userBookService;
     }
 
+    @GetMapping("/{bookId}/status")
+    public  ResponseEntity<Map<String, String>> getUserBookStatus(@PathVariable @Valid String bookId,
+                                                                         Authentication authentication) {
+        String username = authentication.getName();
+        Optional<String> statusOpt = userBookService.getUserBookStatus(username, bookId);
+        return statusOpt
+                .map(status -> ResponseEntity.ok(Map.of("status", status)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Book does not exist in any of the user's lists.")));
+    }
+
     /**
      * Retrieves the list of books in the authenticated user's reading list by the specified status.
      *
@@ -35,7 +47,7 @@ public class UserBookController {
      * @return A list of BookDTOs wrapped in a map with key "books"
      */
     @GetMapping
-    public ResponseEntity<Map<String, List<BookDTO>>> getBooksByStatus(@RequestParam ReadingStatus status,
+    public ResponseEntity<Map<String, List<BookDTO>>> getUserBooksByStatus(@RequestParam ReadingStatus status,
                                                                        Authentication authentication) {
         String username = authentication.getName();
         UserDTO userDTO = userBookService.getUserByUsername(username);
