@@ -3,7 +3,6 @@ import "../../styles/book-list-by-status.css";
 import { SearchBarByStatus } from "./SearchBarByStatus";
 import { ReadingStatus } from "../../interfaces/ReadingStatus";     // enum
 import { BookByStatus } from "./BookByStatus";
-import { book } from "../../interfaces/BookInterface";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import { Link } from "react-router-dom";
 

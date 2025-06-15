@@ -2,15 +2,13 @@ package com.example.booktracker.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableWebMvc
 public class CorsConfig implements WebMvcConfigurer {
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        System.out.println("CorsConfig is being applied");      // debugging line
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000")  // Restrict to your frontend domain
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

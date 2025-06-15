@@ -14,7 +14,9 @@ services:
     restart: always
 
   app_client:
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     container_name: app_client
     ports:
       - "3000:3000"
@@ -23,13 +25,17 @@ services:
       - /client-app/node_modules
     stdin_open: true
     tty: true
-    restart: always
 
   app_server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     container_name: app_server
     ports:
       - 8080:8080
+    volumes:
+      - ./server:/app       # Mount local code for live updates
+      - ~/.m2:/root/.m2      # (Optional) Use local Maven cache to speed up builds
     environment:
       - SPRING_DB_URL=jdbc:postgresql://app_db:5432/${DB_NAME}
       - SPRING_DB_USERNAME=${DB_USERNAME}
@@ -40,7 +46,8 @@ services:
       - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
       - SPRING_JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SPRING_SECURITY_JWT_EXPIRATION_TIME=${SECURITY_JWT_EXPIRATION_TIME}
-
+    depends_on:
+      - app_db
 
 volumes:
   db-data:

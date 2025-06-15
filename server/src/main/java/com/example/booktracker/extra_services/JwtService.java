@@ -1,22 +1,17 @@
 package com.example.booktracker.extra_services;
 
-import com.example.booktracker.user.User;
+import com.example.booktracker.user.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
-import java.security.SignatureException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -34,7 +29,8 @@ public class JwtService {
     public void init() {
         this.expirationTime = Long.parseLong(expirationTimeStr);
     }
-    private String extractUsername(String token) {
+
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 

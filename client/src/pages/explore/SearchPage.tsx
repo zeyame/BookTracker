@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import '../../styles/search-page.css';
 import { Genre } from "../../components/Search-Page/Genre";
 import { fetchDefaultBooks } from "../../services/defaultBookSearch";

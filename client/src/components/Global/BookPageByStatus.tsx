@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BookWithStatus } from "../../interfaces/BookWithStatus";
 import "../../styles/book-page-by-status.css";
-import { Link } from "react-router-dom";
 import { sliceDescriptionBySentences } from "../../utils/sliceDescription";
 import { useShelfModal } from "../../custom-hooks/UseShelfModal";
 import { ShelfModal } from "./ShelfModal";

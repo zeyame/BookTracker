@@ -5,27 +5,75 @@ import com.example.booktracker.otp.exception.IncorrectOtpException;
 import com.example.booktracker.otp.exception.InvalidOtpException;
 import com.example.booktracker.otp.exception.OtpAlreadySentException;
 import com.example.booktracker.user.exception.*;
+import org.apache.coyote.BadRequestException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.MailException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.naming.AuthenticationException;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandling {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException (RuntimeException exception) {
-        String message = exception.getMessage();
+        String message = "An unexpected error occurred. Please try again later.";
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
         ErrorResponse errorResponse = new ErrorResponse(message, status.value());
 
         return new ResponseEntity<>(errorResponse, status);
     }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleUnreadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse("Invalid request.", HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse("Invalid request.", HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+
+        return ResponseEntity.badRequest().body(
+                Map.of(
+                        "status", 400,
+                        "errors", errors
+
+                )
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse("Invalid request.", HttpStatus.BAD_REQUEST.value()));
+    }
+
 
     @ExceptionHandler(BookNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleBookNotFoundException (BookNotFoundException exception) {
@@ -111,8 +159,8 @@ public class GlobalExceptionHandling {
     }
 
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUsernammeNotFoundException(UsernameNotFoundException exception) {
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException exception) {
         String message = exception.getMessage();
         HttpStatus status = HttpStatus.NOT_FOUND;
 
@@ -193,15 +241,13 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, status);
     }
 
-
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
-        String message = exception.getMessage();
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        String message = "A data integrity error occurred. Please check your request.";
         HttpStatus status = HttpStatus.CONFLICT;
 
-        ErrorResponse errorResponse = new ErrorResponse(message, status.value());
-
-        return new ResponseEntity<>(errorResponse, status);
+        return new ResponseEntity<>(new ErrorResponse(message, status.value()), status);
     }
+
 
 }

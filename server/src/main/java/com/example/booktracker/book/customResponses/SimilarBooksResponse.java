@@ -1,6 +1,6 @@
 package com.example.booktracker.book.customResponses;
 
-import com.example.booktracker.book.BookDTO;
+import com.example.booktracker.book.dto.BookDTO;
 
 import java.util.List;
 import java.util.Map;

@@ -11,5 +11,6 @@ export const useAuthRedirect = () => {
     if (!token) {
       navigate("/user/login");
     }
+    
   }, [navigate]); // Runs only when `navigate` changes (i.e., on initial render)
 };
