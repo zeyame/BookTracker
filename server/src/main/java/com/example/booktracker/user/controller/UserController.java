@@ -1,14 +1,23 @@
 package com.example.booktracker.user.controller;
 
 import com.example.booktracker.book.exception.CustomBadRequestException;
+import com.example.booktracker.refresh_token.service.RefreshTokenService;
+import com.example.booktracker.user.dto.UserDTO;
+import com.example.booktracker.utils.CookieUtils;
 import com.example.booktracker.extra_services.JwtService;
 import com.example.booktracker.user.service.UserService;
 import com.example.booktracker.user.exception.*;
 import com.example.booktracker.user.request.UserLoginRequest;
 import com.example.booktracker.user.request.UserRegistrationRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,11 +28,13 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     @Autowired
-    public UserController(UserService userService, JwtService jwtService) {
+    public UserController(UserService userService, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     /**
@@ -61,7 +72,7 @@ public class UserController {
      * which is then sent to the user's email address. The user is expected to click the link to
      * verify their email address and complete the registration process.
      *
-     * @param userRegistrationRequest The request object containing user registration details.
+     * @param request The request object containing user registration details.
      *                             It includes the username, email, and password of the user.
      *
      * @return A {@link ResponseEntity} containing a response map with a message indicating
@@ -76,12 +87,12 @@ public class UserController {
      *                                    username, password) are missing or empty.
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationRequest request) {
 
         Map<String, String> responseMap = new HashMap<>();
 
         // register new user to database
-        userService.register(userRegistrationRequest);
+        userService.register(request);
 
         responseMap.put("message", "User registered successfully.");
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
@@ -97,23 +108,54 @@ public class UserController {
      *
      * In case of invalid credentials, an {@link InvalidCredentialsException} is thrown.
      *
-     * @param userLoginRequest A {@link UserLoginRequest} object containing the username and password provided by the user.
+     * @param request A {@link UserLoginRequest} object containing the username and password provided by the user.
      * @return A {@link ResponseEntity} containing a success message and a JWT token if authentication succeeds.
      * @throws InvalidCredentialsException If authentication fails due to incorrect username or password.
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginUser(@RequestBody UserLoginRequest userLoginRequest) {
-        // authenticate user
-        userService.authenticate(userLoginRequest);
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody @Valid UserLoginRequest request,
+                                                         HttpServletResponse response) {
+        userService.authenticate(request);
 
-        // generate token for authenticated user
-        String token = jwtService.generateToken(userLoginRequest.getUsername());
+        UserDTO userDTO = userService.getByUsername(request.getUsername());
 
-        Map<String, String> responseMap = new HashMap<>();
+        // generate jwt and refresh tokens if user has been authenticated
+        String jwtToken = jwtService.generateToken(userDTO.getUsername());
+        String refreshToken = refreshTokenService.createRefreshToken(userDTO.getId(), userDTO.getUsername());
 
-        responseMap.put("message", "User has been authenticated.");
-        responseMap.put("token", token);
+        // store refresh token in response cookie
+        setRefreshTokenCookie(response, refreshToken);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
+        Map<String, String> body = new HashMap<>();
+        body.put("message", "User has been authenticated.");
+        body.put("token", jwtToken);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String oldRefreshToken = CookieUtils.extractRefreshTokenFromCookie(request);
+        if (oldRefreshToken == null) {
+            throw new InvalidCredentialsException("Refresh token cookie is missing.");
+        }
+
+        UserDTO userDTO = userService.getByUsername(jwtService.extractUsername(oldRefreshToken));
+        Map<String, String> tokenMap = refreshTokenService.refreshAccessToken(oldRefreshToken, userDTO.getId());
+
+        setRefreshTokenCookie(response, tokenMap.get("refreshToken"));
+
+        // Return the new JWT
+        return ResponseEntity.ok(Map.of("token", tokenMap.get("token")));
+    }
+
+    private void setRefreshTokenCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie("refresh_token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // enable in prod
+        cookie.setPath("/");
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        response.addCookie(cookie);
+    }
+
 }

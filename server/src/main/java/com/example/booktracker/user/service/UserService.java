@@ -1,6 +1,8 @@
 package com.example.booktracker.user.service;
 
 import com.example.booktracker.book.exception.CustomBadRequestException;
+import com.example.booktracker.extra_services.JwtService;
+import com.example.booktracker.refresh_token.service.RefreshTokenService;
 import com.example.booktracker.user.dto.UserDTO;
 import com.example.booktracker.user.exception.*;
 import com.example.booktracker.user.model.User;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,11 +21,16 @@ import java.util.stream.Stream;
 @Service
 public class UserService {
 
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder encoder) {
+    public UserService(JwtService jwtService, RefreshTokenService refreshTokenService,
+                       UserRepository userRepository, BCryptPasswordEncoder encoder) {
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;
         this.encoder = encoder;
     }
@@ -144,16 +150,16 @@ public class UserService {
      * and then saving the user details to the database. If an error occurs during the database operation,
      * a {@link RuntimeException} is thrown with a descriptive error message.
      *
-     * @param userRegistrationDTO The {@link UserRegistrationRequest} object containing the user's details, including the username, email, and password.
+     * @param userRegistrationRequest The {@link UserRegistrationRequest} object containing the user's details, including the username, email, and password.
      *             The password is expected to be in plain text and will be encoded before saving.
      * @throws RuntimeException If an error occurs while saving the user to the database, such as a data access issue.
      */
     @Transactional
-    public void register(UserRegistrationRequest userRegistrationDTO) {
+    public void register(UserRegistrationRequest userRegistrationRequest) {
 
-        String username = userRegistrationDTO.getUsername();
-        String email = userRegistrationDTO.getEmail();
-        String password = userRegistrationDTO.getPassword();
+        String username = userRegistrationRequest.getUsername();
+        String email = userRegistrationRequest.getEmail();
+        String password = userRegistrationRequest.getPassword();
 
         // if any of the fields in the http request are not provided or empty
         if (Stream.of(email, username, password).anyMatch(val -> val == null || val.trim().isEmpty())) {
@@ -172,7 +178,6 @@ public class UserService {
         user.setPassword(encoder.encode(user.getPassword()));
         save(user);
     }
-
 
     /**
      * Authenticates a user based on the provided login credentials.

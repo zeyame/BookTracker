@@ -110,7 +110,7 @@ export const requestOTP = async (email: string): Promise<void> => {
 export const verifyOtp = async (email: string, otp: string): Promise<void> => {
 
     try {
-        const response = await fetch(`${BASE_URL}/api/otp/verify`,{
+        const response = await fetch(`${BASE_URL}/api/otp/verify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

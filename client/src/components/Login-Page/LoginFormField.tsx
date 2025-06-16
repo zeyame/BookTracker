@@ -15,7 +15,14 @@ export const LoginFormField: React.FC<LoginFormFieldProps> = ({placeholder, valu
 
     return (
         <div className="login-form-field-container">
-            <input type={isPasswordField ? 'password' : 'text'} className="login-field-input" placeholder={placeholder} value={value} onChange={(inputValue) => handleLoginField(placeholder,inputValue.target.value)} onKeyDown={(event) => handleKeyDown(event, handleLoginButton)} />
+            <input 
+                type={isPasswordField ? 'password' : 'text'} 
+                className="login-field-input" 
+                placeholder={placeholder} value={value} 
+                onChange={(inputValue) => handleLoginField(placeholder,inputValue.target.value)} 
+                onKeyDown={(event) => handleKeyDown(event, handleLoginButton)} 
+                autoComplete={isPasswordField ? 'current-password' : 'username'}    
+            />
             {
                 isPasswordField ?
                     <div className="forgot-password-and-error-container">

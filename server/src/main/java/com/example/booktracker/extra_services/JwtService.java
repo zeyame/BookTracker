@@ -23,11 +23,16 @@ public class JwtService {
     @Value("${security.jwt.expiration-time}")
     private String expirationTimeStr;
 
+    @Value("${security.jwt.refresh-expiration-time}")
+    private String refreshExpirationTimeStr;
+
     private static long expirationTime;
+    private static long refreshExpirationTime;
 
     @PostConstruct
     public void init() {
-        this.expirationTime = Long.parseLong(expirationTimeStr);
+        JwtService.expirationTime = Long.parseLong(expirationTimeStr);
+        JwtService.refreshExpirationTime = Long.parseLong(refreshExpirationTimeStr);
     }
 
     public String extractUsername(String token) {
@@ -57,6 +62,10 @@ public class JwtService {
      */
     public String generateToken(String username) {
         return buildToken(username, expirationTime);
+    }
+
+    public String generateRefreshToken(String username) {
+        return buildToken(username, refreshExpirationTime);
     }
 
     /**

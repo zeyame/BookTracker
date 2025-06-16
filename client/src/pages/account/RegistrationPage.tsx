@@ -4,9 +4,8 @@ import '../../styles/registration-page.css'
 import { RegistrationForm } from "../../components/Registration-Page/RegistrationForm";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RegistrationError } from "../../interfaces/RegistrationError";
-import { registerUser, validateUser } from "../../services/userAccount";
+import { validateUser } from "../../services/userAccount";
 import { handleKeyDown } from "../../utils/handleKeyDown";
-import { validate } from "uuid";
 import { UserRegistration } from "../../interfaces/UserRegistration";
 
 

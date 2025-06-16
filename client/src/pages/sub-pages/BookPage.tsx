@@ -15,7 +15,7 @@ import { AboutAuthor } from "../../components/Book-Page/AboutAuthor";
 import { useFetchAuthorDetails } from "../../custom-hooks/useFetchAuthorDetails";
 import { BookDescription } from "../../components/Book-Page/BookDescription";
 import { BookCoverAndStatus } from "../../components/Book-Page/BookCoverAndStatus";
-import { addUserBookByStatus, getBookStatusById } from "../../services/userBookService";
+import { addUserBookByStatus } from "../../services/userBookService";
 import { useBookStatus } from "../../custom-hooks/useBookStatus";
 
 export const BookPage: React.FC = () => {

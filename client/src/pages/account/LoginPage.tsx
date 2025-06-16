@@ -29,14 +29,12 @@ export const LoginPage: React.FC = () => {
 
     // effects
     useEffect(() => {
-        const possibleUserLogin: string | null = sessionStorage.getItem("userLogin"); 
+        const state = location.state as { registeredMessage?: string, prefillCredentials?: UserLogin };
 
-        if (possibleUserLogin) {
-            const existingUserLoginDetails: UserLogin = JSON.parse(possibleUserLogin);
-            setUserLogin(existingUserLoginDetails);
+        if (state?.prefillCredentials) {
+            setUserLogin(state.prefillCredentials);
         }
-    
-    }, []);
+    }, [location.state]);
 
     // if user came from logout, delete token 
     useEffect(() => {
@@ -71,9 +69,6 @@ export const LoginPage: React.FC = () => {
             try {
                 setLoading(true);
                 await loginUser(userLogin.username, userLogin.password);
-
-                // once user logs in once for the session they are remembered if they log out within the same session
-                sessionStorage.setItem("userLogin", JSON.stringify(userLogin));
                 
                 navigate(`/app`, {replace: true});
             }
