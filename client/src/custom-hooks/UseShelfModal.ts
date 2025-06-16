@@ -2,14 +2,12 @@ import { useState } from "react";
 import { book } from "../interfaces/BookInterface";
 import { ReadingStatus } from "../interfaces/ReadingStatus";
 import { addUserBookByStatus, doesUserHaveBook, removeUserBook, updateUserBookStatus } from "../services/userBookService";
-import { fetchDefaultBooks } from "../services/defaultBookSearch";
 
 export const useShelfModal = (
     bookStatus: string,
     setBookStatus: (status: string) => void,
     setShowPopUp: (show: boolean) => void,
     book: book | null,
-    token: string,
     authorDescription?: string,
     onStatusChange?: () => void
   ) => {
@@ -49,14 +47,14 @@ export const useShelfModal = (
         setShowModal(false);
 
         try {
-            const alreadyExists = await doesUserHaveBook(book.id, token);
+            const alreadyExists = await doesUserHaveBook(book.id);
 
             if (alreadyExists) {
                 // Update existing entry
-                await updateUserBookStatus(book.id, selectedShelf, token);
+                await updateUserBookStatus(book.id, selectedShelf);
             } else {
                 // Add new entry
-                await addUserBookByStatus(book, selectedShelf, token, authorDescription);
+                await addUserBookByStatus(book, selectedShelf, authorDescription);
             }
 
             setBookStatus(selectedShelf);
@@ -81,7 +79,7 @@ export const useShelfModal = (
         if (!bookToRemove) return;
 
         try {
-            await removeUserBook(bookToRemove.id, token);
+            await removeUserBook(bookToRemove.id);
             setBookStatus(""); // clear status
             setShowRemoveFromShelfModal(false);
             if (onStatusChange) onStatusChange();

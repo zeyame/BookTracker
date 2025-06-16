@@ -33,7 +33,7 @@ export const ExpandedSimilarBook: React.FC<ExpandedSimilarBookProps> = ({ simila
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, similarBook, token, "");
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, similarBook, "");
 
     // refs
     const fullBookDescriptionRef = useRef<string>(similarBook.description);

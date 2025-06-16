@@ -14,7 +14,6 @@ interface BookPageByStatusProps {
 export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book, onStatusChange }) => {
     const [bookStatus, setBookStatus] = useState<string>(book.status);
     const [showPopUp, setShowPopUp] = useState<boolean>(false);
-    const token = sessionStorage.getItem("token") || ""
     
     const {
         showModal,
@@ -29,7 +28,7 @@ export const BookPageByStatus: React.FC<BookPageByStatusProps> = ({ book, onStat
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book.bookData, token, book.authorDescription, onStatusChange);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book.bookData, book.authorDescription, onStatusChange);
     
     const [numberOfSentences, setNumberOfSentences] = useState<number>(0);
 

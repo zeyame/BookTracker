@@ -1,10 +1,11 @@
 import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
+import { authorizedFetch } from "../utils/authorizedFetch";
 
 export const fetchSimilarBooks = async (title: string, limit: number): Promise<Array<book> | null> => {
     try {
         const encodedTitle = encodeURIComponent(title.toLowerCase());
-        const response = await fetch(`${BASE_URL}/api/books/similar?title=${encodedTitle}&type=book&limit=${limit}`, {
+        const response = await authorizedFetch(`${BASE_URL}/api/books/similar?title=${encodedTitle}&type=book&limit=${limit}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'

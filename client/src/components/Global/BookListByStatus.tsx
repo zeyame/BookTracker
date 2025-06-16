@@ -30,7 +30,7 @@ export const BookListByStatus: React.FC<BookListByStatusProps> = ({status, handl
             }
 
             try {
-                const storedBooks: Array<book> = await getUserBooksByStatus(status, token);
+                const storedBooks: Array<book> = await getUserBooksByStatus(status);
                 const booksWithStatus: BookWithStatus[] = storedBooks.map(book => ({
                     bookData: book,
                     status: status

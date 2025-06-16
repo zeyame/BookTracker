@@ -1,5 +1,6 @@
 import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
+import { authorizedFetch } from "../utils/authorizedFetch";
 
 const readingStatusToBackendEnum: Record<string, string> = {
     "Want to read": "TO_READ",
@@ -7,12 +8,10 @@ const readingStatusToBackendEnum: Record<string, string> = {
     "Read": "READ"
 };
 
-export const getBookStatusById = async (bookId: string, token: string): Promise<string | null> => {
+export const getBookStatusById = async (bookId: string): Promise<string | null> => {
     try {
-        const response = await fetch(`${BASE_URL}/api/user/books/${bookId}/status`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books/${bookId}/status`, {
+            method: "GET"
         });
 
         if (response.status === 404) {
@@ -31,14 +30,11 @@ export const getBookStatusById = async (bookId: string, token: string): Promise<
 };
 
 
-export const getUserBooksByStatus = async (status: string, token: string) : Promise<Array<book>> => {
+export const getUserBooksByStatus = async (status: string) : Promise<Array<book>> => {
     try {
         const enumStatus = readingStatusToBackendEnum[status];
-        const response = await fetch(`${BASE_URL}/api/user/books?status=${enumStatus}`, {
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books?status=${enumStatus}`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
         });
         if (!response.ok) {
             throw new Error("An unexpected error occurred when fetching your stored books. Please try again.");
@@ -51,14 +47,11 @@ export const getUserBooksByStatus = async (status: string, token: string) : Prom
     }
 }
 
-export const doesUserHaveBook = async (bookId: string, token: string): Promise<boolean> => {
+export const doesUserHaveBook = async (bookId: string): Promise<boolean> => {
 
     try {
-        const response = await fetch(`${BASE_URL}/api/user/books/${bookId}/status`, {
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books/${bookId}/status`, {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
         });
 
         if (response.status === 404) return false;
@@ -71,13 +64,12 @@ export const doesUserHaveBook = async (bookId: string, token: string): Promise<b
 };
 
 
-export const addUserBookByStatus = async (book: book, bookStatus: string, token: string, authorDescription? : string) : Promise<void> => {
+export const addUserBookByStatus = async (book: book, bookStatus: string, authorDescription? : string) : Promise<void> => {
     try {
         const enumStatus = readingStatusToBackendEnum[bookStatus];
-        const response = await fetch(`${BASE_URL}/api/user/books`, {
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }, 
             body: JSON.stringify({
@@ -95,14 +87,13 @@ export const addUserBookByStatus = async (book: book, bookStatus: string, token:
     }
 }
 
-export const updateUserBookStatus = async (bookId: string, newStatus: string, token: string): Promise<void> => {
+export const updateUserBookStatus = async (bookId: string, newStatus: string): Promise<void> => {
     try {
         const enumStatus = readingStatusToBackendEnum[newStatus];
 
-        const response = await fetch(`${BASE_URL}/api/user/books`, {
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ 
@@ -119,13 +110,10 @@ export const updateUserBookStatus = async (bookId: string, newStatus: string, to
     }
 };
 
-export const removeUserBook = async (bookId: string, token: string): Promise<void> => {
+export const removeUserBook = async (bookId: string): Promise<void> => {
     try {
-        const response = await fetch(`${BASE_URL}/api/user/books/${bookId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        const response = await authorizedFetch(`${BASE_URL}/api/user/books/${bookId}`, {
+            method: 'DELETE'
         });
 
         if (!response.ok) {

@@ -1,10 +1,11 @@
 // File handles fetching a book by either title, author, ISBN 
 import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
+import { authorizedFetch } from "../utils/authorizedFetch";
 
 export const getBooks = async (search: string, limit: number, signal?: AbortSignal) => {
     try {
-        const response = await fetch(`${BASE_URL}/api/books?search=${search}&limit=${limit}`, { signal });
+        const response = await authorizedFetch(`${BASE_URL}/api/books?search=${search}&limit=${limit}`, { signal });
         if (!response.ok) {
             throw new Error(`Failed to fetch books from the backend for search: ${search}`);
         }

@@ -10,7 +10,7 @@ export const useBookStatus = (bookId: string): [string, (newStatus: string) => v
 
         const fetchStatus = async () => {
             try {
-                const fetchedStatus = await getBookStatusById(bookId, token);
+                const fetchedStatus = await getBookStatusById(bookId);
 
                 // if null then the book was not already shelved
                 if (!fetchedStatus) return;

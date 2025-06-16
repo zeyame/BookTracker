@@ -23,7 +23,6 @@ export const BookPage: React.FC = () => {
 
     const location = useLocation();
     const book: book | null = location.state?.bookData;
-    const token = sessionStorage.getItem("token") || "";
 
     // states
     const [bookShowMoreClicked, setBookShowMoreClicked] = useState<boolean>(false);
@@ -66,7 +65,7 @@ export const BookPage: React.FC = () => {
         handleDone,
         handleExitRemoveFromShelfModal,
         handleRemoveFromShelfButton
-    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book, token, fullAuthorDescriptionRef.current);
+    } = useShelfModal(bookStatus, setBookStatus, setShowPopUp, book, fullAuthorDescriptionRef.current);
 
 
     // effects
@@ -111,7 +110,7 @@ export const BookPage: React.FC = () => {
 
         try {
             // persist the book with "Want to read" status
-            await addUserBookByStatus(book, "Want to read", token, fullAuthorDescriptionRef.current);
+            await addUserBookByStatus(book, "Want to read", fullAuthorDescriptionRef.current);
             setBookStatus("Want to read");
             setShowPopUp(true);
 

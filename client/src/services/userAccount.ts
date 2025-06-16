@@ -153,7 +153,8 @@ export const loginUser = async (username: string, password: string): Promise<voi
             body: JSON.stringify({
                 username,
                 password
-            })
+            }),
+            credentials: 'include'
         });
 
         if (!response.ok) {

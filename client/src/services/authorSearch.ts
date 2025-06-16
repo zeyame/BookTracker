@@ -1,9 +1,10 @@
 import { BASE_URL } from "../global-variables/BaseUrl";
 import { Author } from "../interfaces/AuthorInterface";
+import { authorizedFetch } from "../utils/authorizedFetch";
 
 export const fetchAuthorDetails = async (authorName: string): Promise<Author | null> => {
     try {
-        const response = await fetch(`${BASE_URL}/api/authors?authorName=${authorName}`);
+        const response = await authorizedFetch(`${BASE_URL}/api/authors?authorName=${authorName}`);
         if (!response.ok) {
             throw new Error(`Response from server failed when fetching details about the author '${authorName}'.`);
         }

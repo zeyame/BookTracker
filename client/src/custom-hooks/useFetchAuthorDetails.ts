@@ -113,7 +113,4 @@ export const useFetchAuthorDetails = (book: book | null) => {
         handleShowMore, 
         handleShowLess
     }
-
-
-
 }

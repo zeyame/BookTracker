@@ -1,6 +1,7 @@
 // File handles fetching the initially displayed books for the user 
 import { BASE_URL } from "../global-variables/BaseUrl";
 import { book } from "../interfaces/BookInterface";
+import { authorizedFetch } from "../utils/authorizedFetch";
 
 export const fetchDefaultBooks = async (limit: number, genres: Array<string>) => {
     try {
@@ -24,7 +25,7 @@ export const fetchDefaultBooks = async (limit: number, genres: Array<string>) =>
 
 export const fetchBooksByGenre = async (genre : string, limit: number) => {
     try {
-        const response = await fetch(`${BASE_URL}/api/books/${genre}?limit=${limit}`);
+        const response = await authorizedFetch(`${BASE_URL}/api/books/${genre}?limit=${limit}`);
         if (!response.ok) {
             throw new Error(`Response from Flask backend failed when requesting ${genre} books.`);
         }

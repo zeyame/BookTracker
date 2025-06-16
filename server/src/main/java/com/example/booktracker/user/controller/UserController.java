@@ -152,9 +152,11 @@ public class UserController {
     private void setRefreshTokenCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("refresh_token", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // enable in prod
         cookie.setPath("/");
         cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+
+        // ❗️ Development-only: don't use Secure or SameSite in local dev
+        // browser will ignore "SameSite=None" without "Secure" on localhost
         response.addCookie(cookie);
     }
 
